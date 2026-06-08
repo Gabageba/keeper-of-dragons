@@ -16,6 +16,45 @@ class ContentLoaderImpl {
     (scene.cache.json.get('dragons') as DragonDef[] | undefined)?.forEach((d) => this.dragons.set(d.id, d));
     (scene.cache.json.get('plants') as PlantDef[] | undefined)?.forEach((p) => this.plants.set(p.id, p));
     this.recipes = (scene.cache.json.get('breeding') as BreedRecipe[] | undefined) ?? [];
+
+    if (import.meta.env.DEV) {
+      this.validate();
+    }
+  }
+
+  private validate(): void {
+    const dragonIds = new Set(this.dragons.keys());
+    const plantIds = new Set(this.plants.keys());
+
+    // дубли id
+    const rawDragons = [...this.dragons.values()];
+    const seenDragons = new Set<string>();
+    for (const d of rawDragons) {
+      if (seenDragons.has(d.id)) console.error(`[ContentLoader] дубль dragon id: "${d.id}"`);
+      seenDragons.add(d.id);
+    }
+    const rawPlants = [...this.plants.values()];
+    const seenPlants = new Set<string>();
+    for (const p of rawPlants) {
+      if (seenPlants.has(p.id)) console.error(`[ContentLoader] дубль plant id: "${p.id}"`);
+      seenPlants.add(p.id);
+    }
+
+    // целостность рецептов
+    for (const r of this.recipes) {
+      if (!dragonIds.has(r.parent_1))
+        console.error(`[ContentLoader] рецепт "${r.id}": parent_1 "${r.parent_1}" не найден в dragons`);
+      if (!dragonIds.has(r.parent_2))
+        console.error(`[ContentLoader] рецепт "${r.id}": parent_2 "${r.parent_2}" не найден в dragons`);
+      if (!dragonIds.has(r.result))
+        console.error(`[ContentLoader] рецепт "${r.id}": result "${r.result}" не найден в dragons`);
+      for (const { plant } of r.required_plants) {
+        if (!plantIds.has(plant))
+          console.error(`[ContentLoader] рецепт "${r.id}": required_plant "${plant}" не найден в plants`);
+      }
+      if (r.boost_plant && !plantIds.has(r.boost_plant.plant))
+        console.error(`[ContentLoader] рецепт "${r.id}": boost_plant "${r.boost_plant.plant}" не найден в plants`);
+    }
   }
 
   dragon(id: string): DragonDef | undefined {

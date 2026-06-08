@@ -43,11 +43,11 @@ PreloadScene, доступ через индексированный `ContentLoa
 
 ## Definition of Done
 
-- [ ] JSON грузятся в PreloadScene, `ContentLoader.init` вызывается в `create`.
-- [ ] `ContentLoader.dragon('embrix')` возвращает корректный объект.
-- [ ] `findRecipe('embrix','terravur')` находит `breed_fire_earth` (порядок не важен).
-- [ ] Dev-валидация ловит несуществующий `result`/`plant` и пишет в консоль.
-- [ ] Добавление нового дракона = правка только JSON, без TS.
+- [  ] JSON грузятся в PreloadScene, `ContentLoader.init` вызывается в `create`.
+- [  ] `ContentLoader.dragon('embrix')` возвращает корректный объект.
+- [  ] `findRecipe('embrix','terravur')` находит `breed_fire_earth` (порядок не важен).
+- [  ] Dev-валидация ловит несуществующий `result`/`plant` и пишет в консоль.
+- [  ] Добавление нового дракона = правка только JSON, без TS.
 
 ## Ссылки на GDD
 

@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '@/config';
+import { DATA_MANIFEST } from '@/data/manifest';
+import { ContentLoader } from '@/systems/ContentLoader';
+import { GameState } from '@/systems/GameState';
+import { SaveManager } from '@/systems/SaveManager';
 
 /**
  * PreloadScene — показывает прогресс-бар и грузит JSON-контент и спрайты
@@ -14,15 +18,17 @@ export class PreloadScene extends Phaser.Scene {
   preload(): void {
     this.createProgressBar();
 
-    // TODO: загрузить JSON-контент (см. task-02-data-content-layer.md)
-    // this.load.json('dragons', 'data/dragons.json');
-    // this.load.json('plants', 'data/plants.json');
-    // this.load.json('breeding', 'data/breeding.json');
+    for (const { key, path, active } of DATA_MANIFEST) {
+      if (active) this.load.json(key, path);
+    }
 
     // TODO: загрузить спрайты острова, гнёзд, растений (task-27).
   }
 
   create(): void {
+    ContentLoader.init(this);
+    GameState.init(SaveManager.load() ?? SaveManager.createNew());
+
     this.scene.start('IslandScene');
     this.scene.launch('UIScene');
   }

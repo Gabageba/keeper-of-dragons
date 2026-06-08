@@ -14,6 +14,9 @@ export class IslandScene extends Phaser.Scene {
     super('IslandScene');
   }
 
+  // islandId будет использован в task-17 (выбор острова на карте)
+  init(_data: { islandId?: string }): void {}
+
   create(): void {
     this.drawGridPlaceholder();
 

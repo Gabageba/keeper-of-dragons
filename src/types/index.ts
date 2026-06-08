@@ -80,6 +80,54 @@ export interface PlantDef {
   description: string;
 }
 
+// --- Будущий контент (фазы 4–5, типы заведены заранее) ---
+
+/** Заказ от персонажа (data/orders.json). */
+export interface OrderDef {
+  id: string;
+  npc: string;
+  required_resources: { resource: string; amount: number }[];
+  reward_coins: number;
+  reward_xp: number;
+  reward_gems?: number;
+  expires_hours: number;
+}
+
+/** Остров-локация (data/islands.json). */
+export interface IslandDef {
+  id: string;
+  name: string;
+  biome: BiomeType;
+  unlock_level: number;
+  unlock_cost: number;
+  max_nests: number;
+  has_garden: boolean;
+  sprite: string;
+}
+
+/** Постройка на острове (data/buildings.json). */
+export interface BuildingDef {
+  id: string;
+  name: string;
+  type: 'nest' | 'garden' | 'incubator' | 'market' | 'lab';
+  unlock_level: number;
+  build_cost: number;
+  capacity?: number;
+  sprite: string;
+}
+
+/** Маршрут экспедиции (data/expeditions.json). */
+export interface ExpeditionRouteDef {
+  id: string;
+  name: string;
+  destination: string;
+  duration_hours: number;
+  unlock_level: number;
+  required_dragon_element?: Element;
+  reward_resources: { resource: string; min: number; max: number }[];
+  sprite: string;
+}
+
 // --- Состояние сохранения (динамические данные игрока) ---
 
 export interface DragonState {
