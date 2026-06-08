@@ -1,0 +1,3391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Архипелаг Драконов — Game Design Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b14;
+    --bg2: #13101e;
+    --bg3: #1a1628;
+    --border: #2e2845;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --text: #d4cce8;
+    --text-dim: #7a6f99;
+    --fire: #e05c30;
+    --water: #3a9fd8;
+    --earth: #6abf5e;
+    --storm: #9b5de5;
+    --ice: #7de8e8;
+    --shadow: #5a4080;
+    --lava: #ff7043;
+    --crystal: #a8dadc;
+    --cosmic: #c77dff;
+    --nature: #80b918;
+    --time: #f4d35e;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+  }
+
+  /* LAYOUT */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR NAV */
+  nav {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 0 40px;
+  }
+
+  nav .logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 13px;
+    color: var(--gold);
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+  }
+
+  nav a {
+    display: block;
+    padding: 7px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    transition: color 0.2s, background 0.2s;
+    border-left: 2px solid transparent;
+  }
+
+  nav a:hover { color: var(--gold2); background: rgba(201,168,76,0.06); }
+  nav a.active { color: var(--gold); border-left-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  nav .nav-section {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 16px 24px 4px;
+    opacity: 0.6;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    flex: 1;
+    padding: 60px 80px 100px;
+    max-width: 900px;
+  }
+
+  /* TYPOGRAPHY */
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 36px;
+    color: var(--gold);
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: var(--gold2);
+    margin: 56px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--text);
+    margin: 32px 0 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 24px 0 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  p { margin-bottom: 14px; }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 40px;
+    letter-spacing: 0.02em;
+  }
+
+  /* SECTION ANCHOR */
+  section { scroll-margin-top: 40px; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 40px 0;
+  }
+
+  /* LORE BOX */
+  .lore-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-style: italic;
+    color: #c4b8e0;
+    font-size: 17px;
+  }
+
+  /* GRID CARDS */
+  .grid { display: grid; gap: 16px; margin: 20px 0; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--gold); }
+
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    font-style: normal;
+  }
+
+  /* DRAGON CARDS */
+  .dragon-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 12px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dragon-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .dragon-card.fire::before { background: var(--fire); }
+  .dragon-card.water::before { background: var(--water); }
+  .dragon-card.earth::before { background: var(--earth); }
+  .dragon-card.storm::before { background: var(--storm); }
+  .dragon-card.ice::before { background: var(--ice); }
+  .dragon-card.shadow::before { background: var(--shadow); }
+  .dragon-card.lava::before { background: var(--lava); }
+  .dragon-card.crystal::before { background: var(--crystal); }
+  .dragon-card.cosmic::before { background: var(--cosmic); }
+  .dragon-card.nature::before { background: var(--nature); }
+  .dragon-card.time::before { background: var(--time); }
+  .dragon-card.wind::before { background: #a8e6cf; }
+  .dragon-card.light::before { background: #ffe066; }
+  .dragon-card.mythic::before { background: linear-gradient(180deg, #c77dff, #ff7ad9, #7de8e8); }
+  .dragon-card.divine::before { background: linear-gradient(180deg, #e8c97a, #fff, #c9a84c); }
+
+  .dragon-name {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .dragon-type {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 12px;
+    font-family: 'Cinzel', serif;
+  }
+
+  .dragon-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 15px;
+    flex-wrap: wrap;
+  }
+
+  .dragon-meta span { color: var(--text-dim); }
+  .dragon-meta strong { color: var(--text); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em;
+    margin: 2px;
+  }
+
+  .badge-fire { background: rgba(224,92,48,0.2); color: #f09070; border: 1px solid rgba(224,92,48,0.3); }
+  .badge-water { background: rgba(58,159,216,0.2); color: #7ac4e8; border: 1px solid rgba(58,159,216,0.3); }
+  .badge-earth { background: rgba(106,191,94,0.2); color: #9dd490; border: 1px solid rgba(106,191,94,0.3); }
+  .badge-storm { background: rgba(155,93,229,0.2); color: #c09af0; border: 1px solid rgba(155,93,229,0.3); }
+  .badge-ice { background: rgba(125,232,232,0.2); color: #a0f0f0; border: 1px solid rgba(125,232,232,0.3); }
+  .badge-shadow { background: rgba(90,64,128,0.2); color: #a080d0; border: 1px solid rgba(90,64,128,0.3); }
+  .badge-rare { background: rgba(58,159,216,0.18); color: #7ac4e8; border: 1px solid rgba(58,159,216,0.4); }
+  .badge-epic { background: rgba(155,93,229,0.2); color: #c09af0; border: 1px solid rgba(155,93,229,0.5); }
+  .badge-legendary { background: rgba(201,168,76,0.3); color: var(--gold); border: 1px solid var(--gold); }
+  .badge-mythic { background: linear-gradient(90deg, rgba(199,125,255,0.25), rgba(255,122,217,0.25)); color: #f0a8ff; border: 1px solid rgba(199,125,255,0.6); }
+  .badge-divine { background: linear-gradient(90deg, rgba(232,201,122,0.3), rgba(255,255,255,0.2)); color: #fff0c0; border: 1px solid var(--gold2); box-shadow: 0 0 12px rgba(232,201,122,0.3); }
+  .badge-common { background: rgba(122,111,153,0.18); color: #a89cc0; border: 1px solid rgba(122,111,153,0.4); }
+  .badge-uncommon { background: rgba(106,191,94,0.18); color: #9dd490; border: 1px solid rgba(106,191,94,0.4); }
+
+  /* BREEDING TABLE */
+  .breed-row {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr 32px 1fr;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 6px 0;
+    font-size: 15px;
+  }
+
+  .breed-row .arrow { color: var(--gold); text-align: center; font-size: 18px; }
+  .breed-row .result { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold2); }
+
+  /* ISLAND CARDS */
+  .island-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 12px 0;
+  }
+
+  .island-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .island-icon { font-size: 28px; }
+  .island-name { font-family: 'Cinzel', serif; font-size: 16px; letter-spacing: 0.04em; }
+  .island-subtitle { font-size: 13px; color: var(--text-dim); }
+
+  /* RESOURCE PILLS */
+  .resource-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+
+  .resource-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 14px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.04em;
+  }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 15px;
+  }
+
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(46,40,69,0.5);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* CALLOUT */
+  .callout {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin: 16px 0;
+    font-size: 16px;
+  }
+
+  .callout.tip { border-color: rgba(106,191,94,0.3); background: rgba(106,191,94,0.06); }
+  .callout.warn { border-color: rgba(224,92,48,0.3); background: rgba(224,92,48,0.06); }
+
+  /* PROGRESSION */
+  .progress-step {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-step:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: var(--gold);
+    min-width: 32px;
+    opacity: 0.5;
+  }
+
+  .step-content h4 { margin: 0 0 6px; font-size: 14px; }
+
+  /* PLANT CARD */
+  .plant-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 15px;
+  }
+
+  .plant-name { font-family: 'Cinzel', serif; font-size: 14px; margin-bottom: 6px; }
+  .plant-stat { color: var(--text-dim); font-size: 13px; margin: 2px 0; }
+
+  /* BESTIARY ENTRY */
+  .bestiary-entry {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 8px 0;
+  }
+  .bestiary-entry .be-name {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--gold2);
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  .bestiary-entry .be-bio {
+    font-size: 15px;
+    font-style: italic;
+    color: #c4b8e0;
+    margin-bottom: 8px;
+  }
+  .biome-line {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .biome-buff { color: #9dd490; }
+  .biome-debuff { color: #f09070; }
+  .biome-neutral { color: var(--ice); }
+
+  .be-art {
+    font-size: 14px;
+    color: #b8add4;
+    background: rgba(201,168,76,0.05);
+    border-left: 2px solid rgba(201,168,76,0.4);
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .be-nest {
+    font-size: 14px;
+    color: #a8c79a;
+    background: rgba(106,191,94,0.05);
+    border-left: 2px solid rgba(106,191,94,0.4);
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .art-line {
+    font-size: 13px;
+    color: #c9b88a;
+    font-style: italic;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(201,168,76,0.25);
+  }
+
+  /* ISLAND MAP */
+  .island-map {
+    background: #0a1410;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: 4px;
+    overflow-x: auto;
+    margin: 16px 0;
+    color: #4a7a4a;
+  }
+  .map-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 24px;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  .map-legend div { padding: 2px 0; }
+  .map-legend .ml-key {
+    display: inline-block;
+    width: 22px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: var(--gold2);
+  }
+
+  /* PANEL MOCKUP */
+  .panel-mock {
+    background: var(--bg3);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    max-width: 420px;
+  }
+  .panel-mock .pm-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(46,40,69,0.6);
+    font-size: 15px;
+  }
+  .panel-mock .pm-row:last-child { border-bottom: none; }
+  .panel-mock .pm-label { color: var(--text-dim); font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.05em; }
+  .panel-mock .pm-val { color: var(--text); }
+
+  /* PEDIGREE TREE */
+  .pedigree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0;
+  }
+  .pedigree .ped-node {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+  }
+  .pedigree .ped-parents { display: flex; gap: 40px; }
+  .pedigree .ped-line { color: var(--gold); font-size: 18px; }
+
+  a { color: var(--gold2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { display: none; }
+    main { padding: 32px 24px 60px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Sticky back-to-top */
+  .back-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s;
+    z-index: 100;
+  }
+  .back-top:hover { border-color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav>
+  <div class="logo">🐉 АРХИПЕЛАГ<br>ДРАКОНОВ<br><span style="font-size:10px;opacity:0.6">Game Design Document v1.0</span></div>
+
+  <div class="nav-section">Концепция</div>
+  <a href="#lore">Лор и сеттинг</a>
+  <a href="#pillars">Основные столпы</a>
+
+  <div class="nav-section">Драконы</div>
+  <a href="#rarity">Система редкостей</a>
+  <a href="#dragons-base">Обычные (базовые)</a>
+  <a href="#dragons-hybrid">Необычные (гибриды)</a>
+  <a href="#dragons-rare">Редкие</a>
+  <a href="#dragons-epic">Эпические</a>
+  <a href="#dragons-legendary">Легендарные</a>
+  <a href="#dragons-mythic">Мифические и Древние</a>
+  <a href="#dragons-full">Полный список (57)</a>
+  <a href="#bestiary">Бестиарий (биографии)</a>
+  <a href="#biome-pref">Предпочтения биомов</a>
+  <a href="#nicknames">Клички и родословная</a>
+  <a href="#breeding">Скрещивание</a>
+
+  <div class="nav-section">Растения</div>
+  <a href="#plants">Растения по стихиям</a>
+  <a href="#biomes">Магические биомы</a>
+  <a href="#rare-plants">Редкие культуры</a>
+
+  <div class="nav-section">Ресурсы</div>
+  <a href="#resources">Все ресурсы</a>
+  <a href="#buildings">Здания</a>
+  <a href="#grid">Сетка острова и размеры</a>
+
+  <div class="nav-section">Геймплей</div>
+  <a href="#worldmap">Карта архипелага</a>
+  <a href="#islands">Острова</a>
+  <a href="#loop">Игровой цикл</a>
+  <a href="#orders">Заказы и квесты</a>
+  <a href="#expeditions">Экспедиции</a>
+  <a href="#progression">Прогрессия</a>
+
+  <div class="nav-section">Дизайн</div>
+  <a href="#economy">Экономика</a>
+  <a href="#tech">Техническая база</a>
+  <a href="#mvp">MVP и план</a>
+</nav>
+
+<!-- MAIN -->
+<main id="top">
+
+  <h1>Архипелаг Драконов</h1>
+  <p class="subtitle">Полный игровой дизайн-документ · Драконья ферма-коллекционер</p>
+
+  <div class="lore-box">
+    «В начале было только Море Пепла. Потом пришли Древние — они вдохнули в острова стихии. Первые острова стали родиной первых драконов. Ты, Хранитель, получаешь в наследство крохотный клочок земли и первое яйцо. Остальное — дело твоих рук и мудрости.»
+  </div>
+
+  <!-- ═══════════════════════════════════ ЛОР ═══ -->
+  <section id="lore">
+    <h2>ЛОР И СЕТТИНГ</h2>
+
+    <h3>Мир</h3>
+    <p>Архипелаг Пепельного Моря — бескрайний океан, в котором из воды торчат острова самых разных форм и стихий. Каждый остров пронизан магией определённой стихии: огнём, водой, землёй, грозой, льдом. Драконы — живые воплощения этих стихий, они не просто животные, они — источники магического сырья.</p>
+
+    <p>Игрок — молодой Хранитель, которому Совет Древних доверил первый Пепельный Остров и одно яйцо. Задача Хранителя — освоить острова, вывести всех известных и неизвестных драконов, и расшифровать древнюю Книгу Скрещиваний.</p>
+
+    <h3>Тон и атмосфера</h3>
+    <div class="grid grid-3">
+      <div class="card"><div class="card-title">🌋 Магический мир</div>Не обычная ферма, а живой магический архипелаг с биомами и аномалиями</div>
+      <div class="card"><div class="card-title">📖 Коллекционирование</div>Книга Драконов — главная цель. Игрок открывает и записывает комбинации</div>
+      <div class="card"><div class="card-title">🐣 Тайна яйца</div>Каждое яйцо — загадка. Скрещивание — эксперимент. Открытие — награда</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ СТОЛПЫ ═══ -->
+  <section id="pillars">
+    <h2>ОСНОВНЫЕ СТОЛПЫ ГЕЙМПЛЕЯ</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">🥚 Коллекционирование драконов</div>
+        Собрать всех 30+ видов драконов. Каждый новый вид записывается в Книгу. Книга — прогресс-бар игрока.
+      </div>
+      <div class="card">
+        <div class="card-title">🌿 Магическое садоводство</div>
+        Биомные сады вместо грядок. Растения питают драконов, нужны для скрещивания, продаются в заказах.
+      </div>
+      <div class="card">
+        <div class="card-title">🏝 Освоение островов</div>
+        Каждый новый остров — новая стихия, новые ресурсы, новые драконы. Прогрессия через пространство.
+      </div>
+      <div class="card">
+        <div class="card-title">📦 Заказы и торговля</div>
+        Выполнение заказов Совета = основная валюта. Редкие заказы дают яйца уникальных драконов.
+      </div>
+      <div class="card">
+        <div class="card-title">🗺 Экспедиции</div>
+        Отправлять драконов в экспедиции за редкими ресурсами, яйцами и фрагментами карт.
+      </div>
+      <div class="card">
+        <div class="card-title">🔬 Скрещивание</div>
+        Простая система «A + B = C». Игрок экспериментирует и открывает комбинации сам.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ РЕДКОСТИ ═══ -->
+  <section id="rarity">
+    <h2>СИСТЕМА РЕДКОСТЕЙ</h2>
+    <p>Драконы делятся на 7 уровней редкости. Чем выше редкость — тем больше ресурсов даёт дракон, тем сложнее его получить и тем ценнее запись в Книге Драконов. Редкость влияет на свечение карточки, размер ауры в чиби-портрете и эффекты вокруг гнезда.</p>
+
+    <table>
+      <tr><th>Редкость</th><th>Кол-во</th><th>Как получить</th><th>Произв.</th><th>Особенность</th></tr>
+      <tr><td><span class="badge badge-common">Обычный</span></td><td>7</td><td>Яйцо из магазина / старт</td><td>8/ч</td><td>Базовые стихии</td></tr>
+      <tr><td><span class="badge badge-uncommon">Необычный</span></td><td>15</td><td>Скрещивание 2 обычных</td><td>12/ч</td><td>Двойная стихия</td></tr>
+      <tr><td><span class="badge badge-rare">Редкий</span></td><td>12</td><td>Скрещивание необычных + растения</td><td>16–20/ч</td><td>Уникальная стихия</td></tr>
+      <tr><td><span class="badge badge-epic">Эпический</span></td><td>9</td><td>Скрещивание редких + редкие растения</td><td>24–30/ч</td><td>Пассивные бонусы</td></tr>
+      <tr><td><span class="badge badge-legendary">Легендарный</span></td><td>7</td><td>Спец. рецепты + экспедиции</td><td>35–45/ч</td><td>Глобальные бонусы острова</td></tr>
+      <tr><td><span class="badge badge-mythic">Мифический</span></td><td>4</td><td>Скрещивание легендарных + события</td><td>50–70/ч</td><td>Влияют на всю ферму</td></tr>
+      <tr><td><span class="badge badge-divine">Древний</span></td><td>3</td><td>Финальные квесты / 100% Книги</td><td>80–120/ч</td><td>Венец коллекции</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Всего драконов: 57.</strong> Дизайн редкостей сделан так, чтобы у игрока всегда была «следующая цель»: открыл всех обычных → охота за необычными → редкими и так до Древних. Полное заполнение Книги — звание «Великий Хранитель».
+    </div>
+
+    <h3>Стихии мира (9 базовых + производные)</h3>
+    <div class="resource-list">
+      <span class="resource-pill">🔥 Огонь</span>
+      <span class="resource-pill">💧 Вода</span>
+      <span class="resource-pill">🌿 Земля</span>
+      <span class="resource-pill">⚡ Гроза</span>
+      <span class="resource-pill">❄️ Лёд</span>
+      <span class="resource-pill">🍃 Ветер</span>
+      <span class="resource-pill">🌳 Природа</span>
+      <span class="resource-pill">☀️ Свет</span>
+      <span class="resource-pill">🌑 Тень</span>
+      <span class="resource-pill">✨ Космос</span>
+      <span class="resource-pill">⌛ Время</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ БАЗОВЫЕ ДРАКОНЫ ═══ -->
+  <section id="dragons-base">
+    <h2>ОБЫЧНЫЕ ДРАКОНЫ (7 базовых стихий)</h2>
+    <p>Семь базовых видов — первичные, получаемые из яиц без скрещивания. Они являются основой для всех гибридов.</p>
+
+    <div class="dragon-card fire">
+      <div class="dragon-name">🔥 Эмберикс (Embrix)</div>
+      <div class="dragon-type">Стихия: Огонь · Базовый</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Жар-Уголь</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Огнецвет, Лавовая Ягода</strong></div>
+        <div><span>Не любит: </span><strong>Лунный Лотос</strong></div>
+        <div><span>Бонус при любимой еде: </span><strong>+20%</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Яростный и горячий, оставляет следы пепла на траве. Первый дракон каждого Хранителя.</p>
+    </div>
+
+    <div class="dragon-card water">
+      <div class="dragon-name">💧 Акваринт (Aqurint)</div>
+      <div class="dragon-type">Стихия: Вода · Базовый</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Чистая Эссенция</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Морской Цветок, Жемчужный Мох</strong></div>
+        <div><span>Не любит: </span><strong>Огнецвет</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Спокойный, любит плескаться в прудах. Чешуя переливается как морская вода.</p>
+    </div>
+
+    <div class="dragon-card earth">
+      <div class="dragon-name">🌿 Терравор (Terravur)</div>
+      <div class="dragon-type">Стихия: Земля · Базовый</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Живая Глина</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Корень Силы, Каменный Плод</strong></div>
+        <div><span>Не любит: </span><strong>Лунный Лотос</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Медленный и мощный. Его чешуя покрыта трещинами, из которых прорастают маленькие ростки.</p>
+    </div>
+
+    <div class="dragon-card storm">
+      <div class="dragon-name">⚡ Вольтракс (Voltrax)</div>
+      <div class="dragon-type">Стихия: Гроза · Базовый</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Молниевый Заряд</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Грозовой Перец, Электрический Трюфель</strong></div>
+        <div><span>Не любит: </span><strong>Жемчужный Мох</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Беспокойный, всегда в движении. Кончики крыльев искрят даже в ясную погоду.</p>
+    </div>
+
+    <div class="dragon-card ice">
+      <div class="dragon-name">❄️ Фростел (Frostel)</div>
+      <div class="dragon-type">Стихия: Лёд · Базовый</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Вечный Иней</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Ледяная Роза, Снежный Гриб</strong></div>
+        <div><span>Не любит: </span><strong>Огнецвет, Лавовая Ягода</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Холодный и величественный. Дышит морозным паром, трава под ним покрывается инеем.</p>
+    </div>
+
+    <div class="dragon-card wind">
+      <div class="dragon-name">🍃 Зефир (Zephyr)</div>
+      <div class="dragon-type">Стихия: Ветер · Обычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Чистый Бриз</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Воздушный Одуванчик, Перо-трава</strong></div>
+        <div><span>Не любит: </span><strong>Каменный Плод</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Лёгкий и игривый. Почти не касается земли, парит и кружится. Самый быстрый базовый дракон.</p>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🌳 Сильвен (Sylven)</div>
+      <div class="dragon-type">Стихия: Природа · Обычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Зелёная Смола</strong></div>
+        <div><span>Произв.: </span><strong>8 ед/час</strong></div>
+        <div><span>Любит: </span><strong>Цветок Жизни, Сладкий Корень</strong></div>
+        <div><span>Не любит: </span><strong>Грозовой Перец</strong></div>
+        <div><span>Инкубация: </span><strong>30 мин</strong></div>
+        <div><span>Взросление: </span><strong>2 часа</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Добрый лесной дракон, покрытый листьями и цветами. Рядом с ним растения растут быстрее.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ГИБРИДЫ ═══ -->
+  <section id="dragons-hybrid">
+    <h2>ГИБРИДНЫЕ ДРАКОНЫ (уровень 1)</h2>
+    <p>Получаются скрещиванием двух базовых драконов. Имеют черты обоих родителей, дают ресурсы обоих типов в меньших количествах + уникальный гибридный ресурс.</p>
+
+    <div class="dragon-card lava">
+      <div class="dragon-name">🌋 Лавакрон (Lavakron)</div>
+      <div class="dragon-type">Огонь + Земля · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Расплавленный Камень</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Эмберикс + Терравор</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Бронированный дракон с кожей из застывшей лавы. Оставляет огненные следы в земле.</p>
+    </div>
+
+    <div class="dragon-card shadow">
+      <div class="dragon-name">🌑 Небулор (Nebulor)</div>
+      <div class="dragon-type">Огонь + Гроза · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Пепельная Искра</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Эмберикс + Вольтракс</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Дракон взрывной энергии. Его рёв сопровождается раскатом грома и вспышкой пламени.</p>
+    </div>
+
+    <div class="dragon-card crystal">
+      <div class="dragon-name">💎 Глейсстоун (Glacestone)</div>
+      <div class="dragon-type">Лёд + Земля · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Ледяной Кристалл</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Фростел + Терравор</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Кристаллический дракон. Его чешуя — натуральные кристаллы льда, растущие из каменной кожи.</p>
+    </div>
+
+    <div class="dragon-card water">
+      <div class="dragon-name">🌊 Тайднар (Tydnar)</div>
+      <div class="dragon-type">Вода + Лёд · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Замороженная Эссенция</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Акваринт + Фростел</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Дракон арктических морей. Плавает подо льдом и оставляет в воде ледяные узоры.</p>
+    </div>
+
+    <div class="dragon-card storm">
+      <div class="dragon-name">⛈ Тандростом (Tundrostorm)</div>
+      <div class="dragon-type">Лёд + Гроза · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Замороженный Разряд</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Фростел + Вольтракс</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🌱 Мосстейл (Mosstale)</div>
+      <div class="dragon-type">Земля + Вода · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Живая Роса</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Терравор + Акваринт</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Дракон болот и лесов. Его тело покрыто мхом и мелкими цветами.</p>
+    </div>
+
+    <div class="dragon-card shadow">
+      <div class="dragon-name">🟣 Вайолетрикс (Violetrix)</div>
+      <div class="dragon-type">Огонь + Вода · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Пурпурный Пар</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Эмберикс + Акваринт</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Редкий результат противостоящих стихий. Фиолетовое свечение, пар вокруг тела.</p>
+    </div>
+
+    <div class="dragon-card storm">
+      <div class="dragon-name">🌿⚡ Флорамп (Floramp)</div>
+      <div class="dragon-type">Земля + Гроза · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Электрический Сок</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Терравор + Вольтракс</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card water">
+      <div class="dragon-name">💧⚡ Плазмариус (Plasmarius)</div>
+      <div class="dragon-type">Вода + Гроза · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Плазменная Капля</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Акваринт + Вольтракс</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card fire">
+      <div class="dragon-name">🔥❄️ Игнифрост (Ignifrost)</div>
+      <div class="dragon-type">Огонь + Лёд · Гибрид</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Туман Контрастов</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Эмберикс + Фростел</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Сочетание несочетаемого. Одна половина тела пылает, другая покрыта льдом.</p>
+    </div>
+
+    <div class="dragon-card wind">
+      <div class="dragon-name">🍃🔥 Пиросвист (Pyrosvist)</div>
+      <div class="dragon-type">Ветер + Огонь · Необычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Раскалённый Вихрь</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Зефир + Эмберикс</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Несётся как огненный смерч. За ним тянется хвост из искр.</p>
+    </div>
+
+    <div class="dragon-card wind">
+      <div class="dragon-name">🍃💧 Мистраль (Mistral)</div>
+      <div class="dragon-type">Ветер + Вода · Необычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Морская Дымка</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Зефир + Акваринт</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card storm">
+      <div class="dragon-name">🍃⚡ Сторми (Stormy)</div>
+      <div class="dragon-type">Ветер + Гроза · Необычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Шквальный Заряд</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Зефир + Вольтракс</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Маленькая грозовая тучка с крыльями. Очаровательный и шумный.</p>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🌳🔥 Эмберлиф (Emberleaf)</div>
+      <div class="dragon-type">Природа + Огонь · Необычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Тлеющая Листва</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Сильвен + Эмберикс</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Дракон осеннего леса. Листья на его теле горят оранжевым огнём, но не сгорают.</p>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🌳💧 Блумтайд (Bloomtide)</div>
+      <div class="dragon-type">Природа + Вода · Необычный</div>
+      <div class="dragon-meta">
+        <div><span>Ресурс: </span><strong>Цветочный Нектар</strong></div>
+        <div><span>Произв.: </span><strong>12 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>4 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Сильвен + Акваринт</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Весь усыпан цветущими лотосами. Самый «милый» дракон для коллекционеров.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ РЕДКИЕ ═══ -->
+  <section id="dragons-rare">
+    <h2>РЕДКИЕ ДРАКОНЫ (12)</h2>
+    <p>Получаются скрещиванием необычных гибридов с использованием редких растений. Каждый — носитель уникальной стихии, недоступной у базовых драконов.</p>
+
+    <div class="dragon-card cosmic">
+      <div class="dragon-name">✨ Астралон (Astralon)</div>
+      <div class="dragon-type">Космос · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Звёздная Пыль</strong></div>
+        <div><span>Произв.: </span><strong>18 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>12 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Лавакрон + Тундростом</strong></div>
+        <div><span>Доп.: </span><strong>Астральная Лоза ×3</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Галактическая расцветка, следы звёздной пыли за хвостом.</p>
+    </div>
+
+    <div class="dragon-card shadow">
+      <div class="dragon-name">🌑 Умброн (Umbron)</div>
+      <div class="dragon-type">Тень · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Тёмная Эссенция</strong></div>
+        <div><span>Произв.: </span><strong>18 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>10 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Небулор + Глейсстоун + Теневой Мак</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card light">
+      <div class="dragon-name">☀️ Солярис (Solaris)</div>
+      <div class="dragon-type">Свет · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Лучистая Пыльца</strong></div>
+        <div><span>Произв.: </span><strong>18 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>10 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Пиросвист + Сторми + Солнцецвет</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Сияет тёплым золотым светом. Ускоряет рост растений в радиусе своего гнезда.</p>
+    </div>
+
+    <div class="dragon-card wind">
+      <div class="dragon-name">🌪 Вихрон (Vihron)</div>
+      <div class="dragon-type">Торнадо · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Сжатый Ветер</strong></div>
+        <div><span>Произв.: </span><strong>16 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>8 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Мистраль + Сторми</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card crystal">
+      <div class="dragon-name">🌈 Призмат (Prismat)</div>
+      <div class="dragon-type">Кристалл-Радуга · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Радужный Осколок</strong></div>
+        <div><span>Произв.: </span><strong>20 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>12 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Глейсстоун + Солярис</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Прозрачная кристаллическая чешуя, преломляющая свет всеми цветами радуги.</p>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🍄 Спорус (Sporus)</div>
+      <div class="dragon-type">Гриб-Яд · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Споровая Пыль</strong></div>
+        <div><span>Произв.: </span><strong>16 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>8 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Мосстейл + Блумтайд</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card water">
+      <div class="dragon-name">⚓ Кракендрейк (Krakendrake)</div>
+      <div class="dragon-type">Глубина · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Глубинный Жемчуг</strong></div>
+        <div><span>Произв.: </span><strong>18 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>10 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Тайднар + Плазмариус</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Дракон океанских глубин со щупальцами вместо части хвоста. Светится в темноте.</p>
+    </div>
+
+    <div class="dragon-card lava">
+      <div class="dragon-name">🪨 Магмалит (Magmalit)</div>
+      <div class="dragon-type">Расплав · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Жидкая Магма</strong></div>
+        <div><span>Произв.: </span><strong>20 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>12 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Лавакрон + Эмберлиф</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card ice">
+      <div class="dragon-name">🧊 Криовир (Cryovir)</div>
+      <div class="dragon-type">Абсолютный Лёд · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Абсолютный Иней</strong></div>
+        <div><span>Произв.: </span><strong>18 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>10 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Тайднар + Тундростом</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card shadow">
+      <div class="dragon-name">🌫 Мглорог (Mglorog)</div>
+      <div class="dragon-type">Туман · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Густой Туман</strong></div>
+        <div><span>Произв.: </span><strong>16 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>8 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Мистраль + Умброн</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🌺 Флоренция (Florentia)</div>
+      <div class="dragon-type">Цветение · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Вечный Цвет</strong></div>
+        <div><span>Произв.: </span><strong>18 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>10 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Блумтайд + Солярис</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Тело покрыто живыми цветами, которые меняются по сезонам. Любимец для милого чиби-арта.</p>
+    </div>
+
+    <div class="dragon-card shadow">
+      <div class="dragon-name">🦴 Костяной Дрейк (Bonedrake)</div>
+      <div class="dragon-type">Кость · Редкий</div>
+      <span class="badge badge-rare">Редкий</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Древняя Кость</strong></div>
+        <div><span>Произв.: </span><strong>16 ед/час</strong></div>
+        <div><span>Инкубация: </span><strong>8 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Глейсстоун + Умброн</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ЭПИЧЕСКИЕ ═══ -->
+  <section id="dragons-epic">
+    <h2>ЭПИЧЕСКИЕ ДРАКОНЫ (9)</h2>
+    <p>Создаются скрещиванием редких драконов с редкими растениями. Обладают пассивными бонусами для острова.</p>
+
+    <div class="dragon-card cosmic">
+      <div class="dragon-name">🌟 Стелларис (Stellaris)</div>
+      <div class="dragon-type">Звёздный · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Концентрат Звёзд</strong></div>
+        <div><span>Произв.: </span><strong>28 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+10% к косм. ресурсам</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Астралон + Призмат</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card storm">
+      <div class="dragon-name">⚡ Громовержец (Gromoverzhets)</div>
+      <div class="dragon-type">Повелитель гроз · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Концентрат Молний</strong></div>
+        <div><span>Произв.: </span><strong>30 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>-10% к таймерам гроз. драконов</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Вихрон + Криовир</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card water">
+      <div class="dragon-name">🌊 Левиафан-юн (Leviathan-yun)</div>
+      <div class="dragon-type">Морской титан · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Сердце Океана</strong></div>
+        <div><span>Произв.: </span><strong>28 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+15% к водным ресурсам</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Кракендрейк + Криовир</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card lava">
+      <div class="dragon-name">🌋 Вулканар (Vulkanar)</div>
+      <div class="dragon-type">Великий вулкан · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Ядро Вулкана</strong></div>
+        <div><span>Произв.: </span><strong>30 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+15% к огненным ресурсам</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Магмалит + Стелларис</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card light">
+      <div class="dragon-name">🔮 Аркануум (Arcanuum)</div>
+      <div class="dragon-type">Чистая магия · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Сырая Магия</strong></div>
+        <div><span>Произв.: </span><strong>26 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+5% опыта Хранителя</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Призмат + Солярис</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🍂 Сезонар (Sezonar)</div>
+      <div class="dragon-type">Времена года · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Эссенция Сезонов</strong></div>
+        <div><span>Произв.: </span><strong>26 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+10% к урожаю всех садов</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Флоренция + Спорус</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Меняет облик 4 раза в день: весна, лето, осень, зима. Игроки обожают его за анимации.</p>
+    </div>
+
+    <div class="dragon-card shadow">
+      <div class="dragon-name">💀 Некрос (Nekros)</div>
+      <div class="dragon-type">Нежить · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Эктоплазма</strong></div>
+        <div><span>Произв.: </span><strong>28 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+15% к теневым ресурсам</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Костяной Дрейк + Мглорог</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card cosmic">
+      <div class="dragon-name">🐉 Рунический Дрейк (Runedrake)</div>
+      <div class="dragon-type">Руны · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Руническая Энергия</strong></div>
+        <div><span>Произв.: </span><strong>26 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+10% шанс гибрида при скрещивании</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Аркануум + Некрос</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card wind">
+      <div class="dragon-name">🌫⚡ Бурелом (Burelom)</div>
+      <div class="dragon-type">Буря · Эпический</div>
+      <span class="badge badge-epic">Эпический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Энергия Бури</strong></div>
+        <div><span>Произв.: </span><strong>28 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>-10% к таймерам экспедиций</strong></div>
+        <div><span>Инкубация: </span><strong>16 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Вихрон + Громовержец</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ЛЕГЕНДАРНЫЕ ═══ -->
+  <section id="dragons-legendary">
+    <h2>ЛЕГЕНДАРНЫЕ ДРАКОНЫ (7)</h2>
+    <p>Венец продвинутого скрещивания. Требуют легендарных растений и часто яиц из экспедиций. Дают глобальные бонусы всему острову.</p>
+
+    <div class="dragon-card time">
+      <div class="dragon-name">⌛ Хроносаур (Chronosaur)</div>
+      <div class="dragon-type">Время · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Осколок Времени</strong></div>
+        <div><span>Произв.: </span><strong>40 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>-20% ко всем таймерам острова</strong></div>
+        <div><span>Инкубация: </span><strong>24 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Стелларис + Хроновис (экспедиция)</strong></div>
+        <div><span>Доп.: </span><strong>Цветок Времени ×5</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card divine">
+      <div class="dragon-name">🌑 Эклипсар (Eclipsar)</div>
+      <div class="dragon-type">Затмение (Свет+Тень) · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Энергия Затмения</strong></div>
+        <div><span>Произв.: </span><strong>42 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+15% ко всем ресурсам ночью</strong></div>
+        <div><span>Инкубация: </span><strong>24 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Аркануум + Некрос</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Половина тела — свет, половина — тьма. Меняется день/ночь по реальному времени.</p>
+    </div>
+
+    <div class="dragon-card fire">
+      <div class="dragon-name">🔥 Феникс-Прим (Phoenix-Prime)</div>
+      <div class="dragon-type">Возрождение · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Пепел Возрождения</strong></div>
+        <div><span>Произв.: </span><strong>40 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>Удваивает 1 сбор ресурсов в день</strong></div>
+        <div><span>Инкубация: </span><strong>24 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Вулканар + Солярис</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card ice">
+      <div class="dragon-name">❄️ Вечнозим (Vechnozim)</div>
+      <div class="dragon-type">Вечная мерзлота · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Сердце Ледника</strong></div>
+        <div><span>Произв.: </span><strong>38 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>Ресурсы не «переполняются» (бесконечный склад)</strong></div>
+        <div><span>Инкубация: </span><strong>24 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Левиафан-юн + Криовир</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card cosmic">
+      <div class="dragon-name">🌌 Галактон (Galakton)</div>
+      <div class="dragon-type">Галактика · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Галактическая Эссенция</strong></div>
+        <div><span>Произв.: </span><strong>45 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+10% производству всех косм. и эпич. драконов</strong></div>
+        <div><span>Инкубация: </span><strong>30 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Стелларис + Рунический Дрейк</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card storm">
+      <div class="dragon-name">🐲 Драконий Король (Dragon King)</div>
+      <div class="dragon-type">Король драконов · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Корона</strong></div>
+        <div><span>Произв.: </span><strong>42 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+5% производству каждого дракона на острове</strong></div>
+        <div><span>Инкубация: </span><strong>30 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Громовержец + Вулканар</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card nature">
+      <div class="dragon-name">🌳 Древо-Дракон (Drevo-Drake)</div>
+      <div class="dragon-type">Мировое древо · Легендарный</div>
+      <span class="badge badge-legendary">Легендарный</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Сок Мирового Древа</strong></div>
+        <div><span>Произв.: </span><strong>38 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+20% к урожаю всех садов</strong></div>
+        <div><span>Инкубация: </span><strong>24 часа</strong></div>
+        <div><span>Скрещивание: </span><strong>Сезонар + Древо-семя (экспедиция)</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ МИФИЧЕСКИЕ И ДРЕВНИЕ ═══ -->
+  <section id="dragons-mythic">
+    <h2>МИФИЧЕСКИЕ И ДРЕВНИЕ ДРАКОНЫ (7)</h2>
+    <p>Высшая лига коллекции. Получаются скрещиванием легендарных, через сезонные события или за заполнение Книги Драконов. Влияют на всю ферму, а не только на остров.</p>
+
+    <h3>Мифические (4)</h3>
+
+    <div class="dragon-card mythic">
+      <div class="dragon-name">🌀 Парадокс (Paradox)</div>
+      <div class="dragon-type">Искажение реальности · Мифический</div>
+      <span class="badge badge-mythic">Мифический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Осколок Парадокса</strong></div>
+        <div><span>Произв.: </span><strong>60 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>-15% таймеров на ВСЕХ островах</strong></div>
+        <div><span>Инкубация: </span><strong>36 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Хроносаур + Эклипсар</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card mythic">
+      <div class="dragon-name">🕊 Этериал (Ethereal)</div>
+      <div class="dragon-type">Чистый эфир · Мифический</div>
+      <span class="badge badge-mythic">Мифический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Эфир</strong></div>
+        <div><span>Произв.: </span><strong>55 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+10% производству всех драконов фермы</strong></div>
+        <div><span>Инкубация: </span><strong>36 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Галактон + Феникс-Прим</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Полупрозрачный, светящийся изнутри. Самый красивый дракон в чиби-исполнении.</p>
+    </div>
+
+    <div class="dragon-card mythic">
+      <div class="dragon-name">🩸 Древний Тёмный (Ancient Dark)</div>
+      <div class="dragon-type">Первобытная тьма · Мифический</div>
+      <span class="badge badge-mythic">Мифический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Первобытная Тьма</strong></div>
+        <div><span>Произв.: </span><strong>60 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+25% к редким наградам экспедиций</strong></div>
+        <div><span>Инкубация: </span><strong>40 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Эклипсар + Драконий Король</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card mythic">
+      <div class="dragon-name">☄️ Кометар (Kometar)</div>
+      <div class="dragon-type">Комета · Мифический</div>
+      <span class="badge badge-mythic">Мифический</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Ядро Кометы</strong></div>
+        <div><span>Произв.: </span><strong>65 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>Раз в день: мгновенный сбор всех ресурсов</strong></div>
+        <div><span>Инкубация: </span><strong>40 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Галактон + Парадокс</strong></div>
+      </div>
+    </div>
+
+    <h3>Древние (3) — венец коллекции</h3>
+
+    <div class="dragon-card divine">
+      <div class="dragon-name">🌌 Некзус (Nexus)</div>
+      <div class="dragon-type">Все стихии · Древний</div>
+      <span class="badge badge-divine">Древний</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Первичная Магия</strong></div>
+        <div><span>Произв.: </span><strong>90 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+15% производству всех драконов фермы</strong></div>
+        <div><span>Инкубация: </span><strong>48 часов</strong></div>
+        <div><span>Скрещивание: </span><strong>Этериал + Кометар + Сердце Кометы ×3</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Тело переливается всеми стихиями одновременно. Главная цель коллекции.</p>
+    </div>
+
+    <div class="dragon-card divine">
+      <div class="dragon-name">🐉 Прародитель (Progenitor)</div>
+      <div class="dragon-type">Первый дракон · Древний</div>
+      <span class="badge badge-divine">Древний</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Дыхание Творения</strong></div>
+        <div><span>Произв.: </span><strong>100 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>Все яйца инкубируются на 30% быстрее</strong></div>
+        <div><span>Инкубация: </span><strong>72 часа</strong></div>
+        <div><span>Получение: </span><strong>Финальный квест «Тайна Архипелага»</strong></div>
+      </div>
+    </div>
+
+    <div class="dragon-card divine">
+      <div class="dragon-name">♾ Вечный (Eternal)</div>
+      <div class="dragon-type">Бесконечность · Древний (секретный)</div>
+      <span class="badge badge-divine">Древний</span>
+      <div class="dragon-meta" style="margin-top:10px">
+        <div><span>Ресурс: </span><strong>Бесконечная Эссенция</strong></div>
+        <div><span>Произв.: </span><strong>120 ед/час</strong></div>
+        <div><span>Бонус: </span><strong>+20% ко всему · золотая аура</strong></div>
+        <div><span>Получение: </span><strong>Заполнить Книгу Драконов на 100% (все 56 видов)</strong></div>
+      </div>
+      <p style="margin-top:12px;font-size:15px;color:var(--text-dim)">Награда за полную коллекцию. Доказательство звания «Великий Хранитель».</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ПОЛНЫЙ СПИСОК ═══ -->
+  <section id="dragons-full">
+    <h2>ПОЛНЫЙ СПИСОК ДРАКОНОВ (56)</h2>
+    <p>Сводная таблица всех видов с их происхождением. Древний «Вечный» (#57) — секретная награда за 100% коллекции.</p>
+
+    <h3><span class="badge badge-common">Обычные</span> · 7</h3>
+    <table>
+      <tr><th>#</th><th>Дракон</th><th>Стихия</th><th>Ресурс</th></tr>
+      <tr><td>1</td><td>🔥 Эмберикс</td><td>Огонь</td><td>Жар-Уголь</td></tr>
+      <tr><td>2</td><td>💧 Акваринт</td><td>Вода</td><td>Чистая Эссенция</td></tr>
+      <tr><td>3</td><td>🌿 Терравор</td><td>Земля</td><td>Живая Глина</td></tr>
+      <tr><td>4</td><td>⚡ Вольтракс</td><td>Гроза</td><td>Молниевый Заряд</td></tr>
+      <tr><td>5</td><td>❄️ Фростел</td><td>Лёд</td><td>Вечный Иней</td></tr>
+      <tr><td>6</td><td>🍃 Зефир</td><td>Ветер</td><td>Чистый Бриз</td></tr>
+      <tr><td>7</td><td>🌳 Сильвен</td><td>Природа</td><td>Зелёная Смола</td></tr>
+    </table>
+
+    <h3><span class="badge badge-uncommon">Необычные</span> · 15</h3>
+    <table>
+      <tr><th>#</th><th>Дракон</th><th>Стихия</th><th>Родители</th></tr>
+      <tr><td>8</td><td>🌋 Лавакрон</td><td>Огонь+Земля</td><td>Эмберикс + Терравор</td></tr>
+      <tr><td>9</td><td>🌑 Небулор</td><td>Огонь+Гроза</td><td>Эмберикс + Вольтракс</td></tr>
+      <tr><td>10</td><td>💎 Глейсстоун</td><td>Лёд+Земля</td><td>Фростел + Терравор</td></tr>
+      <tr><td>11</td><td>🌊 Тайднар</td><td>Вода+Лёд</td><td>Акваринт + Фростел</td></tr>
+      <tr><td>12</td><td>⛈ Тундростом</td><td>Лёд+Гроза</td><td>Фростел + Вольтракс</td></tr>
+      <tr><td>13</td><td>🌱 Мосстейл</td><td>Земля+Вода</td><td>Терравор + Акваринт</td></tr>
+      <tr><td>14</td><td>🟣 Вайолетрикс</td><td>Огонь+Вода</td><td>Эмберикс + Акваринт</td></tr>
+      <tr><td>15</td><td>🌿⚡ Флорамп</td><td>Земля+Гроза</td><td>Терравор + Вольтракс</td></tr>
+      <tr><td>16</td><td>💧⚡ Плазмариус</td><td>Вода+Гроза</td><td>Акваринт + Вольтракс</td></tr>
+      <tr><td>17</td><td>🔥❄️ Игнифрост</td><td>Огонь+Лёд</td><td>Эмберикс + Фростел</td></tr>
+      <tr><td>18</td><td>🍃🔥 Пиросвист</td><td>Ветер+Огонь</td><td>Зефир + Эмберикс</td></tr>
+      <tr><td>19</td><td>🍃💧 Мистраль</td><td>Ветер+Вода</td><td>Зефир + Акваринт</td></tr>
+      <tr><td>20</td><td>🍃⚡ Сторми</td><td>Ветер+Гроза</td><td>Зефир + Вольтракс</td></tr>
+      <tr><td>21</td><td>🌳🔥 Эмберлиф</td><td>Природа+Огонь</td><td>Сильвен + Эмберикс</td></tr>
+      <tr><td>22</td><td>🌳💧 Блумтайд</td><td>Природа+Вода</td><td>Сильвен + Акваринт</td></tr>
+    </table>
+
+    <h3><span class="badge badge-rare">Редкие</span> · 12</h3>
+    <table>
+      <tr><th>#</th><th>Дракон</th><th>Стихия</th><th>Родители</th></tr>
+      <tr><td>23</td><td>✨ Астралон</td><td>Космос</td><td>Лавакрон + Тундростом</td></tr>
+      <tr><td>24</td><td>🌑 Умброн</td><td>Тень</td><td>Небулор + Глейсстоун</td></tr>
+      <tr><td>25</td><td>☀️ Солярис</td><td>Свет</td><td>Пиросвист + Сторми</td></tr>
+      <tr><td>26</td><td>🌪 Вихрон</td><td>Торнадо</td><td>Мистраль + Сторми</td></tr>
+      <tr><td>27</td><td>🌈 Призмат</td><td>Кристалл</td><td>Глейсстоун + Солярис</td></tr>
+      <tr><td>28</td><td>🍄 Спорус</td><td>Гриб-Яд</td><td>Мосстейл + Блумтайд</td></tr>
+      <tr><td>29</td><td>⚓ Кракендрейк</td><td>Глубина</td><td>Тайднар + Плазмариус</td></tr>
+      <tr><td>30</td><td>🪨 Магмалит</td><td>Расплав</td><td>Лавакрон + Эмберлиф</td></tr>
+      <tr><td>31</td><td>🧊 Криовир</td><td>Абс. Лёд</td><td>Тайднар + Тундростом</td></tr>
+      <tr><td>32</td><td>🌫 Мглорог</td><td>Туман</td><td>Мистраль + Умброн</td></tr>
+      <tr><td>33</td><td>🌺 Флоренция</td><td>Цветение</td><td>Блумтайд + Солярис</td></tr>
+      <tr><td>34</td><td>🦴 Костяной Дрейк</td><td>Кость</td><td>Глейсстоун + Умброн</td></tr>
+    </table>
+
+    <h3><span class="badge badge-epic">Эпические</span> · 9</h3>
+    <table>
+      <tr><th>#</th><th>Дракон</th><th>Стихия</th><th>Родители</th></tr>
+      <tr><td>35</td><td>🌟 Стелларис</td><td>Звёздный</td><td>Астралон + Призмат</td></tr>
+      <tr><td>36</td><td>⚡ Громовержец</td><td>Гроза</td><td>Вихрон + Криовир</td></tr>
+      <tr><td>37</td><td>🌊 Левиафан-юн</td><td>Океан</td><td>Кракендрейк + Криовир</td></tr>
+      <tr><td>38</td><td>🌋 Вулканар</td><td>Вулкан</td><td>Магмалит + Стелларис</td></tr>
+      <tr><td>39</td><td>🔮 Аркануум</td><td>Магия</td><td>Призмат + Солярис</td></tr>
+      <tr><td>40</td><td>🍂 Сезонар</td><td>Сезоны</td><td>Флоренция + Спорус</td></tr>
+      <tr><td>41</td><td>💀 Некрос</td><td>Нежить</td><td>Костяной Дрейк + Мглорог</td></tr>
+      <tr><td>42</td><td>🐉 Рунический Дрейк</td><td>Руны</td><td>Аркануум + Некрос</td></tr>
+      <tr><td>43</td><td>🌫⚡ Бурелом</td><td>Буря</td><td>Вихрон + Громовержец</td></tr>
+    </table>
+
+    <h3><span class="badge badge-legendary">Легендарные</span> · 7</h3>
+    <table>
+      <tr><th>#</th><th>Дракон</th><th>Стихия</th><th>Родители / Получение</th></tr>
+      <tr><td>44</td><td>⌛ Хроносаур</td><td>Время</td><td>Стелларис + Хроновис*</td></tr>
+      <tr><td>45</td><td>🌑 Эклипсар</td><td>Затмение</td><td>Аркануум + Некрос</td></tr>
+      <tr><td>46</td><td>🔥 Феникс-Прим</td><td>Возрождение</td><td>Вулканар + Солярис</td></tr>
+      <tr><td>47</td><td>❄️ Вечнозим</td><td>Мерзлота</td><td>Левиафан-юн + Криовир</td></tr>
+      <tr><td>48</td><td>🌌 Галактон</td><td>Галактика</td><td>Стелларис + Рунический Дрейк</td></tr>
+      <tr><td>49</td><td>🐲 Драконий Король</td><td>Король</td><td>Громовержец + Вулканар</td></tr>
+      <tr><td>50</td><td>🌳 Древо-Дракон</td><td>Древо</td><td>Сезонар + Древо-семя*</td></tr>
+    </table>
+
+    <h3><span class="badge badge-mythic">Мифические</span> · 4 &nbsp; <span class="badge badge-divine">Древние</span> · 3</h3>
+    <table>
+      <tr><th>#</th><th>Дракон</th><th>Стихия</th><th>Получение</th></tr>
+      <tr><td>51</td><td>🌀 Парадокс</td><td>Парадокс</td><td>Хроносаур + Эклипсар</td></tr>
+      <tr><td>52</td><td>🕊 Этериал</td><td>Эфир</td><td>Галактон + Феникс-Прим</td></tr>
+      <tr><td>53</td><td>🩸 Древний Тёмный</td><td>Тьма</td><td>Эклипсар + Драконий Король</td></tr>
+      <tr><td>54</td><td>☄️ Кометар</td><td>Комета</td><td>Галактон + Парадокс</td></tr>
+      <tr><td>55</td><td>🌌 Некзус</td><td>Все стихии</td><td>Этериал + Кометар</td></tr>
+      <tr><td>56</td><td>🐉 Прародитель</td><td>Творение</td><td>Финальный квест</td></tr>
+      <tr><td>57</td><td>♾ Вечный</td><td>Бесконечность</td><td>100% Книги Драконов</td></tr>
+    </table>
+    <p style="font-size:14px;color:var(--text-dim)">* Хроновис и Древо-семя — особые яйца, добываемые только в экспедициях на островах 5 и поздних.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ КЛИЧКИ И РОДОСЛОВНАЯ ═══ -->
+  <section id="nicknames">
+    <h2>КЛИЧКИ И РОДОСЛОВНАЯ</h2>
+    <p>Драконы — не безликие генераторы ресурсов, а питомцы. Игрок может дать каждому кличку и проследить его происхождение. Это усиливает привязанность и коллекционерский азарт.</p>
+
+    <h3>Клички</h3>
+    <ul>
+      <li>При вылуплении дракон получает имя вида (напр. «Эмберикс»), но игрок может задать любую кличку (напр. «Уголёк»)</li>
+      <li>Кличка отображается над гнездом и в Книге Драконов</li>
+      <li>Кличку можно менять в любой момент в панели дракона</li>
+      <li>Ограничение длины ~16 символов, простой фильтр на запрещённые слова</li>
+      <li>Технически: поле <code>nickname</code> в объекте дракона; если пусто — показывается имя вида</li>
+    </ul>
+
+    <h3>Панель дракона (что видит игрок по тапу)</h3>
+    <div class="panel-mock">
+      <div class="pm-row"><span class="pm-label">Кличка</span><span class="pm-val">Уголёк ✏️</span></div>
+      <div class="pm-row"><span class="pm-label">Вид</span><span class="pm-val">🔥 Эмберикс</span></div>
+      <div class="pm-row"><span class="pm-label">Редкость</span><span class="pm-val">Обычный</span></div>
+      <div class="pm-row"><span class="pm-label">Ресурс</span><span class="pm-val">Жар-Уголь · 8/ч</span></div>
+      <div class="pm-row"><span class="pm-label">Биом</span><span class="pm-val biome-buff">Вулканический +15% 🟢</span></div>
+      <div class="pm-row"><span class="pm-label">Любимая еда</span><span class="pm-val">Огнецвет, Лавовая Ягода</span></div>
+      <div class="pm-row"><span class="pm-label">Родители</span><span class="pm-val">👁 Посмотреть</span></div>
+      <div class="pm-row"><span class="pm-label">Потомки</span><span class="pm-val">3 дракона</span></div>
+    </div>
+
+    <h3>Родословная</h3>
+    <p>По кнопке «Посмотреть родителей» открывается дерево происхождения дракона. Игрок видит, от каких двух драконов он получен, и может перейти к ним (если ещё живы). Также видны потомки — кого вывели с участием этого дракона.</p>
+
+    <div class="pedigree">
+      <div class="ped-parents">
+        <div class="ped-node">🔥 Уголёк (Эмберикс)</div>
+        <div class="ped-node">🌿 Камешек (Терравор)</div>
+      </div>
+      <div class="ped-line">↓</div>
+      <div class="ped-node" style="border-color:var(--gold);color:var(--gold2)">🌋 Вулкаша (Лавакрон)</div>
+    </div>
+
+    <div class="callout tip">
+      <strong>Реализация (просто):</strong> у каждого дракона хранятся <code>parent_ids: [id1, id2]</code>. Дерево строится рекурсивно по этим ссылкам. Потомки находятся обратным поиском — кто указал этого дракона родителем. Никакой сложной БД: всё в JSON-снимке сохранения.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ БЕСТИАРИЙ ═══ -->
+  <section id="bestiary">
+    <h2>БЕСТИАРИЙ — БИОГРАФИИ ДРАКОНОВ</h2>
+    <p>Каждый дракон имеет характер и историю, раскрываемую в Книге Драконов при открытии вида. Указан любимый (🟢 +15%) и нелюбимый (🔴 −10%) биом, строка 🎨 — детальный визуальный референс для рисования в чиби-стиле, а строка 🏠 — облик уникального гнезда этого дракона (тоже под рисовку), согласованные с биографией.</p>
+
+    <h3><span class="badge badge-common">Обычные</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🔥 Эмберикс</div>
+      <div class="be-bio">Первый дракон каждого Хранителя. Вылупляется из тлеющего яйца, найденного в золе старого вулкана. Вспыльчив, но предан — если кормить его вовремя, он тихо мурлычет, разбрасывая безобидные искорки.</div>
+      <div class="be-art">🎨 Пухлый чиби-дракончик в алой и оранжевой чешуе, брюшко светло-жёлтое. На голове два маленьких рожка-уголька, вдоль спины — гребень из язычков пламени вместо шипов. Большие круглые глаза цвета расплавленного золота, кончик хвоста горит как факел. Вокруг летают безобидные искорки.</div>
+      <div class="be-nest">🏠 Гнездо-кратер из тлеющих углей и обсидиановых камней; по краям мерцают огоньки, в центре уютная выемка с тёплым пеплом. Над гнездом вьётся тонкая струйка дыма.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Вулканический</span><span class="biome-debuff">🔴 Ледяной</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">💧 Акваринт</div>
+      <div class="be-bio">Спокойный мечтатель океанских отмелей. Может часами лежать в пруду, пуская пузыри и глядя в небо. Старейшины говорят, что в его глазах отражаются давно затонувшие острова.</div>
+      <div class="be-art">🎨 Округлый дракончик в сине-бирюзовой переливающейся чешуе, брюшко перламутрово-белое. Вместо ушей — большие плавники, на спине плавниковый гребень, хвост заканчивается рыбьим плавником. Огромные мечтательные глаза цвета морской волны, с тела стекают капельки воды.</div>
+      <div class="be-nest">🏠 Гнездо-прудик с кристально-голубой водой, обрамлённый ракушками и водорослями; дракончик дремлет наполовину в воде, по поверхности расходятся лёгкие круги.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Лунный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌿 Терравор</div>
+      <div class="be-bio">Медлительный садовник архипелага. Где он спит, там сами собой прорастают цветы и мох. Не любит спешку и громкие звуки, зато может носить на спине целый сад.</div>
+      <div class="be-art">🎨 Коренастый чиби с каменно-коричневой кожей в трещинах, из которых растут зелёные ростки и мелкие цветы. Округлая морда, маленькие добрые янтарные глаза-бусины, на голове и спине вместо шипов — камешки и мох. Толстые короткие лапки, тяжёлый хвост-валун.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из плотно утрамбованной тёплой земли, выстеленная мхом, листьями и корнями; по краям прорастают свежие ростки и мелкие цветы.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Кристальный</span><span class="biome-debuff">🔴 Грозовой</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">⚡ Вольтракс</div>
+      <div class="be-bio">Комок неугомонной энергии. Не может усидеть на месте и искрит от любого волнения. Засыпает по-настоящему только во время сильной грозы — раскаты грома для него колыбельная.</div>
+      <div class="be-art">🎨 Худой шустрый чиби ярко-жёлтого цвета с синими зигзагами-молниями по бокам. Большие острые уши торчком, гребень наэлектризован и стоит дыбом, глаза — белые искрящиеся. Хвост в форме молнии, по кончикам крыльев пробегают разряды.</div>
+      <div class="be-nest">🏠 Гнездо-катушка из мотков проволоки и обломков металла, по краям бегают искры; в центре потрескивает маленький шар статики, над ним вьются мини-молнии.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">❄️ Фростел</div>
+      <div class="be-bio">Сдержанный аристократ среди базовых драконов. Дышит морозным паром и оставляет за собой узоры инея. Ценит тишину, одиночество и идеально ровный лёд.</div>
+      <div class="be-art">🎨 Изящный чиби в бледно-голубой и белой чешуе с инеевым блеском. Тонкие ледяные рога-кристаллы, гребень из острых льдинок, большие спокойные глаза цвета льда. Изо рта вырывается морозный пар, под лапками узор инея, хвост заканчивается снежинкой.</div>
+      <div class="be-nest">🏠 Ледяная чаша из голубых кристаллов и плотного снега с инеевыми узорами по краям; внутри мягкая «перина» из снежинок и лёгкий морозный пар.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Ледяной</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🍃 Зефир</div>
+      <div class="be-bio">Самый лёгкий и игривый дракон. Почти не касается земли — парит, кувыркается в потоках воздуха и обожает гоняться за опадающими листьями. Невозможно поймать, когда он не в настроении.</div>
+      <div class="be-art">🎨 Лёгкий, почти полупрозрачный чиби бледно-зелёного и белого цвета. Крылья больше тела, пушистый хвост-облачко, на голове завиток-вихрь. Огромные весёлые глаза, вокруг кружатся листики и пёрышки; лапки едва касаются земли.</div>
+      <div class="be-nest">🏠 Гнездо-пуховичок из одуванчиковых пушинок и мягких пёрышек, лежащее прямо на траве; ветерок постоянно ласково шевелит пушинки по краям.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Воздушный</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌳 Сильвен</div>
+      <div class="be-bio">Добрая душа леса, покрытая мхом и живыми цветами, что меняются по сезонам. Рядом с ним всё расцветает быстрее. Никогда не повышает голос и любит обнимашки.</div>
+      <div class="be-art">🎨 Мягкий округлый чиби лиственно-зелёного цвета с коричневым, покрыт мхом и мелкими цветами. Рога-веточки с листьями и бутонами, большие добрые глаза цвета молодой листвы, на спине растёт мини-сад. Хвост заканчивается распустившимся цветком.</div>
+      <div class="be-nest">🏠 Сплетение из живых веточек и лиан на земле, выстеленное мхом и бутонами; по краям распускаются цветы, а вокруг кружат светлячки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-debuff">🔴 Теневой</span></div>
+    </div>
+
+    <h3><span class="badge badge-uncommon">Необычные</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌋 Лавакрон</div>
+      <div class="be-bio">Рождён там, где лава встретила камень. Бронированный гигант, в трещинах которого светится внутренний жар. Тяжёл и нетороплив, но добродушен — любит, когда его чешут между плитами панциря.</div>
+      <div class="be-art">🎨 Массивный бронированный чиби из тёмно-серого камня с раскалёнными оранжевыми трещинами, светящимися изнутри. Толстые каменные плиты-панцирь, короткие мощные лапы, тупые рога. Глаза горят оранжевым, из трещин на спине поднимается дымок.</div>
+      <div class="be-nest">🏠 Чаша из чёрного базальта в застывшем лавовом потоке, с раскалёнными оранжевыми трещинами по дну. Поднимается жар и тонкий дымок.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Вулканический</span><span class="biome-debuff">🔴 Ледяной</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌑 Небулор</div>
+      <div class="be-bio">Взрывной характер во плоти: его рёв сопровождается раскатом грома и вспышкой огня. Появляется в небе во время редких огненных бурь. Капризен, но безумно эффектен.</div>
+      <div class="be-art">🎨 Тёмно-багровый чиби с дымчато-серыми крыльями; по телу одновременно бегут огненные и грозовые сполохи (оранжевый и фиолетовый). Растрёпанный острый гребень, глаза горят жёлто-оранжевым. Вокруг — искры и маленькие молнии.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из обугленных веток и углей; внутри тлеет жар, а над ним то и дело сверкают искры и крошечные молнии.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Лунный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">💎 Глейсстоун</div>
+      <div class="be-bio">Каменный дракон, поросший кристаллами вечного льда. Двигается редко, но если уж сдвинулся — его не остановить. Сородичи считают его мудрым и бесконечно терпеливым.</div>
+      <div class="be-art">🎨 Коренастый каменный чиби серо-голубого цвета, из спины и плеч растут полупрозрачные кристаллы льда. Тяжёлая челюсть, спокойные глубокие синие глаза, ледяные наросты как броня. Медлительная поза, иней по краям тела.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из выложенных камней, утыканных кристаллами льда; по краям наросты инея.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Кристальный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌊 Тайднар</div>
+      <div class="be-bio">Повелитель арктических течений. Плавает подо льдом, оставляя в воде причудливые морозные узоры. Молчалив и загадочен — никогда не знаешь, о чём он думает.</div>
+      <div class="be-art">🎨 Гладкий обтекаемый чиби в тёмно-сине-бирюзовой чешуе с ледяным отливом. Плавники-уши и перепонки на лапах, гребень-плавник со льдинками, хвост-плавник. Загадочные узкие глаза цвета морского льда, по телу морозные узоры.</div>
+      <div class="be-nest">🏠 Гнездо-полынья изо льда с тёмно-бирюзовой водой внутри, обрамлённая льдинками и ракушками; дракон спит на самой границе воды и льда.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Ледяной</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">⛈ Тундростом</div>
+      <div class="be-bio">Гроза над замёрзшими морями. Его молнии бьют холодным синим светом, а крылья покрыты инеем. Любит высоту, холод и одиночество ледяных вершин.</div>
+      <div class="be-art">🎨 Чиби цвета грозовой тучи (тёмно-синий и серый) с инеем по краям; по телу бегают холодные синие молнии. Острые ледяные рожки, взъерошенный гребень, светящиеся бело-голубые глаза. Крылья как штормовые облака, кончики искрят синим.</div>
+      <div class="be-nest">🏠 Снежное гнездо-тучка, плотно слежавшаяся на земле; по краям бегают синие искры, сверху капает ледяная морось.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌱 Мосстейл</div>
+      <div class="be-bio">Дракон тихих болот и туманных лесов. Покрыт мхом и кувшинками, пахнет дождём и тёплой землёй. Самый умиротворённый из всех гибридов — рядом с ним хочется задремать.</div>
+      <div class="be-art">🎨 Низкий уютный чиби болотно-зелёного цвета, спина покрыта мхом, кувшинками и каплями росы. Большие сонные глаза, округлая добрая морда, на голове лист-кувшинка как шляпка. Перепончатые лапки, хвост с цветком лотоса.</div>
+      <div class="be-nest">🏠 Кочка из мха, кувшинок и тростника, стоящая в тонкой лужице болотной воды; вокруг покачиваются листья лотоса, тихо квакают лягушки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🟣 Вайолетрикс</div>
+      <div class="be-bio">Редкое дитя враждующих стихий огня и воды. Окутан фиолетовым паром и тихо шипит при касании. Капризный, противоречивый, но завораживающий.</div>
+      <div class="be-art">🎨 Чиби в фиолетово-пурпурной чешуе с розовым отливом, окутан клубами лилового пара. Контрастные тёплые и холодные отметины, яркие глаза-аметисты, капризное выражение. От тела поднимается пар, кончик хвоста дымится.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из контрастных тёплых и холодных камней, окутанное лиловым паром; в центре булькает маленький горячий источник.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Лунный</span><span class="biome-debuff">🔴 Грозовой</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌿⚡ Флорамп</div>
+      <div class="be-bio">Дракон, чьи рога ветвятся как корни и искрят как провода. Растения вокруг него растут под действием постоянной статики. Немного дёрганый, но безобидный.</div>
+      <div class="be-art">🎨 Чиби зелёно-жёлтого цвета; рога ветвятся как корни-провода с искрами на кончиках. По телу растительные узоры, между которыми пробегает статика. Удивлённые большие глаза, гребень слегка дыбом, крылья-листья.</div>
+      <div class="be-nest">🏠 Сплетение корней и проводящих лоз на земле, между которыми проскакивают искры; по краям растут слегка наэлектризованные цветы.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Ледяной</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">💧⚡ Плазмариус</div>
+      <div class="be-bio">Мерцающий дракон штормового моря. Его капли бьют слабым током, а чешуя светится в брызгах. Игривый и опасный одновременно — лучше не дразнить.</div>
+      <div class="be-art">🎨 Полупрозрачный сине-голубой чиби, по телу мерцают электрические капли. Гладкая мокрая чешуя со светящимися линиями, плавники с разрядами, большие озорные глаза. Вокруг — брызги, искрящие током.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из мокрых светящихся камней с мелкой лужицей внутри; вода искрит током, по поверхности пробегают голубые разряды.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🔥❄️ Игнифрост</div>
+      <div class="be-bio">Живой парадокс: одна половина тела пылает, другая скована льдом. Постоянно «спорит сам с собой», выпуская струйки пара. Удивительно, что он вообще существует.</div>
+      <div class="be-art">🎨 Чиби, идеально разделённый пополам: левая половина огненно-красная с пламенем, правая ледяно-голубая с инеем. Один глаз оранжевый, другой голубой; из одной ноздри пар, из другой дымок. Гребень наполовину огонь, наполовину лёд, по центру тела лёгкий парок.</div>
+      <div class="be-nest">🏠 Гнездо-чаша, поделённая строго пополам: одна сторона из тлеющих углей, другая изо льда; по центру клубится пар от их встречи.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — без штрафов ни в одном биоме</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🍃🔥 Пиросвист</div>
+      <div class="be-bio">Огненный смерч на крыльях. Несётся по острову, оставляя за собой хвост из искр. Непоседа и обожатель скорости — выиграть у него гонку невозможно.</div>
+      <div class="be-art">🎨 Стремительный обтекаемый чиби оранжево-красного цвета, за ним тянется огненно-искристый хвост-смерч. Большие крылья, прижатые от скорости уши, азартные глаза. Поза в движении, вокруг спираль из искр.</div>
+      <div class="be-nest">🏠 Низкое гнездо-чаша из уложенных по спирали перьев с тлеющими кончиками; стоит на земле, вокруг вьются маленькие огненные искорки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Воздушный</span><span class="biome-debuff">🔴 Лунный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🍃💧 Мистраль</div>
+      <div class="be-bio">Прохладный морской бриз во плоти. Приносит лёгкий туман и мелкий дождь, куда бы ни прилетел. Меланхоличен, нежен и любит туманные рассветы.</div>
+      <div class="be-art">🎨 Нежный полупрозрачный чиби бледно-голубого и серого цвета, окутан лёгким туманом и капельками. Большие лёгкие крылья, мягкий хвост-струйка, чуть грустные большие глаза. Вокруг дымка и морось.</div>
+      <div class="be-nest">🏠 Каменное гнездо-чаша на земле, выстеленное мхом и пухом; над ним клубится лёгкая дымка, на стенках оседают капельки росы.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Воздушный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🍃⚡ Сторми</div>
+      <div class="be-bio">Крохотная грозовая тучка с крыльями и огромными глазами. Шумит, гремит и сверкает, но совершенно безобиден. Безоговорочный любимец детей-Хранителей.</div>
+      <div class="be-art">🎨 Очень милый чиби в форме маленькой грозовой тучки на коротеньких лапках, тёмно-серый с белым брюшком. Огромные глаза, крошечные крылышки, из тела торчат мини-молнии. Над головой капает дождик, выражение радостно-удивлённое.</div>
+      <div class="be-nest">🏠 Мягкое гнездо-чаша из серой ваты, стоящее прямо на земле; над ним собралась маленькая личная тучка, из которой капает дождик и подмигивают молнии.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌳🔥 Эмберлиф</div>
+      <div class="be-bio">Дракон вечной осени. Листья на его теле горят тёплым оранжевым пламенем, но не сгорают. Уютный и неспешный — рядом с ним всегда тепло.</div>
+      <div class="be-art">🎨 Уютный чиби тёпло-коричневого цвета, тело покрыто осенними листьями оранжево-красных оттенков, тлеющими по краям. Рога-веточки с горящими листьями, добрые тёплые янтарные глаза. Вокруг кружатся светящиеся листики, хвост — пылающая ветка.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из осенних листьев, тлеющих по краям тёплым оранжевым светом; уютная и пахнущая дымком и осенью.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-debuff">🔴 Ледяной</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌳💧 Блумтайд</div>
+      <div class="be-bio">Самый милый дракон архипелага — весь усыпан цветущими лотосами. Источает нежный аромат, привлекающий бабочек и пчёл. Кроткий и ласковый.</div>
+      <div class="be-art">🎨 Самый милый чиби: мягкий бело-розово-зелёный, весь усыпан цветущими розовыми лотосами и бутонами. Большие сияющие глаза, цветок на голове как корона, вокруг порхают бабочки. Хвост-букет, нежная улыбающаяся мордочка.</div>
+      <div class="be-nest">🏠 Гнездо-кувшинка с розовыми лотосами и бутонами, лежащее в тонкой лужице; вокруг порхают бабочки — самое милое гнездо архипелага.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Лунный</span><span class="biome-debuff">🔴 Теневой</span></div>
+    </div>
+
+    <h3><span class="badge badge-rare">Редкие</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">✨ Астралон</div>
+      <div class="be-bio">Дитя падающей звезды. По ночам его чешуя мерцает россыпью созвездий, а за хвостом тянется звёздная пыль. Смотрит в небо куда чаще, чем под ноги.</div>
+      <div class="be-art">🎨 Чиби глубокого тёмно-синего и фиолетового цвета, по телу мерцают звёзды и созвездия как ночное небо. Глаза — две маленькие галактики, рога-кометы, за хвостом тянется шлейф звёздной пыли. Лёгкое свечение по контуру (аура редкости).</div>
+      <div class="be-nest">🏠 Гнездо-чаша из тёмного камня с вкраплениями звёзд; по краям кружат искорки звёздной пыли.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Космический</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌑 Умброн</div>
+      <div class="be-bio">Сотканный из теней дракон, которого видно только краем глаза. Вовсе не злой, но пугающе тихий — появляется и исчезает без звука. Обожает прохладный сумрак.</div>
+      <div class="be-art">🎨 Чиби из тёмной полупрозрачной дымки, силуэт нечёткий и тает по краям. Светятся только большие бледно-фиолетовые глаза и тонкие узоры на теле. Почти бесплотный, вокруг клубы тени, тёмно-фиолетовая аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из тёмного камня, окутанная сгустившимися тенями; светятся лишь слабые фиолетовые узоры по краю.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Теневой</span><span class="biome-debuff">🔴 Светлый / Природный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">☀️ Солярис</div>
+      <div class="be-bio">Живое маленькое солнце. Сияет тёплым золотом, и все растения тянутся в его сторону. Излучает спокойную, заразительную радость.</div>
+      <div class="be-art">🎨 Сияющий золотисто-белый чиби, излучающий тёплый свет; по телу солнечные узоры. Гребень-лучи как корона солнца, тёплые радостные глаза, золотая аура вокруг. На референсе растения тянутся в его сторону.</div>
+      <div class="be-nest">🏠 Гнездо-солнце из тёплого камня с золотыми солнечными лучами по краям; излучает мягкий свет, и растения вокруг тянутся к нему.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный / Светлый</span><span class="biome-debuff">🔴 Теневой</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌪 Вихрон</div>
+      <div class="be-bio">Заключённый в драконьем теле смерч. Вечно в движении, поднимает листву, пыль и мелкие предметы. Горд, стремителен и не выносит покоя.</div>
+      <div class="be-art">🎨 Чиби-смерч: тело закручено воронкой из серо-белого ветра, очертания размыты движением. Большие крылья, развевающийся длинный хвост, гордые острые глаза. Вокруг кружатся листья, пыль и мелкие предметы.</div>
+      <div class="be-nest">🏠 Гнездо-чаша в углублении на земле, выложенное листьями и веточками; вокруг неподвижного гнезда кружит небольшой смерч, поднимая пыль и листву.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Воздушный</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌈 Призмат</div>
+      <div class="be-bio">Прозрачный кристаллический дракон, преломляющий любой свет в радугу. Каждое его движение рассыпает по острову яркие блики. Тщеславен и обожает быть в центре внимания.</div>
+      <div class="be-art">🎨 Прозрачный кристаллический чиби как огранённый алмаз, преломляющий свет во все цвета радуги. Грани тела отбрасывают цветные блики, переливающиеся глаза, на спине радужные кристаллы. Горделивая тщеславная поза, искры света вокруг.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из огранённых кристаллов, преломляющих свет в радугу; вокруг разбегаются яркие цветные блики.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Кристальный</span><span class="biome-debuff">🔴 Теневой</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🍄 Спорус</div>
+      <div class="be-bio">Дракон-грибница, покрытый светящимися шляпками. Распространяет безвредные споры, от которых весь сад начинает пахнуть лесом после дождя. Тихий и немного странный.</div>
+      <div class="be-art">🎨 Округлый чиби пятнисто-зелёно-фиолетового цвета, по спине и голове растут светящиеся грибные шляпки разных размеров. Большие спокойные глаза, мягкое тело, споры-блёстки в воздухе. Хвост с грибочком.</div>
+      <div class="be-nest">🏠 Чаша из крупных грибных шляпок, светящихся мягким зеленоватым светом; в воздухе плавают блёстки спор.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">⚓ Кракендрейк</div>
+      <div class="be-bio">Ужас глубин со щупальцами вместо части хвоста. Светится в темноте, чтобы приманивать добычу — но на самом деле невероятно застенчив и боится яркого света.</div>
+      <div class="be-art">🎨 Тёмно-сине-фиолетовый чиби глубин; часть хвоста — пучок маленьких щупалец. На теле светящиеся биолюминесцентные пятна и фонарик-отросток на голове (как у удильщика). Огромные застенчивые глаза, перепончатые плавники, вокруг пузырьки.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из коралла и обломков старого якоря с тонкой лужицей воды внутри; светятся биолюминесцентные пятна, со дна поднимаются пузырьки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Лунный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🪨 Магмалит</div>
+      <div class="be-bio">Дракон из текучего камня. Капли магмы стекают с его боков и застывают цветами обсидиана. Горяч во всех смыслах — и темпераментом, и буквально.</div>
+      <div class="be-art">🎨 Чиби из текучего камня: тело тёмное обсидиановое с ярко светящимися оранжево-красными потёками лавы. Капли магмы стекают с боков и застывают каплями обсидиана. Раскалённые глаза, дымок от тела, горячая капающая текстура.</div>
+      <div class="be-nest">🏠 Кратер из обсидиана с лужицей текучей магмы внутри; края застыли каплями камня, от гнезда идёт жар.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Вулканический</span><span class="biome-debuff">🔴 Ледяной</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🧊 Криовир</div>
+      <div class="be-bio">Воплощение абсолютного холода. Воздух вокруг него звенит от мороза, а земля покрывается инеем. Высокомерен, невозмутим и считает себя выше суеты.</div>
+      <div class="be-art">🎨 Величественный чиби из почти прозрачного голубого льда с острыми гранями и кристаллами по телу. Длинные ледяные рога-корона, высокомерный прищур ледяных глаз, морозный ореол. Воздух рядом звенит — мелкие льдинки парят вокруг.</div>
+      <div class="be-nest">🏠 Ледяной чертог из идеально гранёного голубого льда с морозными узорами по краям, лежащий на земле; воздух вокруг звенит от мороза.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Ледяной</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌫 Мглорог</div>
+      <div class="be-bio">Дракон утреннего тумана, который тает и собирается вновь. Никто не видел его очертаний целиком. Загадочный, ускользающий, почти призрачный.</div>
+      <div class="be-art">🎨 Чиби из утреннего тумана, силуэт постоянно тает и собирается; цвет бледно-серый с перламутром. Очертания нечёткие, видны лишь мягкие большие глаза и намёк на крылья. Вокруг клубящаяся дымка, форма «полусобрана».</div>
+      <div class="be-nest">🏠 Гнездо-чаша из тёмного камня, окутанная клубящимся туманом; контуры теряются в перламутровой дымке.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Теневой / Воздушный</span><span class="biome-debuff">🔴 Светлый</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌺 Флоренция</div>
+      <div class="be-bio">Королева цветения, чьё тело меняет цветы вместе с временами года. Грациозна и немного кокетлива. Притягивает к себе всех опылителей острова.</div>
+      <div class="be-art">🎨 Грациозный чиби в нежно-розово-зелёных тонах, всё тело в распускающихся цветах разных сезонов. Изящная шея, цветочная корона на голове, кокетливые большие глаза с длинными ресницами. Вокруг порхают бабочки и лепестки, хвост-букет.</div>
+      <div class="be-nest">🏠 Гнездо-цветок с раскрытыми лепестками, обнимающими дракона; меняет цвет по сезонам, вокруг порхают бабочки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-debuff">🔴 Теневой</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🦴 Костяной Дрейк</div>
+      <div class="be-bio">Древний дракон, от которого остался лишь сияющий костяк, движимый старой магией. Совсем не страшный — скорее печальный и удивительно мудрый.</div>
+      <div class="be-art">🎨 Чиби-скелетик из светящихся костей, скреплённых мягким голубым магическим свечением в промежутках. Большие, но не страшные, а печальные глазницы с двумя светящимися огоньками. Аккуратный костяной гребень, призрачно-голубая аура.</div>
+      <div class="be-nest">🏠 Чаша из аккуратно сложенных светящихся костей; между ними мерцает мягкое голубое погребальное свечение.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Теневой</span><span class="biome-debuff">🔴 Светлый</span></div>
+    </div>
+
+    <h3><span class="badge badge-epic">Эпические</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌟 Стелларис</div>
+      <div class="be-bio">Сгусток звёздного вещества, обретший форму. Его рёв звучит как далёкое эхо космоса. Величественный, отстранённый, будто всегда смотрит сквозь тебя в бесконечность.</div>
+      <div class="be-art">🎨 Чиби из сгустка звёздного света, тело тёмно-синее с яркой звездой, светящейся в груди. По телу россыпь звёзд, рога-лучи, величественная отстранённая поза. Сильное свечение и звёздная аура (эпик).</div>
+      <div class="be-nest">🏠 Звёздное гнездо из тёмных камней, выложенных в форме звезды на земле, с ярко сияющим звёздным кристаллом в центре; вокруг рассыпаны мерцающие звёзды-блёстки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Космический</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">⚡ Громовержец</div>
+      <div class="be-bio">Повелитель всех гроз архипелага. Где он расправляет крылья — там сами собой собираются тучи. Грозен на вид, но справедлив и благороден к сородичам.</div>
+      <div class="be-art">🎨 Крупный внушительный чиби тёмно-синего и золотого цвета, по телу бегут мощные золотые молнии. Большие грозовые крылья-тучи, корона из молний, суровые но благородные глаза. Над головой собираются тучки, разряды по контуру.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из тёмных камней с короной из мелких молний по краю; над гнездом собирается маленькая грозовая тучка, по краям бьют золотые разряды.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌊 Левиафан-юн</div>
+      <div class="be-bio">Древний титан морей, чьё тело тянется на целый залив. Спокоен как штиль и страшен как шторм. Помнит времена, когда островов ещё не было.</div>
+      <div class="be-art">🎨 Длиннотелый чиби-змей глубокого сине-зелёного цвета с гигантскими плавниками и усами как у восточного дракона. Большие древние спокойные глаза, чешуя с перламутром, тело извивается волной. Вокруг вода и пузыри.</div>
+      <div class="be-nest">🏠 Гнездо-водоворот в каменной чаше, обрамлённое жемчугом и кораллами; вода в центре неспешно кружится воронкой.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Лунный</span><span class="biome-debuff">🔴 Вулканический</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌋 Вулканар</div>
+      <div class="be-bio">Живой вулкан с крыльями. Его дыхание плавит камень, а шаги сотрясают остров. Под суровой раскалённой бронёй бьётся горячее и верное сердце.</div>
+      <div class="be-art">🎨 Огромный бронированный чиби, тело — действующий мини-вулкан: тёмная скальная броня с лавовым кратером на спине, откуда поднимается дым. Раскалённые трещины, мощные лапы, грозные но добрые глаза. Искры и дымок над спиной.</div>
+      <div class="be-nest">🏠 Кратер из тёмного камня с маленьким лавовым озерцом внутри и поднимающимся дымом; излучает жар.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Вулканический</span><span class="biome-debuff">🔴 Ледяной</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🔮 Аркануум</div>
+      <div class="be-bio">Дракон чистой магии, на чешуе которого постоянно меняются светящиеся руны. Бесконечно любопытен — изучает всё вокруг и иногда случайно колдует.</div>
+      <div class="be-art">🎨 Чиби насыщенно-фиолетового цвета, по телу плавают и меняются светящиеся золотые руны. Любопытные большие глаза, вокруг парят магические символы и кольца. Тело будто соткано из магии, руническая аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из выложенных каменных рунических плит с мягким углублением в центре; над ним медленно вращаются золотые магические символы и кольца.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — комфортно в любом биоме</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🍂 Сезонар</div>
+      <div class="be-bio">Четырёхликий дракон, меняющий облик с весны на лето, осень и зиму прямо в течение дня. С каждым сезоном меняется и его характер — от игривого до задумчивого.</div>
+      <div class="be-art">🎨 Чиби, на референсе показывается в четырёх сезонных окрасах: весна (розовый, цветы), лето (зелёный), осень (оранжевый, листья), зима (белый, снежинки). Большие меняющиеся глаза, в гриве — листья и снежинки в зависимости от сезона.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из переплетённых веток, что меняется с сезоном: весной в цвету, летом в зелени, осенью в листьях, зимой под снегом.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">💀 Некрос</div>
+      <div class="be-bio">Призрачный дракон из эктоплазмы, светящийся болотным огнём. Совсем не агрессивен — просто… не до конца жив. Любит тишину старых руин.</div>
+      <div class="be-art">🎨 Призрачный чиби из светящейся зеленовато-голубой эктоплазмы, полупрозрачный; нижняя часть тела растворяется в дымку (без лап, парит). Светящиеся болотно-зелёные глаза, костяной гребень. Жутковато-милая аура, призрачные огоньки вокруг.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из старых костей, стоящее в тёмной нише на земле; внутри тлеет призрачный зелёный огонь, вокруг мерцают болотные огоньки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Теневой</span><span class="biome-debuff">🔴 Светлый</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🐉 Рунический Дрейк</div>
+      <div class="be-bio">Дракон, покрытый древними светящимися рунами, смысла которых он сам уже не помнит. Каждая руна — забытое заклинание, дремлющее в его коже.</div>
+      <div class="be-art">🎨 Чиби каменно-серого цвета, всё тело покрыто древними светящимися голубыми рунами как татуировки. Серьёзные глаза, руны пульсируют светом, на спине крупный рунический символ. Магическое свечение вдоль линий.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из каменных плит, испещрённых светящимися голубыми рунами, которые медленно пульсируют светом.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Космический</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌫⚡ Бурелом</div>
+      <div class="be-bio">Ходячая буря, сметающая всё на своём пути. Его появление сопровождают шквалы ветра и стена ливня. Неукротим — но в покое почти ласков.</div>
+      <div class="be-art">🎨 Крупный вихревой чиби тёмно-серо-синего цвета, тело окутано бурей: ветер, дождь и молнии вокруг. Развевающийся гребень и хвост, мощные крылья-тучи, неукротимые глаза. Спираль ветра у лап, капли и разряды.</div>
+      <div class="be-nest">🏠 Гнездо-чаша в самом оке маленькой бури: спокойный центр, окружённый кольцом ветра, дождя и молний.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Грозовой / Воздушный</span><span class="biome-debuff">🔴 Кристальный</span></div>
+    </div>
+
+    <h3><span class="badge badge-legendary">Легендарные</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">⌛ Хроносаур</div>
+      <div class="be-bio">Дракон, чьи крылья закручены, как песочные часы. Вокруг него время течёт чуть быстрее. Говорят, он помнит будущее, но забывает прошлое.</div>
+      <div class="be-art">🎨 Чиби песочно-золотого и тёмно-синего цвета; крылья закручены спиралью как песочные часы, в груди светящийся «таймер» с пересыпающимся песком. По телу узоры шестерёнок и стрелок, янтарные глаза. Вокруг парят золотистые песчинки, золотая аура (легенд.).</div>
+      <div class="be-nest">🏠 Песочно-стеклянное гнездо с орнаментом песочных часов по бокам; золотистые песчинки времени кружат по краям, а всё внутри движется чуть быстрее.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — вне времени и биомов</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌑 Эклипсар</div>
+      <div class="be-bio">Дракон затмения: одна половина тела сияет светом, другая утопает во тьме. Меняется вместе с днём и ночью. Воплощённое равновесие двух стихий.</div>
+      <div class="be-art">🎨 Чиби, разделённый строго пополам: одна половина сияюще-белая (свет/солнце), другая глубоко чёрная (тьма/луна), на стыке — корона затмения. Один глаз золотой, другой серебряный. Вокруг кольцо затмения, контрастная аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша, поделённая на свет и тьму; над ним парит кольцо затмения, одна половина сияет, другая поглощает свет.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный · силён ночью</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🔥 Феникс-Прим</div>
+      <div class="be-bio">Первый из фениксов, что сгорает на закате и возрождается с каждым рассветом. Олицетворение надежды и обновления — он не умирает насовсем никогда.</div>
+      <div class="be-art">🎨 Изящный чиби ярко золото-оранжево-алого цвета; крылья и хвост — длинные перья живого пламени. Корона-гребень из огня, благородные тёплые глаза, перья по краям рассыпаются искрами. Вокруг золотое пламя и возрождающиеся угольки.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из золотых пылающих ветвей и перьев, что сгорает и возрождается; на рассвете рассыпает искры.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Вулканический</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">❄️ Вечнозим</div>
+      <div class="be-bio">Древний ледник, обретший драконью форму. Его холод хранит любые вещи нетронутыми целую вечность. Терпелив и нетороплив, как сама зима.</div>
+      <div class="be-art">🎨 Древний массивный чиби из плотного синего ледника, по телу слои древнего льда с вмёрзшими блёстками. Огромные рога-сосульки, спокойные мудрые глаза, тяжёлая величественная поза. Морозный ореол, медленно падающий снег вокруг.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из плотного древнего синего ледника с вмёрзшими блёстками; окутана вечным морозом.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Ледяной</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌌 Галактон</div>
+      <div class="be-bio">Дракон, в чьём теле медленно вращается целая галактика. Его взгляд бесконечно глубок — кажется, он видит сразу всё и везде. Спокоен и всеведущ.</div>
+      <div class="be-art">🎨 Чиби тёмно-фиолетового и чёрного цвета, в теле (особенно в груди и на спине) медленно вращается настоящая спиральная галактика. Глаза — бездонные звёздные точки, по контуру туманности. Сильное космическое свечение, звёздная аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из тёмного фиолетового камня на земле; в углублении медленно вращается миниатюрная спиральная галактика, вокруг мерцают звёзды.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Космический</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🐲 Драконий Король</div>
+      <div class="be-bio">Коронованный владыка всех драконов. Его одно лишь присутствие вдохновляет сородичей работать усерднее. Благороден, горд и справедлив к каждому.</div>
+      <div class="be-art">🎨 Благородный чиби в красно-золотой чешуе с золотой короной на голове и царственной осанкой. Богатый гребень, длинные усы как у восточного дракона, гордые мудрые глаза. Золотой узор-мантия по спине, царственная аура.</div>
+      <div class="be-nest">🏠 Царственное гнездо из красного золота с орнаментом и миниатюрной короной по краю; роскошное в деталях.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — король везде дома</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌳 Древо-Дракон</div>
+      <div class="be-bio">Дракон, сросшийся с мировым древом. Его ветви-рога питают своими корнями весь архипелаг. Древнее самого Пепельного Моря, мудр и нетороплив.</div>
+      <div class="be-art">🎨 Огромный древний чиби, сросшийся с деревом: тело — кора и корни, рога — ветви с листвой и плодами, на спине растёт маленький лес. Глубокие древние зелёные глаза, «борода» из мха. Вокруг порхают светлячки, природная аура.</div>
+      <div class="be-nest">🏠 Сплетение живых корней мирового древа на земле, выстланное мхом; по краям прорастают листья и плоды, вокруг порхают светлячки.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Природный</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <h3><span class="badge badge-mythic">Мифические</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌀 Парадокс</div>
+      <div class="be-bio">Дракон, существующий в нескольких временах одновременно. Смотреть на него слишком долго — голова идёт кругом. Искажает реальность вокруг себя самим фактом присутствия.</div>
+      <div class="be-art">🎨 Чиби с двоящимся «глючащим» силуэтом; цвета смещены друг относительно друга (хроматическая аберрация), будто наложено несколько копий. Глаза словно в разных временах, контур искажён спиралью. Вокруг закрученное пространство, переливающаяся мифическая аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша с двоящимися «глючащими» очертаниями, будто наложено несколько копий; пространство вокруг слегка закручено.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — вне причин и следствий</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🕊 Этериал</div>
+      <div class="be-bio">Полупрозрачный дракон чистого эфира, светящийся изнутри мягким светом. Кажется, он не вполне находится здесь. Самый красивый и эфемерный из всех.</div>
+      <div class="be-art">🎨 Полупрозрачный чиби, светящийся изнутри мягким бело-голубым/радужным светом, тело почти бесплотное и парящее. Нежные эфирные крылья, добрые сияющие глаза, мягко светящиеся очертания. Вокруг лёгкие частицы света, эфемерная аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из светлого камня с мягкой подстилкой из перьев, стоящее на земле; гнездо излучает мягкое белое сияние, вокруг плывут частицы света.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — почти бесплотен</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🩸 Древний Тёмный</div>
+      <div class="be-bio">Первобытная тьма, что была ещё до света. Древний, спокойный и бесконечно глубокий. Это не зло — просто нечто намного старше самого понятия зла.</div>
+      <div class="be-art">🎨 Массивный чиби из глубокой первобытной тьмы: тело — чёрный силуэт с глубоким бордово-фиолетовым подсветом. Древние спокойные тёмно-красные светящиеся глаза, едва видимые узоры. Тьма поглощает свет вокруг, тяжёлая древняя аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша из чёрного камня с первобытной тьмой внутри и бордово-фиолетовым подсветом; тьма поглощает свет вокруг, древние узоры едва видны по краям.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Теневой</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">☄️ Кометар</div>
+      <div class="be-bio">Пойманная в драконью форму комета. Несётся по небу острова, оставляя за собой ослепительный сияющий след. Раз в день дарит Хранителю вспышку изобилия.</div>
+      <div class="be-art">🎨 Чиби-комета: яркое бело-голубое ядро-тело с пылающим длинным хвостом из света и льда, в позе полёта. Сияющие глаза, обтекаемая форма, кристаллики льда и искры в шлейфе. Ослепительное свечение, метеорная аура.</div>
+      <div class="be-nest">🏠 Гнездо-кратер из светлого камня с длинным выжженным следом-дорожкой позади, как от упавшей кометы; на дне светится ядро, по краям кристаллики льда и искры.</div>
+      <div class="biome-line"><span class="biome-buff">🟢 Космический</span><span class="biome-neutral">⚪ Адаптивный</span></div>
+    </div>
+
+    <h3><span class="badge badge-divine">Древние</span></h3>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🌌 Некзус</div>
+      <div class="be-bio">Дракон, в котором сплелись все стихии разом — венец любого скрещивания. Его тело одновременно переливается огнём, водой, землёй, грозой и светом. Главная цель коллекции.</div>
+      <div class="be-art">🎨 Чиби, чьё тело переливается всеми стихиями сразу: участки огня, воды, земли, грозы, льда, света и тени плавно перетекают друг в друга. Гребень меняет стихию, многоцветные глаза, по контуру все стихийные эффекты одновременно. Мощная переливающаяся божественная аура.</div>
+      <div class="be-nest">🏠 Гнездо-чаша, переливающаяся всеми стихиями сразу: участки огня, воды, земли, грозы, льда и света плавно сменяют друг друга по краям.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — дом везде</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">🐉 Прародитель</div>
+      <div class="be-bio">Первый дракон архипелага, от которого произошли все остальные. Тысячи лет спал в Сердце Архипелага, ожидая достойного Хранителя. Бесконечно добр и мудр.</div>
+      <div class="be-art">🎨 Огромный древний, но добрый чиби в тёплой золото-белой чешуе с приглушёнными чертами всех стихий. Длинная мудрая морда, ласковые древние глаза, величественные крылья. Мягкое золотое сияние — ощущение прародителя всех драконов.</div>
+      <div class="be-nest">🏠 Низкий древний алтарь из золото-белого камня с приглушёнными чертами всех стихий по краям; мягко сияет золотым светом.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный — отец всех стихий</span></div>
+    </div>
+
+    <div class="bestiary-entry">
+      <div class="be-name">♾ Вечный</div>
+      <div class="be-bio">Дракон бесконечности, являющийся лишь тому, кто собрал всю коллекцию до единого вида. Не имеет ни начала, ни конца. Его золотая аура освещает весь остров — доказательство звания «Великий Хранитель».</div>
+      <div class="be-art">🎨 Чиби чистого золота и белого света с символом бесконечности ∞, светящимся на лбу и груди. Тело будто из жидкого золота, безупречные плавные формы, спокойные всезнающие глаза. Ослепительная золотая аура, освещающая всё вокруг — высшая награда.</div>
+      <div class="be-nest">🏠 Гнездо-сияние из чистого золота с символом ∞ на боку, прочно стоящее на земле; от него расходится ослепительное свечение, освещающее весь остров — гнездо Великого Хранителя.</div>
+      <div class="biome-line"><span class="biome-neutral">⚪ Адаптивный · +20% ко всему</span></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ СКРЕЩИВАНИЕ ═══ -->
+  <section id="breeding">
+    <h2>МЕХАНИКА СКРЕЩИВАНИЯ</h2>
+
+    <h3>Процесс</h3>
+    <div class="progress-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Выбор родителей</h4>
+        Игрок выбирает двух взрослых драконов. Оба дракона недоступны на время скрещивания (заняты в Гнезде).
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Выбор растений</h4>
+        Для каждой комбинации нужны определённые растения. Растения потребляются. Чем ценнее гибрид — тем редче растения.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Ожидание яйца</h4>
+        Процесс занимает от 1 до 24 часов. Игрок видит таймер, но не знает результат.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Инкубация яйца</h4>
+        Яйцо помещается в Инкубатор. Ещё один таймер. Дракон вылупляется.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Взросление</h4>
+        Детёныш не производит ресурсы. Нужно кормить его 3–5 раз, прежде чем он вырастет.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Запись в Книгу</h4>
+        Если это новый вид — он записывается в Книгу Драконов с описанием и найденной комбинацией. Игрок получает награду.
+      </div>
+    </div>
+
+    <h3>Требования растений для скрещивания</h3>
+    <table>
+      <tr><th>Комбинация</th><th>Растение 1</th><th>Растение 2</th><th>Шанс ↑ при редком</th></tr>
+      <tr><td>Огонь + Земля</td><td>5× Огнецвет</td><td>5× Корень Силы</td><td>+10% Жаркий Мох</td></tr>
+      <tr><td>Огонь + Вода</td><td>5× Огнецвет</td><td>5× Морской Цветок</td><td>+10% Паровая Орхидея</td></tr>
+      <tr><td>Огонь + Гроза</td><td>5× Огнецвет</td><td>5× Грозовой Перец</td><td>—</td></tr>
+      <tr><td>Огонь + Лёд</td><td>5× Лавовая Ягода</td><td>5× Ледяная Роза</td><td>+15% (редкая пара)</td></tr>
+      <tr><td>Земля + Вода</td><td>5× Корень Силы</td><td>5× Жемчужный Мох</td><td>—</td></tr>
+      <tr><td>Лёд + Гроза</td><td>5× Снежный Гриб</td><td>5× Грозовой Перец</td><td>—</td></tr>
+      <tr><td>Лавакрон + Тундростом</td><td>3× Астральная Лоза</td><td>3× Сердце Кометы</td><td>+20% Лунный Лотос</td></tr>
+      <tr><td>Хроносаур + Астралон</td><td>5× Цветок Времени</td><td>3× Сердце Кометы</td><td>—</td></tr>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ РАСТЕНИЯ ═══ -->
+  <section id="plants">
+    <h2>РАСТЕНИЯ ПО СТИХИЯМ</h2>
+    <p>Каждое растение принадлежит одной стихии. В родном биоме растёт в 1.5× быстрее. Строка 🎨 — описание внешнего вида для рисовки.</p>
+
+    <h3>🔥 Огненные растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌺 Огнецвет</div>
+        <div class="art-line">🎨 Алый цветок с 5–6 заострёнными лепестками, краснеющими у основания и жёлто-оранжевыми на кончиках — будто язычки пламени; в центре светящийся золотой уголёк, стебель тёмно-бордовый.</div>
+        <div class="plant-stat">Рост: 15 мин · Биом: Вулкан</div>
+        <div class="plant-stat">Алый цветок, лепестки которого тлеют как угли. Самая частая культура архипелага — нужна почти в каждом огненном рецепте и скрещивании. Неприхотлив и быстро растёт.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🍒 Лавовая Ягода</div>
+        <div class="art-line">🎨 Гроздь круглых тёмно-красных ягод со светящимися оранжевыми прожилками-трещинами, как остывающая лава; растут на низком чёрном кустике.</div>
+        <div class="plant-stat">Рост: 30 мин · Биом: Вулкан</div>
+        <div class="plant-stat">Жгучая ягода, растущая прямо на застывших потоках лавы. Любимое лакомство Эмберикса — при кормлении даёт ему +20% к ресурсу. На вкус, говорят, как перец с углями.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🌿 Жаркий Мох</div>
+        <div class="art-line">🎨 Низкий ковёр тёмно-серого мха с тлеющими оранжевыми точками-угольками; местами поднимается тонкий дымок.</div>
+        <div class="plant-stat">Рост: 45 мин · Биом: Вулкан</div>
+        <div class="plant-stat">Редкий мох, растущий только на горячих камнях. Тлеет, но не сгорает. Добавленный в скрещивание Огонь+Земля, повышает шанс получить именно гибрида.</div>
+      </div>
+    </div>
+
+    <h3>💧 Водные растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌸 Морской Цветок</div>
+        <div class="art-line">🎨 Нежный сине-голубой цветок с волнистыми лепестками как у морской анемоны, влажно блестит; в центре капля-жемчужина, стебель бирюзовый.</div>
+        <div class="plant-stat">Рост: 20 мин · Биом: Лунный</div>
+        <div class="plant-stat">Нежный синий цветок, раскрывающийся только в лунном свете. Основа всех водных рецептов. Лепестки всегда влажные, будто только что из моря.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🪸 Жемчужный Мох</div>
+        <div class="art-line">🎨 Подушечка светло-зелёного мха, усыпанная мелкими перламутровыми бусинами-жемчужинами росы, что переливаются на свету.</div>
+        <div class="plant-stat">Рост: 40 мин · Биом: Лунный</div>
+        <div class="plant-stat">Мягкий мох с перламутровыми бусинами росы. Любимая еда Акваринта (+20%). Необходим для выведения дракона Земля+Вода.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🌊 Паровая Орхидея</div>
+        <div class="art-line">🎨 Изящная бледно-голубая орхидея с длинными изогнутыми лепестками; от неё постоянно поднимается лёгкий белый пар, тонкий стебель дугой.</div>
+        <div class="plant-stat">Рост: 2 часа · Биом: Лунный</div>
+        <div class="plant-stat">Орхидея, постоянно окутанная тёплым паром. Растёт медленно и капризно. Повышает шанс редкого скрещивания Огонь+Вода (Вайолетрикс).</div>
+      </div>
+    </div>
+
+    <h3>🌿 Земляные растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌰 Корень Силы</div>
+        <div class="art-line">🎨 Толстый узловатый корень землисто-коричневого цвета, торчащий из земли, с парой зелёных листьев наверху и светящимися янтарными прожилками.</div>
+        <div class="plant-stat">Рост: 25 мин · Биом: Кристальный</div>
+        <div class="plant-stat">Толстый узловатый корень, налитый силой земли. Основа земляных рецептов. Чтобы его выкопать, нужно постараться — держится крепко.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🪨 Каменный Плод</div>
+        <div class="art-line">🎨 Круглый плод, похожий на серый камень-валун с трещинами, сквозь которые видна сочная оранжевая мякоть; сверху маленький листик.</div>
+        <div class="plant-stat">Рост: 1 час · Биом: Кристальный</div>
+        <div class="plant-stat">Плод, твёрдый как камень снаружи и сочный внутри. Любимая еда Терравора (+20%) — он грызёт его часами с явным удовольствием.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🌳 Древесный Гриб</div>
+        <div class="art-line">🎨 Ярусный древесный гриб-трутовик коричнево-золотистого цвета, растущий ступеньками на каменном пеньке; шляпки с концентрическими кольцами.</div>
+        <div class="plant-stat">Рост: 3 часа · Биом: Кристальный</div>
+        <div class="plant-stat">Древесный гриб, растущий на каменных деревьях кристального сада. Редок и ценен — часто фигурирует в выгодных заказах Совета.</div>
+      </div>
+    </div>
+
+    <h3>⚡ Грозовые растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌶 Грозовой Перец</div>
+        <div class="art-line">🎨 Изогнутый жёлто-зелёный перчик с фиолетовыми полосками, по которому пробегают крошечные искры; кончик слегка светится.</div>
+        <div class="plant-stat">Рост: 20 мин · Биом: Грозовой</div>
+        <div class="plant-stat">Острый перец, искрящийся статикой при касании. Основа грозовых рецептов. Слегка покалывает язык — и не только в переносном смысле.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🍄 Электрический Трюфель</div>
+        <div class="art-line">🎨 Округлый бугристый трюфель тёмно-синего цвета со светящимися жёлтыми прожилками-молниями; наполовину зарыт в землю.</div>
+        <div class="plant-stat">Рост: 2 часа · Биом: Грозовой</div>
+        <div class="plant-stat">Светящийся трюфель, растущий под слоем наэлектризованной почвы. Любимая еда Вольтракса (+20%). Капризен — растёт долго и только в грозовом биоме.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">⚡ Молниевый Кактус</div>
+        <div class="art-line">🎨 Невысокий зигзагообразный кактус цвета грозовой тучи с жёлтыми иглами-молниями, между которыми проскакивают разряды.</div>
+        <div class="plant-stat">Рост: 4 часа · Биом: Грозовой</div>
+        <div class="plant-stat">Кактус, по иглам которого бегают разряды. Редкая культура для продвинутых заказов и грозовых гибридов высокого уровня.</div>
+      </div>
+    </div>
+
+    <h3>❄️ Ледяные растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌹 Ледяная Роза</div>
+        <div class="art-line">🎨 Роза, целиком будто выточенная из голубого льда; полупрозрачные грани лепестков сверкают, по краям иней, стебель ледяной.</div>
+        <div class="plant-stat">Рост: 30 мин · Биом: Лунный/Ледяной</div>
+        <div class="plant-stat">Роза, выкованная будто изо льда — лепестки звенят на ветру. Основа ледяных рецептов. Не тает даже в тепле.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🍄 Снежный Гриб</div>
+        <div class="art-line">🎨 Пухлый белый гриб с округлой снежной шляпкой и голубоватым свечением снизу; ножка покрыта инеем.</div>
+        <div class="plant-stat">Рост: 1.5 часа · Биом: Ледяной</div>
+        <div class="plant-stat">Холодный гриб, растущий в вечной мерзлоте. Любимая еда Фростела (+20%). Слегка светится голубым в темноте.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">❄️ Хрустальный Иней</div>
+        <div class="art-line">🎨 Кустик из острых прозрачных ледяных кристаллов идеальной формы, растущих веером; искрятся бело-голубым.</div>
+        <div class="plant-stat">Рост: 3 часа · Биом: Ледяной</div>
+        <div class="plant-stat">Редкие кристаллы инея идеальной формы. Используются для выведения ледяных гибридов и в ценных заказах. Хрупки — собирать нужно аккуратно.</div>
+      </div>
+    </div>
+
+    <h3>🌙 Нейтральные растения</h3>
+    <div class="grid grid-2">
+      <div class="plant-card">
+        <div class="plant-name">🌕 Лунный Лотос</div>
+        <div class="art-line">🎨 Серебристо-белый лотос с округлыми лепестками, мягко светящийся изнутри лунным светом; плавает на тёмной воде, в центре золотая сердцевина.</div>
+        <div class="plant-stat">Рост: 2 часа · Биом: Любой</div>
+        <div class="plant-stat">Серебристый лотос, цветущий только ночью под луной. Нейтрален к стихиям, растёт где угодно. Эмберикс и Терравор его не любят, зато он нужен для большинства водных гибридов.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🌑 Теневой Мак</div>
+        <div class="art-line">🎨 Чёрно-фиолетовый мак с бархатистыми лепестками, поглощающий свет; вокруг лёгкая тёмная дымка, центр тускло-багровый.</div>
+        <div class="plant-stat">Рост: 4 часа · Биом: Теневой</div>
+        <div class="plant-stat">Тёмный мак, поглощающий свет вокруг себя. Растёт только в теневом саду. Незаменим для выведения теневых драконов (Умброн, Некрос).</div>
+      </div>
+    </div>
+
+    <h3>🍃 Воздушные растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌼 Воздушный Одуванчик</div>
+        <div class="art-line">🎨 Пушистый белый шар одуванчика на тонком стебле; семена-парашютики постоянно отрываются и парят вокруг, не падая.</div>
+        <div class="plant-stat">Рост: 15 мин · Биом: Воздушный</div>
+        <div class="plant-stat">Пушистый одуванчик, чьи семена вечно парят в воздухе и не желают падать. Любимая еда Зефира (+20%) и основа воздушных рецептов. Растёт быстрее всех.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🪶 Перо-трава</div>
+        <div class="art-line">🎨 Высокие тонкие стебли с листьями в форме мягких пёрышек бледно-зелёного цвета, колышущиеся даже без ветра.</div>
+        <div class="plant-stat">Рост: 40 мин · Биом: Воздушный</div>
+        <div class="plant-stat">Высокая трава с листьями-перьями, колышущаяся даже в полный штиль. Необходима для выведения ветряных гибридов (Пиросвист, Мистраль, Сторми).</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">☁️ Облачный Хлопок</div>
+        <div class="art-line">🎨 Низкий кустик с пухлыми белыми коробочками, похожими на крошечные облачка; одна-две приоткрыты и слегка парят над веткой.</div>
+        <div class="plant-stat">Рост: 2 часа · Биом: Воздушный</div>
+        <div class="plant-stat">Растение, чьи коробочки наполнены настоящим облаком. Редкое и лёгкое как пух. Нужно для торнадо- и буревых драконов (Вихрон, Бурелом).</div>
+      </div>
+    </div>
+
+    <h3>🌳 Природные и световые растения</h3>
+    <div class="grid grid-3">
+      <div class="plant-card">
+        <div class="plant-name">🌷 Цветок Жизни</div>
+        <div class="art-line">🎨 Яркий многолепестковый цветок насыщенно-зелёного и салатового цвета, мягко пульсирующий свечением; в центре светящаяся капля жизненной силы.</div>
+        <div class="plant-stat">Рост: 20 мин · Биом: Природный</div>
+        <div class="plant-stat">Яркий цветок, который слегка светится жизненной силой. Любимая еда Сильвена (+20%) и основа природных рецептов. Рядом с ним соседние растения растут чуть быстрее.</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🥕 Сладкий Корень</div>
+        <div class="art-line">🎨 Оранжево-красный корнеплод (как морковь/свёкла) с пышной зелёной ботвой; блестящий и аппетитный.</div>
+        <div class="plant-stat">Рост: 45 мин · Биом: Природный</div>
+        <div class="plant-stat">Сладкий хрустящий корень, который обожают почти все травоядные драконы. Нужен для выведения природных гибридов (Эмберлиф, Блумтайд).</div>
+      </div>
+      <div class="plant-card">
+        <div class="plant-name">🌻 Солнцецвет</div>
+        <div class="art-line">🎨 Большой подсолнух с золотыми лепестками-лучами и сияющей сердцевиной; всегда повёрнут к свету и сам излучает тёплое сияние.</div>
+        <div class="plant-stat">Рост: 3 часа · Биом: Природный/Светлый</div>
+        <div class="plant-stat">Огромный цветок, всегда повёрнутый к свету и сам излучающий тёплое сияние. Редкая культура, необходимая для выведения световых драконов (Солярис).</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ РЕДКИЕ РАСТЕНИЯ ═══ -->
+  <section id="rare-plants">
+    <h2>РЕДКИЕ КУЛЬТУРЫ</h2>
+    <p>Появляются случайно раз в несколько часов в садах, или привозятся из экспедиций. Критически важны для легендарных рецептов.</p>
+
+    <div class="grid grid-2">
+      <div class="card" style="border-color:rgba(201,168,76,0.4)">
+        <div class="card-title" style="color:var(--gold)">💫 Сердце Кометы</div>
+        <p class="art-line" style="margin-top:6px">🎨 Гранёный пульсирующий кристалл сине-фиолетового цвета в форме осколка-сердца, светящийся изнутри; вокруг кружат искорки звёздной пыли.</p>
+        <p style="font-size:15px">Пульсирующий осколок упавшей кометы, медленно прорастающий в земле как кристалл. Растёт ровно 24 часа и не поддаётся ускорению — даже магией. Занимает один драгоценный слот в саду. Нужно 3 штуки для Астралона и легендарных рецептов.</p>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Биом: Любой · Семена из экспедиций</div>
+      </div>
+      <div class="card" style="border-color:rgba(201,168,76,0.4)">
+        <div class="card-title" style="color:var(--gold)">⌛ Цветок Времени</div>
+        <p class="art-line" style="margin-top:6px">🎨 Цветок с прозрачными лепестками-стрелками, медленно вращающимися вокруг золотой сердцевины как стрелки часов; вокруг парят песчинки.</p>
+        <p style="font-size:15px">Цветок, лепестки которого крутятся как стрелки часов. Растёт 8 часов. Собранный, сокращает таймер инкубации любого яйца на 30 минут — бесценен для нетерпеливых Хранителей. Главный компонент Хроносаура.</p>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Биом: Любой · Семена: магазин или задания</div>
+      </div>
+      <div class="card" style="border-color:rgba(201,168,76,0.4)">
+        <div class="card-title" style="color:var(--gold)">🌌 Астральная Лоза</div>
+        <p class="art-line" style="margin-top:6px">🎨 Тёмно-фиолетовая вьющаяся лоза, что вместо листьев несёт крошечные светящиеся галактики и звёзды; мерцает в темноте.</p>
+        <p style="font-size:15px">Лоза, что вместо листьев несёт крошечные галактики и звёзды. Растёт 12 часов и только в космическом саду. Необходима для Астралона и всех космических скрещиваний. Доступна лишь на 4-м острове.</p>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Биом: Космический сад · Остров 4</div>
+      </div>
+      <div class="card" style="border-color:rgba(201,168,76,0.4)">
+        <div class="card-title" style="color:var(--gold)">🌑 Ночной Кристалл</div>
+        <p class="art-line" style="margin-top:6px">🎨 Чёрный многогранный кристалл, растущий из земли остриём вверх и поглощающий свет; по граням тускло мерцают фиолетовые искры.</p>
+        <p style="font-size:15px">Чёрный кристалл, растущий из земли только в полной темноте теневого сада. Растёт 6 часов и поглощает свет вокруг. Нужен для теневых скрещиваний и заказов Тёмного архипелага.</p>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Биом: Теневой сад · Остров 3</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ БИОМЫ ═══ -->
+  <section id="biomes">
+    <h2>МАГИЧЕСКИЕ БИОМЫ (САДЫ)</h2>
+    <p>Вместо обычных грядок — магические зоны. Каждый биом создаётся за ресурсы и занимает площадь острова. Растения в родном биоме растут на 50% быстрее. Строка 🎨 — описание внешнего вида биома для рисовки.</p>
+
+    <div class="grid grid-2">
+      <div class="island-card">
+        <div class="island-header">
+          <div class="island-icon">🌋</div>
+          <div>
+            <div class="island-name">Вулканический Сад</div>
+            <div class="island-subtitle">Стихия Огня</div>
+          </div>
+        </div>
+        <p style="font-size:15px">Горячая почва с жерлами маленьких вулканчиков. Чёрный пепел и красные кристаллы. Огнецвет и Лавовая Ягода растут в 1.5×.</p>
+        <p class="art-line" style="margin-top:8px">🎨 Почва из чёрного потрескавшегося базальта со светящимися оранжевыми прожилками лавы; торчат маленькие дымящиеся вулканчики и красные кристаллы, по краям тлеют угольки.</p>
+        <div class="resource-list">
+          <span class="resource-pill">Огнецвет ×1.5</span>
+          <span class="resource-pill">Лавовая Ягода ×1.5</span>
+          <span class="resource-pill">Жаркий Мох ×1.5</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim)">Создаётся за: 200 Жар-Угля + 5 Живой Глины</div>
+      </div>
+
+      <div class="island-card">
+        <div class="island-header">
+          <div class="island-icon">🌙</div>
+          <div>
+            <div class="island-name">Лунный Сад</div>
+            <div class="island-subtitle">Стихия Воды</div>
+          </div>
+        </div>
+        <p style="font-size:15px">Мерцающие кристаллы и лунный свет в постоянных сумерках. Вода стекает с листьев. Лунный Лотос и водные растения растут быстрее.</p>
+        <p class="art-line" style="margin-top:8px">🎨 Тёмно-синяя влажная земля в вечных сумерках, усыпанная светящимися лунными кристаллами и лужицами воды, отражающими свет; низко стелется туман.</p>
+        <div class="resource-list">
+          <span class="resource-pill">Морской Цветок ×1.5</span>
+          <span class="resource-pill">Жемчужный Мох ×1.5</span>
+          <span class="resource-pill">Лунный Лотос ×1.5</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim)">Создаётся за: 200 Чистой Эссенции + 5 Вечного Инея</div>
+      </div>
+
+      <div class="island-card">
+        <div class="island-header">
+          <div class="island-icon">⚡</div>
+          <div>
+            <div class="island-name">Грозовой Сад</div>
+            <div class="island-subtitle">Стихия Грозы</div>
+          </div>
+        </div>
+        <p style="font-size:15px">Постоянные электрические разряды в почве. Растения стоят дыбом от статики. Идеален для Грозового Перца и грибов.</p>
+        <p class="art-line" style="margin-top:8px">🎨 Тёмно-серая почва с фиолетовым отливом, по которой пробегают синие разряды; торчат кристаллы-громоотводы, над землёй искрят дуги статики.</p>
+        <div class="resource-list">
+          <span class="resource-pill">Грозовой Перец ×1.5</span>
+          <span class="resource-pill">Электрический Трюфель ×1.5</span>
+          <span class="resource-pill">Молниевый Кактус ×1.5</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim)">Создаётся за: 200 Молниевого Заряда + 5 Пепельной Искры</div>
+      </div>
+
+      <div class="island-card">
+        <div class="island-header">
+          <div class="island-icon">💎</div>
+          <div>
+            <div class="island-name">Кристальный Сад</div>
+            <div class="island-subtitle">Стихия Земли</div>
+          </div>
+        </div>
+        <p style="font-size:15px">Драгоценные кристаллы растут из земли вместе с растениями. Тёплый свет, старые корни, мощная энергия земли.</p>
+        <p class="art-line" style="margin-top:8px">🎨 Тёплая золотисто-коричневая земля, из которой растут крупные янтарные и аметистовые кристаллы; повсюду камни, корни и мягкое сияние.</p>
+        <div class="resource-list">
+          <span class="resource-pill">Корень Силы ×1.5</span>
+          <span class="resource-pill">Каменный Плод ×1.5</span>
+          <span class="resource-pill">Древесный Гриб ×1.5</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim)">Создаётся за: 200 Живой Глины + 5 Расплавленного Камня</div>
+      </div>
+
+      <div class="island-card">
+        <div class="island-header">
+          <div class="island-icon">❄️</div>
+          <div>
+            <div class="island-name">Ледяной Сад</div>
+            <div class="island-subtitle">Стихия Льда</div>
+          </div>
+        </div>
+        <p style="font-size:15px">Вечная мерзлота, хрустящий снег, синий лёд. Цветы выглядят замороженными. Ледяные растения в своей стихии.</p>
+        <p class="art-line" style="margin-top:8px">🎨 Белая заснеженная земля с синим льдом и сосульками; всё покрыто инеем, торчат ледяные шипы, в воздухе медленно падают снежинки.</p>
+        <div class="resource-list">
+          <span class="resource-pill">Ледяная Роза ×1.5</span>
+          <span class="resource-pill">Снежный Гриб ×1.5</span>
+          <span class="resource-pill">Хрустальный Иней ×1.5</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim)">Создаётся за: 200 Вечного Инея + 5 Замороженной Эссенции</div>
+      </div>
+
+      <div class="island-card">
+        <div class="island-header">
+          <div class="island-icon">🌌</div>
+          <div>
+            <div class="island-name">Космический Сад</div>
+            <div class="island-subtitle">Редкий · Остров 4+</div>
+          </div>
+        </div>
+        <p style="font-size:15px">Чёрная почва, звёздный свет, гравитация чуть меньше. Растения плавают в воздухе. Только здесь растёт Астральная Лоза.</p>
+        <p class="art-line" style="margin-top:8px">🎨 Чёрная звёздная почва с фиолетовыми туманностями; гравитация слабее — камни и растения слегка парят, вокруг мерцают звёзды.</p>
+        <div class="resource-list">
+          <span class="resource-pill">Астральная Лоза ×1</span>
+          <span class="resource-pill">Сердце Кометы ×1</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim)">Создаётся за: 3 Звёздной Пыли + 500 Первичной Магии</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ПРЕДПОЧТЕНИЯ БИОМОВ ═══ -->
+  <section id="biome-pref">
+    <h2>ПРЕДПОЧТЕНИЯ БИОМОВ (бафы и дебафы)</h2>
+    <p>Гнездо дракона можно ставить рядом с любым биомом. Но у каждого дракона есть <strong>любимый</strong> и <strong>нелюбимый</strong> биом. От того, рядом с каким биомом стоит гнездо, зависит производительность дракона. Это добавляет лёгкий слой стратегии при расстановке без усложнения.</p>
+
+    <h3>Как работает</h3>
+    <table>
+      <tr><th>Размещение гнезда</th><th>Эффект</th><th>Описание</th></tr>
+      <tr><td>🟢 В любимом биоме</td><td><span class="biome-buff">+15% производства</span></td><td>Дракон в родной стихии — счастлив и продуктивен. Над гнездом — довольная иконка</td></tr>
+      <tr><td>⚪ В нейтральном биоме</td><td>±0%</td><td>Базовая производительность</td></tr>
+      <tr><td>🔴 В нелюбимом биоме</td><td><span class="biome-debuff">−10% производства</span></td><td>Дракону некомфортно. Над гнездом — грустная иконка</td></tr>
+      <tr><td>✨ Любимый биом + любимая еда</td><td><span class="biome-buff">+35% суммарно</span></td><td>Бафы складываются: +15% биом и +20% еда</td></tr>
+    </table>
+
+    <div class="callout tip">
+      <strong>Перк высоких редкостей:</strong> легендарные, мифические и древние драконы <strong>«адаптивны»</strong> — они не получают штраф ни в одном биоме (везде как дома), а в любимом всё равно получают +15%. Это делает топовых драконов приятными в обращении.
+    </div>
+
+    <h3>Таблица предпочтений по стихиям</h3>
+    <p>Гибриды наследуют любимый биом от одного из родителей. Указаны базовые правила:</p>
+    <table>
+      <tr><th>Стихия</th><th>🟢 Любимый биом</th><th>🔴 Нелюбимый биом</th></tr>
+      <tr><td>🔥 Огонь</td><td>Вулканический</td><td>Ледяной</td></tr>
+      <tr><td>💧 Вода</td><td>Лунный</td><td>Вулканический</td></tr>
+      <tr><td>🌿 Земля</td><td>Кристальный</td><td>Грозовой</td></tr>
+      <tr><td>⚡ Гроза</td><td>Грозовой</td><td>Кристальный</td></tr>
+      <tr><td>❄️ Лёд</td><td>Ледяной</td><td>Вулканический</td></tr>
+      <tr><td>🍃 Ветер</td><td>Воздушный</td><td>Кристальный</td></tr>
+      <tr><td>🌳 Природа</td><td>Природный</td><td>Теневой</td></tr>
+      <tr><td>☀️ Свет</td><td>Природный / Светлый</td><td>Теневой</td></tr>
+      <tr><td>🌑 Тень</td><td>Теневой</td><td>Светлый / Природный</td></tr>
+      <tr><td>✨ Космос</td><td>Космический</td><td>Вулканический</td></tr>
+      <tr><td>⌛ Время и выше</td><td>Любой (адаптивный)</td><td>Нет</td></tr>
+    </table>
+
+    <p style="font-size:14px;color:var(--text-dim)">Конкретный любимый/нелюбимый биом каждого дракона указан в Бестиарии ниже.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ РЕСУРСЫ ═══ -->
+  <section id="resources">
+    <h2>ВСЕ РЕСУРСЫ</h2>
+
+    <h3>Ресурсы драконов</h3>
+    <table>
+      <tr><th>Ресурс</th><th>Источник</th><th>Использование</th></tr>
+      <tr><td>🔥 Жар-Уголь</td><td>Эмберикс</td><td>Биомы, переработка, заказы</td></tr>
+      <tr><td>💧 Чистая Эссенция</td><td>Акваринт</td><td>Биомы, зелья, заказы</td></tr>
+      <tr><td>🌿 Живая Глина</td><td>Терравор</td><td>Биомы, строительство, заказы</td></tr>
+      <tr><td>⚡ Молниевый Заряд</td><td>Вольтракс</td><td>Биомы, машины, заказы</td></tr>
+      <tr><td>❄️ Вечный Иней</td><td>Фростел</td><td>Биомы, хранение, заказы</td></tr>
+      <tr><td>🌋 Расплавленный Камень</td><td>Лавакрон</td><td>Строительство высок. уровня</td></tr>
+      <tr><td>💎 Ледяной Кристалл</td><td>Глейсстоун</td><td>Редкие заказы, постройки</td></tr>
+      <tr><td>🌱 Живая Роса</td><td>Мосстейл</td><td>Ускоритель роста растений</td></tr>
+      <tr><td>✨ Звёздная Пыль</td><td>Астралон</td><td>Космический биом, Некзус</td></tr>
+      <tr><td>🌑 Тёмная Эссенция</td><td>Умброн</td><td>Теневые рецепты, экзотика</td></tr>
+      <tr><td>⌛ Осколок Времени</td><td>Хроносаур</td><td>Ускорение всего, Некзус</td></tr>
+      <tr><td>🌌 Первичная Магия</td><td>Некзус</td><td>Мастер-ресурс для всего</td></tr>
+    </table>
+
+    <h3>Общие ресурсы (из садов и переработки)</h3>
+    <table>
+      <tr><th>Ресурс</th><th>Источник</th><th>Использование</th></tr>
+      <tr><td>🪙 Золотые Монеты</td><td>Заказы, продажа излишков</td><td>Покупка яиц, зданий, семян</td></tr>
+      <tr><td>💎 Магические Камни</td><td>Премиум / редкие заказы</td><td>Ускорение, редкие яйца</td></tr>
+      <tr><td>📜 Фрагменты Карты</td><td>Экспедиции</td><td>Открытие новых островов</td></tr>
+      <tr><td>🥚 Яйца (разных видов)</td><td>Скрещивание, экспедиции, заказы</td><td>Вылупить нового дракона</td></tr>
+      <tr><td>🌾 Корм (общий)</td><td>Сады</td><td>Кормить детёнышей, ускорять рост</td></tr>
+    </table>
+
+    <h3>Производные / переработанные ресурсы</h3>
+    <table>
+      <tr><th>Ресурс</th><th>Рецепт (в Кузнице / Лаборатории)</th><th>Использование</th></tr>
+      <tr><td>🔩 Лавовый Сплав</td><td>Жар-Уголь ×20 + Живая Глина ×10</td><td>Здания 3+ уровня</td></tr>
+      <tr><td>🧊 Фростовый Слиток</td><td>Вечный Иней ×20 + Чистая Эссенция ×10</td><td>Ледяные здания, заказы</td></tr>
+      <tr><td>⚡ Плазма</td><td>Молниевый Заряд ×15 + Чистая Эссенция ×15</td><td>Машины, экспедиционные суда</td></tr>
+      <tr><td>🌿 Эликсир Роста</td><td>Живая Роса ×5 + Чистая Эссенция ×5</td><td>-50% времени роста растений (разовый)</td></tr>
+      <tr><td>🔮 Инкубационный Порошок</td><td>Звёздная Пыль ×2 + Вечный Иней ×5</td><td>-2 часа от инкубации</td></tr>
+    </table>
+
+    <h3>🎨 Внешний вид ресурсов (иконки для рисовки)</h3>
+    <p>Все ресурсы — это собираемые предметы-иконки. Описания для отрисовки в чиби/мультяшном стиле:</p>
+    <table>
+      <tr><th>Ресурс</th><th>Как выглядит</th></tr>
+      <tr><td>🔥 Жар-Уголь</td><td>Кусок угля — чёрный снаружи с пульсирующими оранжево-красными трещинами; идёт жар и редкие искры</td></tr>
+      <tr><td>💧 Чистая Эссенция</td><td>Парящая сфера-капля прозрачной голубой воды, слегка светится, внутри плавают блики</td></tr>
+      <tr><td>🌿 Живая Глина</td><td>Комок влажной коричнево-зелёной глины с проросшими ростками и мелкими цветами, блестит влагой</td></tr>
+      <tr><td>⚡ Молниевый Заряд</td><td>Светящийся жёлто-белый шар энергии в стеклянной банке-сфере, внутри бьются молнии</td></tr>
+      <tr><td>❄️ Вечный Иней</td><td>Кристалл голубого льда в форме снежинки, искрится, окружён морозным паром</td></tr>
+      <tr><td>🌋 Расплавленный Камень</td><td>Слиток тёмного камня с прожилками светящейся лавы и каплей магмы на углу</td></tr>
+      <tr><td>💎 Ледяной Кристалл</td><td>Гранёный прозрачно-голубой кристалл, преломляющий свет, с инеем у основания</td></tr>
+      <tr><td>🌱 Живая Роса</td><td>Прозрачная капля с зеленоватым свечением, внутри крошечный росток, на поверхности блики</td></tr>
+      <tr><td>✨ Звёздная Пыль</td><td>Щепотка/мешочек переливающейся сине-фиолетовой пыли с мерцающими звёздочками</td></tr>
+      <tr><td>🌑 Тёмная Эссенция</td><td>Сгусток тёмно-фиолетового тумана в сфере, поглощает свет, лёгкое бордовое свечение</td></tr>
+      <tr><td>⌛ Осколок Времени</td><td>Золотистый кристалл-осколок в форме песочных часов, внутри пересыпается светящийся песок</td></tr>
+      <tr><td>🌌 Первичная Магия</td><td>Переливающаяся всеми цветами сфера чистой магии с вращающимися вокруг кольцами света</td></tr>
+      <tr><td>🪙 Золотые Монеты</td><td>Стопка золотых монет с выгравированным силуэтом дракона</td></tr>
+      <tr><td>💎 Магические Камни</td><td>Гранёные сияющие фиолетово-розовые самоцветы, парящие с мягким свечением</td></tr>
+      <tr><td>📜 Фрагменты Карты</td><td>Обрывок старой пергаментной карты с обгоревшими краями и кусочком береговой линии</td></tr>
+      <tr><td>🥚 Яйцо</td><td>Округлое крапчатое яйцо в цветах своей стихии со светящимся узором по скорлупе</td></tr>
+      <tr><td>🌾 Корм</td><td>Связка-сноп из разных растений и ягод, перевязанная лозой</td></tr>
+      <tr><td>🔩 Лавовый Сплав</td><td>Металлический слиток тёмно-серого цвета с застывшими оранжевыми лавовыми прожилками</td></tr>
+      <tr><td>🧊 Фростовый Слиток</td><td>Брусок голубоватого матового льдо-металла, покрытый инеем</td></tr>
+      <tr><td>⚡ Плазма</td><td>Светящаяся бело-голубая субстанция в прозрачной капсуле, бурлит и искрит</td></tr>
+      <tr><td>🌿 Эликсир Роста</td><td>Колба-пузырёк с ярко-зелёной светящейся жидкостью и листиком на пробке</td></tr>
+      <tr><td>🔮 Инкубационный Порошок</td><td>Мешочек мерцающего сине-золотого порошка, рассыпающего искорки</td></tr>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ЗДАНИЯ ═══ -->
+  <section id="buildings">
+    <h2>ЗДАНИЯ</h2>
+
+    <table>
+      <tr><th>Здание</th><th>Функция</th><th>Разблок.</th></tr>
+      <tr>
+        <td><strong>🐣 Инкубатор</strong></td>
+        <td>Хранит и инкубирует яйца. Уровень 1 — 1 яйцо, макс уровень — 3 яйца одновременно</td>
+        <td>Старт</td>
+      </tr>
+      <tr>
+        <td><strong>🏠 Гнездо Дракона</strong></td>
+        <td>Место обитания взрослого дракона. 1 гнездо = 1 дракон. Апгрейд даёт +% производства. <em>Облик гнезда уникален для каждого вида дракона</em> (тематический скин — см. строку 🏠 в Бестиарии); занимает 2×2 клетки</td>
+        <td>Старт</td>
+      </tr>
+      <tr>
+        <td><strong>💞 Зал Скрещивания</strong></td>
+        <td>Скрещивание двух драконов. Уровень 2 — второй слот. Уровень 3 — ускорение на 20%</td>
+        <td>Уровень 3</td>
+      </tr>
+      <tr>
+        <td><strong>🌱 Магический Биом</strong></td>
+        <td>Сад нужной стихии. 6–12 слотов для растений. Строится за ресурсы стихии</td>
+        <td>Уровень 2</td>
+      </tr>
+      <tr>
+        <td><strong>🏪 Рынок Совета</strong></td>
+        <td>Получение и сдача заказов. Обновляется 3 раза в сутки</td>
+        <td>Уровень 2</td>
+      </tr>
+      <tr>
+        <td><strong>⚒ Кузница Стихий</strong></td>
+        <td>Переработка ресурсов в сплавы и производные. 1 очередь → 2 очереди на ур. 2</td>
+        <td>Уровень 4</td>
+      </tr>
+      <tr>
+        <td><strong>🧪 Алхимическая Лаборатория</strong></td>
+        <td>Создание эликсиров, порошков. Рецепты открываются с прогрессом</td>
+        <td>Уровень 5</td>
+      </tr>
+      <tr>
+        <td><strong>⛵ Экспедиционная Верфь</strong></td>
+        <td>Отправка экспедиций. 1 слот → 2 на ур. 2 → 3 на ур. 3</td>
+        <td>Уровень 6</td>
+      </tr>
+      <tr>
+        <td><strong>📚 Библиотека Драконов</strong></td>
+        <td>Книга Драконов. Отображает все виды, открытые комбинации, прогресс</td>
+        <td>Уровень 3</td>
+      </tr>
+      <tr>
+        <td><strong>🏛 Храм Стихий</strong></td>
+        <td>Разблокирует пассивные бонусы (выбор одной стихии в сутки: +15% её драконам)</td>
+        <td>Уровень 8</td>
+      </tr>
+      <tr>
+        <td><strong>🗺 Картографический Стол</strong></td>
+        <td>Сборка фрагментов карты → открытие нового острова</td>
+        <td>Уровень 7</td>
+      </tr>
+      <tr>
+        <td><strong>🏆 Зал Хранителя</strong></td>
+        <td>Достижения, звания, лидерборд. Награды за вехи</td>
+        <td>Уровень 10</td>
+      </tr>
+    </table>
+
+    <h3>🎨 Внешний вид зданий (для рисовки)</h3>
+    <p>Описания силуэтов и деталей в милом чиби/мультяшном стиле, согласованные с функцией здания:</p>
+    <table>
+      <tr><th>Здание</th><th>Как выглядит</th></tr>
+      <tr><td>🐣 Инкубатор</td><td>Куполообразная тёплая постройка из светлого камня с большим круглым окном-витражом, сквозь которое видно светящееся яйцо; на крыше флюгер-дракончик, рядом — мягкая лежанка</td></tr>
+      <tr><td>🏠 Гнездо Дракона</td><td>Площадка-платформа с навесом и оградкой, на которой стоит тематическое гнездо конкретного вида (см. строку 🏠 в Бестиарии); у входа коврик и миска</td></tr>
+      <tr><td>💞 Зал Скрещивания</td><td>Романтичный открытый павильон с двумя колоннами и аркой-сердцем наверху, мягкое розовое свечение; внутри два уютных места для драконов, вокруг лепестки</td></tr>
+      <tr><td>🏪 Рынок Совета</td><td>Деревянный прилавок под полосатым навесом с флажками и вывеской; на прилавке ящики с товарами, весы и свиток заказов</td></tr>
+      <tr><td>📚 Библиотека Драконов</td><td>Узкая высокая башенка в форме гигантской книги/стопки томов с витражным окном; на шпиле перо, вокруг парят страницы</td></tr>
+      <tr><td>⚒ Кузница Стихий</td><td>Каменная мастерская с большой трубой и дымом; в проёме светится горн, у входа наковальня, молот и щипцы, разлетаются искры</td></tr>
+      <tr><td>🧪 Алхим. Лаборатория</td><td>Уютный домик, в окнах которого множество разноцветных колб и реторт; из трубы вьётся дымок разных цветов, на крыше пузатый котёл</td></tr>
+      <tr><td>⛵ Экспедиц. Верфь</td><td>Деревянный причал-док с пришвартованной лодкой-корабликом, парус которого похож на крыло дракона; рядом бочки, канаты, фонарь и якорь</td></tr>
+      <tr><td>🗺 Картографический Стол</td><td>Открытый навес-шатёр над большим столом с разложенной картой архипелага, флажками-булавками, компасом и подзорной трубой</td></tr>
+      <tr><td>🏛 Храм Стихий</td><td>Величественный монумент из светлого камня с колоннами и куполом; в центре алтарь с парящими символами всех стихий и мягким разноцветным свечением</td></tr>
+      <tr><td>🏆 Зал Хранителя</td><td>Парадный зал с лестницей, колоннами и витриной с кубками и медалями; на фасаде герб с драконом и развевающиеся флаги</td></tr>
+      <tr><td>🌸 Декор / дорожка</td><td>Каменная плитка-тропинка, фонарики, цветочные клумбы и маленькие статуи драконов</td></tr>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ СЕТКА ОСТРОВА ═══ -->
+  <section id="grid">
+    <h2>СЕТКА ОСТРОВА И РАЗМЕРЫ ПОСТРОЕК</h2>
+    <p>Остров — это сетка из клеток (тайлов). Каждое здание и биом занимает прямоугольную область из клеток. Прямоугольные формы выбраны намеренно: их проще всего размещать и проверять на пересечение в Phaser (сетка + проверка занятости клеток). Размер клетки — например 64×64 px в чиби-стиле.</p>
+
+    <h3>Размеры зданий</h3>
+    <table>
+      <tr><th>Здание</th><th>Размер (Ш×В)</th><th>Клеток</th><th>Силуэт</th></tr>
+      <tr><td>🏠 Гнездо Дракона</td><td>2×2</td><td>4</td><td>Уютный квадрат — округлое гнездо с яйцом/драконом</td></tr>
+      <tr><td>🐣 Инкубатор</td><td>2×2</td><td>4</td><td>Квадрат — куполок с тёплым яйцом внутри</td></tr>
+      <tr><td>💞 Зал Скрещивания</td><td>3×2</td><td>6</td><td>Широкий прямоугольник — павильон с сердцем</td></tr>
+      <tr><td>🏪 Рынок Совета</td><td>2×2</td><td>4</td><td>Квадрат с навесом и флажками</td></tr>
+      <tr><td>📚 Библиотека Драконов</td><td>2×3</td><td>6</td><td>Вертикальный прямоугольник — башня-книга</td></tr>
+      <tr><td>⚒ Кузница Стихий</td><td>3×2</td><td>6</td><td>Широкий прямоугольник — горн с трубой</td></tr>
+      <tr><td>🧪 Алхим. Лаборатория</td><td>2×2</td><td>4</td><td>Квадрат — домик с колбами</td></tr>
+      <tr><td>⛵ Экспедиц. Верфь</td><td>3×2</td><td>6</td><td>Прямоугольник на берегу (граничит с водой)</td></tr>
+      <tr><td>🗺 Картографический Стол</td><td>2×2</td><td>4</td><td>Квадрат — стол под навесом с картой</td></tr>
+      <tr><td>🏛 Храм Стихий</td><td>3×3</td><td>9</td><td>Большой квадрат — монумент с колоннами</td></tr>
+      <tr><td>🏆 Зал Хранителя</td><td>3×3</td><td>9</td><td>Большой квадрат — парадный зал с кубками</td></tr>
+      <tr><td>🌸 Декор / дорожка</td><td>1×1</td><td>1</td><td>Одна клетка — тропинка, фонарь, статуя</td></tr>
+    </table>
+
+    <h3>Размеры биомов (садов)</h3>
+    <p>Биом — это квадратная зона 3×3 = 9 клеток, и каждая клетка внутри является слотом для растения (9 слотов). Зону можно улучшить до 4×4 (16 слотов). Центральную клетку можно занять алтарём стихии (даёт +5% к скорости роста в этом биоме) — тогда слотов 8.</p>
+    <table>
+      <tr><th>Биом</th><th>Базовый размер</th><th>Слотов</th><th>Улучшенный</th><th>Слотов</th></tr>
+      <tr><td>🌋 Вулканический сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>🌙 Лунный сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>⚡ Грозовой сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>💎 Кристальный сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>❄️ Ледяной сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>🍃 Воздушный сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>🌳 Природный сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>🌑 Теневой сад</td><td>3×3</td><td>9</td><td>4×4</td><td>16</td></tr>
+      <tr><td>🌌 Космический сад</td><td>4×4</td><td>16</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <h3>Размер острова и расчёт места</h3>
+    <p>Чтобы всё нужное помещалось, но оставалось место для расширения коллекции, остров должен быть заметно больше суммы стартовых построек. Рекомендуемые размеры:</p>
+    <table>
+      <tr><th>Остров</th><th>Габарит сетки</th><th>Полезных клеток*</th><th>Старт открыто</th></tr>
+      <tr><td>1 — Пепельный</td><td>14×11</td><td>~145</td><td>центр ~6×6 (36), расширяется</td></tr>
+      <tr><td>2 — Жемчужный</td><td>16×12</td><td>~170</td><td>~50</td></tr>
+      <tr><td>3 — Громовой</td><td>16×14</td><td>~190</td><td>~60</td></tr>
+      <tr><td>4 — Небесная Терраса</td><td>18×14</td><td>~210</td><td>~70</td></tr>
+      <tr><td>5+ — поздние</td><td>18×16+</td><td>~230+</td><td>~80</td></tr>
+    </table>
+    <p style="font-size:14px;color:var(--text-dim)">* Полезные клетки = вся сетка минус вода/скалы по краям (органичная форма острова). Земля открывается постепенно: игрок расчищает завалы и осушает участки за ресурсы.</p>
+
+    <h3>Бюджет места: остров 1 (середина игры)</h3>
+    <p>Считаем, что нужно разместить на 1-м острове в середине прохождения:</p>
+    <table>
+      <tr><th>Объект</th><th>Кол-во</th><th>Клеток за шт.</th><th>Итого</th></tr>
+      <tr><td>Гнездо Дракона</td><td>8</td><td>4</td><td>32</td></tr>
+      <tr><td>Инкубатор</td><td>1</td><td>4</td><td>4</td></tr>
+      <tr><td>Зал Скрещивания</td><td>1</td><td>6</td><td>6</td></tr>
+      <tr><td>Рынок Совета</td><td>1</td><td>4</td><td>4</td></tr>
+      <tr><td>Библиотека</td><td>1</td><td>6</td><td>6</td></tr>
+      <tr><td>Кузница</td><td>1</td><td>6</td><td>6</td></tr>
+      <tr><td>Картографический Стол</td><td>1</td><td>4</td><td>4</td></tr>
+      <tr><td>Биомы (сады)</td><td>3</td><td>9</td><td>27</td></tr>
+      <tr><td>Дорожки / декор</td><td>~12</td><td>1</td><td>12</td></tr>
+      <tr><td><strong>ИТОГО занято</strong></td><td></td><td></td><td><strong>101</strong></td></tr>
+      <tr><td><strong>Свободно (из ~145)</strong></td><td></td><td></td><td><strong>~44 (≈30%)</strong></td></tr>
+    </table>
+    <div class="callout tip">Вывод: всё необходимое для 1-го острова помещается, и остаётся ~30% места под рост коллекции (новые гнёзда, 4-й биом, храм). Биомы можно вынести на 2-й остров, освобождая место — это естественный стимул к расширению.</div>
+
+    <h3>Пример расстановки (остров 1)</h3>
+    <p>Упрощённая карта 14×11. Так выглядит остров в середине игры с тремя биомами и свободным местом:</p>
+    <div class="island-map">~ ~ . . . . . . . . . . . ~
+~ . V V V . N N . N N . . ~
+. . V V V . N N . N N I I .
+. . V V V . . . . . . I I .
+. . . . . . . . . K K K . .
+. . B B B . M M . K K K N N
+. . B B B . M M . K K K N N
+. . . . . . L L . . . . . .
+. . F F F . L L U U U . C C
+. . F F F . L L U U U . C C
+~ ~ . . . . . . U U U . ~ ~</div>
+
+    <div class="map-legend">
+      <div><span class="ml-key">.</span> свободная земля (трава)</div>
+      <div><span class="ml-key">~</span> вода / скалы (нельзя строить)</div>
+      <div><span class="ml-key">V</span> Вулканический сад (3×3)</div>
+      <div><span class="ml-key">K</span> Кристальный сад (3×3)</div>
+      <div><span class="ml-key">U</span> Лунный сад (3×3)</div>
+      <div><span class="ml-key">N</span> Гнездо Дракона (2×2)</div>
+      <div><span class="ml-key">I</span> Инкубатор (2×2)</div>
+      <div><span class="ml-key">B</span> Зал Скрещивания (3×2)</div>
+      <div><span class="ml-key">M</span> Рынок Совета (2×2)</div>
+      <div><span class="ml-key">L</span> Библиотека (2×3)</div>
+      <div><span class="ml-key">F</span> Кузница (3×2)</div>
+      <div><span class="ml-key">C</span> Картографический Стол (2×2)</div>
+    </div>
+    <p style="font-size:14px;color:var(--text-dim)">В этой раскладке занято 69 клеток из 145 — свободно более половины острова. Это запас под новые гнёзда, четвёртый биом и поздние здания (Храм, Зал Хранителя). Реализация размещения: при перетаскивании здание проверяет, свободны ли все его клетки и не накладывается ли оно на воду.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ОСТРОВА ═══ -->
+  <section id="worldmap">
+    <h2>КАРТА АРХИПЕЛАГА</h2>
+    <p>Все острова существуют на единой карте мира — Архипелаге Пепельного Моря. Карта одновременно служит экраном выбора острова и отображает прогресс освоения мира.</p>
+
+    <h3>Как выглядит карта (🎨 для рисовки)</h3>
+    <p>Карта стилизована под старую морскую карту на пергаменте: тёплая бежево-коричневая бумага с обгоревшими краями, нарисованное от руки сине-зелёное море с волнами-завитками и маленькими доодлами (киты, кораблики, морские змеи). В углу — компас-роза и виньетки. Острова показаны как милые чиби-иконки своей стихии. Открытые острова яркие и анимированные; ещё не открытые скрыты «туманом войны» — серые силуэты с вопросительным знаком. Морские пути между островами нарисованы пунктиром; разблокированные светятся золотом, заблокированные — тусклые с замочком.</p>
+
+    <h3>Расположение островов</h3>
+    <p>Острова образуют кольцо вокруг центрального Сердца Архипелага. Игрок начинает на внешнем южном крае (Пепельный) и постепенно осваивает кольцо по часовой стрелке, продвигаясь внутрь — к Сердцу.</p>
+
+    <div class="island-map" style="color:#6a8a9a; letter-spacing:1px; line-height:1.6">                      [ 4 ]  Небесная Терраса
+                       ☁  (парит над облаками)
+                        |
+        [ 5 ] ──────[ 6 ·СЕРДЦЕ· ]────── [ 3 ]
+     Временной          (в тумане)        Громовой
+       Архипелаг           |              Шпиль
+                        [ 2 ]  Жемчужный Архипелаг
+                            |
+                        [ 1 ]  Пепельный Остров   ★ СТАРТ</div>
+
+    <div class="map-legend">
+      <div><span class="ml-key">★</span> Стартовый остров игрока</div>
+      <div><span class="ml-key">|</span> Морской путь (открывается фрагментами карты)</div>
+      <div><span class="ml-key">☁</span> Парящий остров (над облаками)</div>
+      <div><span class="ml-key">·6·</span> Сердце Архипелага — финал, в кольце тумана</div>
+    </div>
+
+    <table>
+      <tr><th>Остров</th><th>Позиция на карте</th><th>Стихия</th><th>Порядок</th></tr>
+      <tr><td>1 — Пепельный</td><td>Юг, внешний край (старт)</td><td>🌋 Огонь+Земля</td><td>Открыт сразу</td></tr>
+      <tr><td>2 — Жемчужный</td><td>Юг, ближе к центру</td><td>🌊 Вода+Лёд</td><td>2-й</td></tr>
+      <tr><td>3 — Громовой Шпиль</td><td>Восток кольца</td><td>⛈ Гроза+Тень</td><td>3-й</td></tr>
+      <tr><td>4 — Небесная Терраса</td><td>Север, парит над морем</td><td>🌌 Космос</td><td>4-й</td></tr>
+      <tr><td>5 — Временной</td><td>Запад кольца</td><td>⌛ Время</td><td>5-й</td></tr>
+      <tr><td>6 — Сердце Архипелага</td><td>Центр, в тумане</td><td>✨ Все стихии</td><td>Финал</td></tr>
+    </table>
+
+    <h3>Навигация и прогресс</h3>
+    <ul>
+      <li>Морские пути между островами закрыты, пока игрок не соберёт нужное число <strong>Фрагментов Карты</strong> (из экспедиций и заказов) + оплатит ресурсами</li>
+      <li>Открытие пути снимает «туман войны» — силуэт превращается в живой остров</li>
+      <li>Игрок свободно перемещается между уже открытыми островами по карте одним тапом</li>
+      <li>Каждый остров — отдельная сцена-ферма со своей сеткой (см. раздел «Сетка острова»)</li>
+      <li>Центральное Сердце окутано вращающимся туманом и открывается последним, когда выполнены условия финала</li>
+      <li>Реализация в Phaser: карта — отдельная сцена <code>MapScene</code>; острова — кнопки-узлы с состоянием locked/unlocked, маршруты — линии, туман — оверлей-спрайт поверх неоткрытых узлов</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ОСТРОВА ═══ -->
+  <section id="islands">
+    <h2>ОСТРОВА АРХИПЕЛАГА</h2>
+    <p>Каждый остров открывается по мере прогресса. Для открытия нужны Фрагменты Карты (из экспедиций) + ресурсы текущего уровня. Строка 🎨 — описание внешнего вида острова для рисовки.</p>
+
+    <div class="island-card">
+      <div class="island-header">
+        <div class="island-icon">🌋</div>
+        <div>
+          <div class="island-name">Остров 1 — Пепельный Остров</div>
+          <div class="island-subtitle">Стихия: Огонь + Земля · Стартовый</div>
+        </div>
+      </div>
+      <p style="font-size:15px">Вулканический остров с базальтовыми скалами. Здесь игрок начинает. Базовые биомы Вулкан и Кристалл доступны сразу. Первое яйцо — Эмберикс.</p>
+      <p class="art-line" style="margin-top:8px">🎨 Небольшой круглый остров из чёрного базальта с потухшим вулканом-конусом по центру, из жерла которого вьётся дымок. Красно-оранжевые лавовые трещины, тёплые жёлтые огоньки, по краям — золотистые пляжи и пара пальм. Уютный и обжитой вид.</p>
+      <div class="resource-list">
+        <span class="resource-pill">Эмберикс (старт)</span>
+        <span class="resource-pill">Терравор (покупка)</span>
+        <span class="resource-pill">Вулкан + Кристальный биомы</span>
+      </div>
+    </div>
+
+    <div class="island-card">
+      <div class="island-header">
+        <div class="island-icon">🌊</div>
+        <div>
+          <div class="island-name">Остров 2 — Жемчужный Архипелаг</div>
+          <div class="island-subtitle">Стихия: Вода + Лёд · Уровень 5</div>
+        </div>
+      </div>
+      <p style="font-size:15px">Система коралловых островков, соединённых подвесными мостами. Тёплый океан с айсбергами на горизонте. Открывает Акваринта и Фростела.</p>
+      <p class="art-line" style="margin-top:8px">🎨 Россыпь маленьких бирюзово-белых коралловых островков, соединённых деревянными подвесными мостиками; вокруг прозрачная бирюзовая вода с розовыми кораллами и медузами. На горизонте — голубые айсберги. Светлый, курортный настрой.</p>
+      <div class="resource-list">
+        <span class="resource-pill">Акваринт</span>
+        <span class="resource-pill">Фростел</span>
+        <span class="resource-pill">Лунный + Ледяной биомы</span>
+        <span class="resource-pill">Тайднар (скрещивание)</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Цена открытия: 10 Фрагментов Карты + 500 Жар-Угля + 200 Живой Глины</div>
+    </div>
+
+    <div class="island-card">
+      <div class="island-header">
+        <div class="island-icon">⛈</div>
+        <div>
+          <div class="island-name">Остров 3 — Громовой Шпиль</div>
+          <div class="island-subtitle">Стихия: Гроза + Тень · Уровень 10</div>
+        </div>
+      </div>
+      <p style="font-size:15px">Тёмный остров с вечной грозой над головой. Молнии бьют в скалы. Постоянная ночь на северной стороне острова. Открывает Вольтракса и теневые ресурсы.</p>
+      <p class="art-line" style="margin-top:8px">🎨 Высокий тёмный остров-утёс с острым каменным шпилем, увенчанным грозовой тучей; по небу бьют фиолетово-синие молнии. Северная сторона погружена в вечную ночь со светящимися теневыми кристаллами, южная — серая и ветреная. Мрачный, драматичный силуэт.</p>
+      <div class="resource-list">
+        <span class="resource-pill">Вольтракс</span>
+        <span class="resource-pill">Грозовой сад</span>
+        <span class="resource-pill">Теневой сад</span>
+        <span class="resource-pill">Небулор (скрещивание)</span>
+        <span class="resource-pill">Умброн (скрещивание)</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Цена открытия: 20 Фрагментов + 1000 смешанных ресурсов</div>
+    </div>
+
+    <div class="island-card">
+      <div class="island-header">
+        <div class="island-icon">🌌</div>
+        <div>
+          <div class="island-name">Остров 4 — Небесная Терраса</div>
+          <div class="island-subtitle">Стихия: Космос · Уровень 16</div>
+        </div>
+      </div>
+      <p style="font-size:15px">Остров парит над облаками. На нём другая гравитация. Ночью виден Архипелаг снизу. Открывает Астралона и космические биомы.</p>
+      <p class="art-line" style="margin-top:8px">🎨 Летающий остров-плато на перевёрнутой каменной пирамиде с водопадами, стекающими в облака и тающими в воздухе. Парящие вокруг камни-обломки, фиолетово-золотое небо, звёзды видны даже днём. Магический, неземной вид.</p>
+      <div class="resource-list">
+        <span class="resource-pill">Астралон (скрещивание)</span>
+        <span class="resource-pill">Космический сад</span>
+        <span class="resource-pill">Астральная Лоза</span>
+        <span class="resource-pill">Сердце Кометы</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Цена открытия: 40 Фрагментов + Звёздная Пыль ×50</div>
+    </div>
+
+    <div class="island-card">
+      <div class="island-header">
+        <div class="island-icon">⌛</div>
+        <div>
+          <div class="island-name">Остров 5 — Временной Архипелаг</div>
+          <div class="island-subtitle">Стихия: Время · Уровень 22</div>
+        </div>
+      </div>
+      <p style="font-size:15px">Острова в разных временных потоках. На одном — рассвет, на другом — закат. Единственное место, где можно найти яйцо Хроновиса.</p>
+      <p class="art-line" style="margin-top:8px">🎨 Группа островков, каждый в своём времени суток: на одном рассвет, на другом полдень, закат и звёздная ночь — границы между ними мерцают золотым «швом времени». Парят песочные часы и шестерёнки, краски плавно перетекают. Сюрреалистичный коллаж.</p>
+      <div class="resource-list">
+        <span class="resource-pill">Хроносаур (через Хроновис)</span>
+        <span class="resource-pill">Цветок Времени</span>
+        <span class="resource-pill">Яйцо Хроновиса (экспедиция)</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:8px">Цена открытия: 60 Фрагментов + 5 Осколков Времени</div>
+    </div>
+
+    <div class="island-card" style="border-color:rgba(201,168,76,0.4)">
+      <div class="island-header">
+        <div class="island-icon">🌌</div>
+        <div>
+          <div class="island-name">Остров 6 — Сердце Архипелага</div>
+          <div class="island-subtitle">Все стихии · Уровень 30 · Финальный</div>
+        </div>
+      </div>
+      <p style="font-size:15px">Центральный остров, скрытый туманом. Здесь можно скрестить Хроносаура и Астралона для получения Некзуса. Финал основной прогрессии.</p>
+      <p class="art-line" style="margin-top:8px">🎨 Величественный центральный остров в кольце светящегося тумана, с древним храмом-алтарём на вершине; вокруг — все стихийные эффекты сразу (огонь, вода, лёд, гроза, свет). Самый большой и торжественный, переливается всеми цветами. Сердце всего архипелага.</p>
+      <div class="resource-list">
+        <span class="resource-pill">Некзус</span>
+        <span class="resource-pill">Все биомы</span>
+        <span class="resource-pill">Конечная цель</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ИГРОВОЙ ЦИКЛ ═══ -->
+  <section id="loop">
+    <h2>ИГРОВОЙ ЦИКЛ</h2>
+
+    <h3>Ежедневный цикл (сессия 10–20 мин)</h3>
+    <div class="progress-step">
+      <div class="step-num">→</div>
+      <div class="step-content">
+        <h4>Собрать урожай</h4>
+        Зайти в каждый биом, собрать выросшие растения. Посадить новые.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">→</div>
+      <div class="step-content">
+        <h4>Накормить драконов</h4>
+        Покормить взрослых и детёнышей. Выбрать любимую еду для +20% бонуса.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">→</div>
+      <div class="step-content">
+        <h4>Собрать ресурсы</h4>
+        Каждый дракон накопил ресурсы за прошедшее время. Нажать «Собрать».
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">→</div>
+      <div class="step-content">
+        <h4>Выполнить заказы</h4>
+        Проверить Рынок Совета. Сдать выполненные, взять новые.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">→</div>
+      <div class="step-content">
+        <h4>Проверить инкубатор и скрещивание</h4>
+        Забрать вылупившихся, запустить новые, проверить таймер скрещивания.
+      </div>
+    </div>
+    <div class="progress-step">
+      <div class="step-num">→</div>
+      <div class="step-content">
+        <h4>Стратегическое действие</h4>
+        Построить здание, открыть остров, запустить экспедицию, изучить новый рецепт.
+      </div>
+    </div>
+
+    <h3>Основной прогрессионный цикл</h3>
+    <div class="callout">
+      <strong>Растения → Скрещивание → Дракон → Ресурсы → Здания → Острова → Новые драконы</strong>
+      <p style="margin-top:8px;margin-bottom:0;font-size:15px">Каждое открытие создаёт новые цели. Книга Драконов — видимый прогресс.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ЗАКАЗЫ ═══ -->
+  <section id="orders">
+    <h2>ЗАКАЗЫ И КВЕСТЫ</h2>
+
+    <h3>Заказы Совета (ежедневные)</h3>
+    <p>Рынок Совета обновляется 3 раза в сутки (каждые 8 часов). Показывает 5 активных заказов. Сложность и награда зависят от уровня игрока.</p>
+
+    <table>
+      <tr><th>Тип</th><th>Пример</th><th>Награда</th></tr>
+      <tr>
+        <td><span class="badge badge-earth">Простой</span></td>
+        <td>Доставить 20 Огнецветов и 10 Жар-Угля</td>
+        <td>150 Монет</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-water">Средний</span></td>
+        <td>Доставить Лавовый Сплав ×5 + Чистую Эссенцию ×50</td>
+        <td>500 Монет + 3 Фрагмента</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-storm">Сложный</span></td>
+        <td>Доставить Замороженный Разряд ×10 + Ледяной Кристалл ×20</td>
+        <td>1500 Монет + редкое Яйцо</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-legendary">Легендарный</span></td>
+        <td>Доставить Первичную Магию ×5 + Звёздную Пыль ×10 + Осколок Времени ×3</td>
+        <td>5000 Монет + Яйцо Хроновиса</td>
+      </tr>
+    </table>
+
+    <h3>Сюжетные квесты</h3>
+    <p>Линейная цепочка квестов, обучающая механикам и раскрывающая лор. Примеры:</p>
+    <ul>
+      <li>«Первое яйцо» — вырасти и накорми Эмберикса</li>
+      <li>«Знакомство с садом» — создай первый Вулканический Биом</li>
+      <li>«Экспериментатор» — проведи первое скрещивание</li>
+      <li>«Путешественник» — открой второй остров</li>
+      <li>«Хранитель Архипелага» — собери всех базовых драконов</li>
+      <li>«Тайна Некзуса» — заключительный квест на вывод Некзуса</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ЭКСПЕДИЦИИ ═══ -->
+  <section id="expeditions">
+    <h2>ЭКСПЕДИЦИИ</h2>
+
+    <p>Экспедиции — способ получить редкие ресурсы и яйца без скрещивания. Игрок отправляет одного или нескольких взрослых драконов в экспедицию на определённое время.</p>
+
+    <h3>Как работает</h3>
+    <ul>
+      <li>Выбираем дракона (он временно недоступен)</li>
+      <li>Выбираем маршрут — у каждого своё время и таблица наград</li>
+      <li>Стихия дракона влияет на шанс редкой награды</li>
+      <li>По возвращении — получаем награды</li>
+    </ul>
+
+    <h3>Маршруты</h3>
+    <table>
+      <tr><th>Маршрут</th><th>Время</th><th>Лучший дракон</th><th>Награда</th></tr>
+      <tr><td>Вулканические руины</td><td>2 ч</td><td>Огонь/Земля</td><td>Ресурсы + редко: яйцо Лавакрона</td></tr>
+      <tr><td>Коралловый лабиринт</td><td>3 ч</td><td>Вода/Лёд</td><td>Ресурсы + редко: Жемчужный Мох ×10</td></tr>
+      <tr><td>Грозовое ущелье</td><td>4 ч</td><td>Гроза</td><td>Ресурсы + Фрагменты Карты ×3</td></tr>
+      <tr><td>Небесные острова</td><td>6 ч</td><td>Любой гибрид</td><td>Астральная Лоза + редко: Сердце Кометы</td></tr>
+      <tr><td>Временная Аномалия</td><td>12 ч</td><td>Астралон</td><td>Яйцо Хроновиса (шанс 20%) + Осколки</td></tr>
+    </table>
+
+    <div class="callout tip">
+      <strong>Дизайн-принцип:</strong> Экспедиции — пассивный механизм. Игрок уходит, дракон работает. Возвращается — получает награду. Простая петля без микроменеджмента.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ПРОГРЕССИЯ ═══ -->
+  <section id="progression">
+    <h2>ПРОГРЕССИЯ ИГРОКА</h2>
+
+    <h3>Уровни Хранителя</h3>
+    <p>Опыт даётся за: сбор ресурсов, кормление драконов, выполнение заказов, открытие новых видов. Новый уровень = новое здание или остров.</p>
+
+    <table>
+      <tr><th>Ур.</th><th>Разблокируется</th></tr>
+      <tr><td>1–2</td><td>Старт, Эмберикс, первый сад, первые заказы</td></tr>
+      <tr><td>3–4</td><td>Зал Скрещивания, Библиотека Драконов, первые гибриды</td></tr>
+      <tr><td>5</td><td>Остров 2 (Жемчужный), Акваринт, Фростел, Лунный Сад</td></tr>
+      <tr><td>6–8</td><td>Кузница, Верфь, первые экспедиции, Алхимическая Лаборатория</td></tr>
+      <tr><td>10</td><td>Остров 3 (Громовой), Вольтракс, теневые механики</td></tr>
+      <tr><td>12–15</td><td>Гибриды 2-го уровня (Астралон, Умброн), Храм Стихий</td></tr>
+      <tr><td>16</td><td>Остров 4 (Небесная Терраса), Космический Сад, Астральная Лоза</td></tr>
+      <tr><td>20–22</td><td>Остров 5 (Временной), Хроновис-яйца, Хроносаур</td></tr>
+      <tr><td>25–30</td><td>Остров 6 (Сердце), Некзус, Зал Хранителя, эндгейм-контент</td></tr>
+    </table>
+
+    <h3>Книга Драконов</h3>
+    <p>Главный коллекционный прогресс. Показывает силуэты неоткрытых видов. Открытие нового вида даёт золото, титул и запись с лором. Полное заполнение = звание «Великий Хранитель».</p>
+
+    <h3>Звания Хранителя</h3>
+    <div class="resource-list">
+      <span class="resource-pill">Ученик (ур. 1–5)</span>
+      <span class="resource-pill">Хранитель (ур. 6–15)</span>
+      <span class="resource-pill">Мастер Стихий (ур. 16–25)</span>
+      <span class="resource-pill">Архимаг Архипелага (ур. 26–30)</span>
+      <span class="resource-pill">Великий Хранитель (все драконы)</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ЭКОНОМИКА ═══ -->
+  <section id="economy">
+    <h2>ЭКОНОМИКА И МОНЕТИЗАЦИЯ</h2>
+
+    <h3>Валюты</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">🪙 Золотые Монеты (мягкая)</div>
+        Зарабатываются из заказов, продажи растений, базовых активностей. Тратятся на здания, семена, базовые яйца.
+      </div>
+      <div class="card">
+        <div class="card-title">💎 Магические Камни (премиум)</div>
+        Покупаются за реальные деньги или редко получаются из квестов. Ускоряют таймеры, покупают редкие яйца.
+      </div>
+    </div>
+
+    <h3>Принципы (пет-проект, без реальных платежей)</h3>
+    <ul>
+      <li>Магические Камни — внутриигровая премиум-валюта, но <strong>добываются в игре</strong> (квесты, достижения, редкие заказы), а не за деньги</li>
+      <li>Камни ускоряют таймеры и дают доп. слоты — приятный бонус, но не обязательны</li>
+      <li>Всё в игре достижимо без камней — просто чуть дольше</li>
+      <li>Если когда-нибудь захочется монетизации — легко добавить покупку камней, не ломая баланс</li>
+      <li>Акцент на удовольствии от коллекции, а не на выкачивании денег</li>
+    </ul>
+
+    <h3>Баланс таймеров</h3>
+    <table>
+      <tr><th>Действие</th><th>Базовое время</th><th>С ускорителем</th></tr>
+      <tr><td>Рост базового растения</td><td>15–30 мин</td><td>7–15 мин (Эликсир)</td></tr>
+      <tr><td>Скрещивание базовых</td><td>2 ч</td><td>1.5 ч (камни)</td></tr>
+      <tr><td>Инкубация базового яйца</td><td>30 мин</td><td>Мгновенно (5 камней)</td></tr>
+      <tr><td>Скрещивание гибридов</td><td>4–8 ч</td><td>2–4 ч</td></tr>
+      <tr><td>Инкубация редкого яйца</td><td>10–24 ч</td><td>-2 ч за Порошок</td></tr>
+      <tr><td>Экспедиция средняя</td><td>4–6 ч</td><td>Без ускорения</td></tr>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ ТЕХНИКА ═══ -->
+  <section id="tech">
+    <h2>ТЕХНИЧЕСКАЯ БАЗА (пет-проект)</h2>
+
+    <div class="callout tip">
+      <strong>Контекст:</strong> соло пет-проект, без мультиплеера, цель — веб + мобилки через Phaser. Архитектура максимально простая: всё работает на клиенте, прогресс сохраняется локально, серверов почти нет.
+    </div>
+
+    <h3>Стек</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">🎮 Движок</div>
+        <strong>Phaser 3</strong> (TypeScript). Один кодбейс на веб (canvas/WebGL) и мобилки. JS-экосистема, быстрая итерация, идеально для 2D-ферм.
+      </div>
+      <div class="card">
+        <div class="card-title">📱 Мобильная обёртка</div>
+        <strong>Capacitor</strong> — оборачивает Phaser-билд в нативное приложение для iOS/Android без переписывания. Веб-версия = тот же билд в браузере.
+      </div>
+      <div class="card">
+        <div class="card-title">💾 Сохранение</div>
+        <strong>LocalStorage / IndexedDB</strong> на старте. Позже — опциональный облачный бэкап через Firebase или Supabase (один JSON на игрока).
+      </div>
+      <div class="card">
+        <div class="card-title">⏱ Таймеры</div>
+        Поскольку нет мультиплеера и читы не критичны — таймеры считаются от системного времени (timestamp последнего действия). Серверная валидация не нужна.
+      </div>
+      <div class="card">
+        <div class="card-title">📦 Данные (контент)</div>
+        Все драконы, растения, рецепты, заказы — <strong>JSON-файлы</strong>. Балансируешь, не трогая код. Загружаются в Phaser через preload.
+      </div>
+      <div class="card">
+        <div class="card-title">🔊 Звук и анимации</div>
+        Спрайтовые анимации Phaser + tween-движения. Минимум зависимостей. Звук — Web Audio через Phaser Sound Manager.
+      </div>
+    </div>
+
+    <h3>🎨 Визуальный стиль: милый чиби</h3>
+    <p>Драконы — округлые, большеголовые, крупноглазые чиби-создания. Стиль дружелюбный, яркий, «обнимательный». Подходит для мобилок: читается на маленьком экране, легко анимировать.</p>
+    <ul>
+      <li><strong>Пропорции:</strong> голова ≈ 40% тела, большие глаза, короткие лапки, пухлые крылышки</li>
+      <li><strong>Палитра:</strong> насыщенные цвета по стихиям + мягкие тени, лёгкое свечение по редкости</li>
+      <li><strong>Аура редкости:</strong> обычные — без эффектов, редкие+ — частицы, мифические — переливы, древние — золотая аура</li>
+      <li><strong>Анимации:</strong> idle-покачивание, моргание, реакция на тап (подпрыгивает), «happy»-эмоция при кормлении</li>
+      <li><strong>Спрайт-листы:</strong> 4–6 кадров на анимацию хватает для милого эффекта. Можно начать со статичных póses + tween</li>
+      <li><strong>Производство ассетов:</strong> один шаблон тела чиби-дракона + перекраска и аксессуары по стихиям сильно экономит время в соло-разработке</li>
+    </ul>
+
+    <h3>Архитектура сцен Phaser</h3>
+    <table>
+      <tr><th>Сцена</th><th>Назначение</th></tr>
+      <tr><td>BootScene</td><td>Загрузка конфигов и базовых ассетов</td></tr>
+      <tr><td>PreloadScene</td><td>Прогресс-бар, загрузка спрайтов острова</td></tr>
+      <tr><td>IslandScene</td><td>Главная: остров, гнёзда, сады, тапы по драконам</td></tr>
+      <tr><td>BreedingScene</td><td>UI скрещивания (выбор родителей + растений)</td></tr>
+      <tr><td>BookScene</td><td>Книга Драконов — коллекция и прогресс</td></tr>
+      <tr><td>MarketScene</td><td>Заказы Совета</td></tr>
+      <tr><td>UIScene</td><td>Оверлей: валюты, уровень, меню (всегда поверх)</td></tr>
+    </table>
+
+    <h3>Структура данных дракона (JSON)</h3>
+    <pre style="background:var(--bg3);padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;border:1px solid var(--border)"><code>{
+  "id": "embrix",
+  "name": "Эмберикс",
+  "nickname": "Уголёк",
+  "element": "fire",
+  "rarity": "common",
+  "resource": "char_coal",
+  "production_per_hour": 8,
+  "favorite_food": ["fireflower", "lava_berry"],
+  "disliked_food": ["moon_lotus"],
+  "food_bonus": 0.20,
+  "favorite_biome": "volcanic",
+  "disliked_biome": "ice",
+  "biome_buff": 0.15,
+  "biome_debuff": -0.10,
+  "adaptive": false,
+  "hatch_time_minutes": 30,
+  "grow_time_minutes": 120,
+  "biome": "volcanic",
+  "sprite": "dragons/embrix",
+  "global_bonus": null,
+  "parent_ids": ["uglek_001", "kameshek_004"],
+  "bio": "Первый дракон каждого Хранителя..."
+}</code></pre>
+
+    <h3>Структура данных скрещивания (JSON)</h3>
+    <pre style="background:var(--bg3);padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;border:1px solid var(--border)"><code>{
+  "id": "breed_fire_earth",
+  "parent_1": "embrix",
+  "parent_2": "terravur",
+  "result": "lavakron",
+  "chance": 0.70,
+  "required_plants": [
+    { "plant": "fireflower", "amount": 5 },
+    { "plant": "root_of_power", "amount": 5 }
+  ],
+  "boost_plant": { "plant": "hot_moss", "bonus_chance": 0.10 },
+  "breed_time_hours": 4,
+  "fail_result": "random_parent"
+}</code></pre>
+
+    <h3>Сохранение прогресса (JSON-снимок)</h3>
+    <pre style="background:var(--bg3);padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;border:1px solid var(--border)"><code>{
+  "player_level": 7,
+  "coins": 2400,
+  "gems": 15,
+  "unlocked_islands": ["ashen", "pearl"],
+  "dragons": [
+    { "id": "embrix", "level": 3, "last_collected": 1733600000 }
+  ],
+  "book_discovered": ["embrix", "terravur", "lavakron"],
+  "gardens": [
+    { "biome": "volcanic", "slots": [
+      { "plant": "fireflower", "planted_at": 1733600000 }
+    ]}
+  ],
+  "breeding": { "active": null },
+  "incubator": []
+}</code></pre>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ═══════════════════════════════════ MVP ═══ -->
+  <section id="mvp">
+    <h2>MVP И ПЛАН РЕАЛИЗАЦИИ (соло)</h2>
+
+    <div class="callout tip">Цель MVP — проверить основную петлю на Phaser: растить → скрещивать → коллекционировать. Сначала играбельность, потом контент и арт.</div>
+
+    <p><strong>Что входит в MVP:</strong></p>
+    <ul>
+      <li>1 остров (Пепельный), одна сцена с гнёздами и садом</li>
+      <li>7 обычных драконов (базовые стихии)</li>
+      <li>5–6 необычных гибридов (первые комбинации)</li>
+      <li>2–3 биома (Вулкан, Кристальный, Лунный)</li>
+      <li>~10 видов растений</li>
+      <li>Базовые механики: гнездо, инкубатор, скрещивание, сад, сбор ресурсов</li>
+      <li>Простые заказы (1–2 типа)</li>
+      <li>Книга Драконов (показывает прогресс, силуэты неоткрытых)</li>
+      <li>Монеты как единственная валюта</li>
+      <li>Сохранение в LocalStorage</li>
+      <li>Чиби-арт: можно начать с плейсхолдеров/перекраски одного шаблона</li>
+    </ul>
+
+    <h3>Порядок разработки (соло, по приоритету)</h3>
+    <table>
+      <tr><th>Этап</th><th>Содержание</th><th>Зачем</th></tr>
+      <tr><td>1 — Каркас</td><td>Phaser-проект, сцены, загрузка JSON, UI-оверлей</td><td>Фундамент</td></tr>
+      <tr><td>2 — Один дракон</td><td>Гнездо, таймер производства, сбор ресурса, тап-реакция</td><td>Проверка «петли удовольствия»</td></tr>
+      <tr><td>3 — Сад</td><td>Биом, посадка/рост/сбор растений, кормление</td><td>Ресурсная база</td></tr>
+      <tr><td>4 — Скрещивание</td><td>Инкубатор, выбор родителей, рецепты, вылупление</td><td>Ядро игры</td></tr>
+      <tr><td>5 — Книга + заказы</td><td>Коллекция, прогресс, выдача наград</td><td>Цель и мотивация</td></tr>
+      <tr><td>6 — Контент</td><td>Добивание до 56 драконов, биомов, островов</td><td>Долгая игра</td></tr>
+      <tr><td>7 — Арт-полировка</td><td>Чиби-спрайты, анимации, частицы редкости, звук</td><td>Лицо проекта</td></tr>
+      <tr><td>8 — Мобилка</td><td>Сборка через Capacitor, адаптация под тач</td><td>Релиз на телефон</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Совет соло-разработчику:</strong> не пытайся нарисовать 56 драконов сразу. Сделай играбельную петлю с 5–7 драконами и плейсхолдер-артом. Если игра «затягивает» даже с квадратами вместо драконов — тогда вкладывайся в чиби-арт и контент.
+    </div>
+
+    <h3>Что намеренно упрощено</h3>
+    <ul>
+      <li><strong>Нет мультиплеера</strong> — только личная коллекция и прогрессия</li>
+      <li><strong>Нет серверной логики</strong> — всё на клиенте, таймеры от системного времени</li>
+      <li><strong>Нет генетики</strong> — только фиксированные комбинации A+B=C из JSON</li>
+      <li><strong>Нет сложного крафта</strong> — переработка максимум 2 ресурсов в 1</li>
+      <li><strong>Один шаблон чиби-тела</strong> — перекраска и аксессуары вместо 56 уникальных моделей на старте</li>
+      <li><strong>Скрещивание прозрачно</strong> — игрок видит возможные результаты в Книге</li>
+    </ul>
+
+    <div class="callout" style="margin-top:32px">
+      <strong>Итоговая формула игры:</strong><br>
+      «Dragon City встречает Hay Day — но соло, на Phaser, с милыми чиби-драконами, магическими садами и коллекцией из 56+ видов.»
+    </div>
+  </section>
+
+  <p style="margin-top:60px;font-size:13px;color:var(--text-dim);font-family:'Cinzel',serif;letter-spacing:0.06em;text-align:center">
+    АРХИПЕЛАГ ДРАКОНОВ · Game Design Document v1.0
+  </p>
+
+</main>
+</div>
+
+<a href="#top" class="back-top">↑ НАВЕРХ</a>
+
+<script>
+  // Active nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

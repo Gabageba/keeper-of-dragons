@@ -1,0 +1,42 @@
+[
+  {
+    "id": "breed_fire_earth",
+    "parent_1": "embrix",
+    "parent_2": "terravur",
+    "result": "lavakron",
+    "chance": 0.7,
+    "required_plants": [
+      { "plant": "fireflower", "amount": 5 },
+      { "plant": "root_of_power", "amount": 5 }
+    ],
+    "boost_plant": { "plant": "hot_moss", "bonus_chance": 0.1 },
+    "breed_time_hours": 4,
+    "fail_result": "random_parent"
+  },
+  {
+    "id": "breed_fire_storm",
+    "parent_1": "embrix",
+    "parent_2": "voltrax",
+    "result": "nebulor",
+    "chance": 0.7,
+    "required_plants": [
+      { "plant": "fireflower", "amount": 5 },
+      { "plant": "storm_pepper", "amount": 5 }
+    ],
+    "breed_time_hours": 4,
+    "fail_result": "random_parent"
+  },
+  {
+    "id": "breed_ice_earth",
+    "parent_1": "frostel",
+    "parent_2": "terravur",
+    "result": "glacestone",
+    "chance": 0.7,
+    "required_plants": [
+      { "plant": "ice_rose", "amount": 5 },
+      { "plant": "root_of_power", "amount": 5 }
+    ],
+    "breed_time_hours": 4,
+    "fail_result": "random_parent"
+  }
+]

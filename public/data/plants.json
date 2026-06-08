@@ -1,0 +1,13 @@
+[
+  { "id": "fireflower", "name": "Огнецвет", "element": "fire", "grow_time_minutes": 15, "native_biome": "volcanic", "sprite": "plants/fireflower", "description": "Алый цветок, лепестки которого тлеют как угли. Самая частая культура архипелага." },
+  { "id": "lava_berry", "name": "Лавовая Ягода", "element": "fire", "grow_time_minutes": 30, "native_biome": "volcanic", "sprite": "plants/lava_berry", "description": "Жгучая ягода с застывших потоков лавы. Любимое лакомство Эмберикса (+20%)." },
+  { "id": "hot_moss", "name": "Жаркий Мох", "element": "fire", "grow_time_minutes": 45, "native_biome": "volcanic", "sprite": "plants/hot_moss", "description": "Тлеет, но не сгорает. Повышает шанс гибрида в скрещивании Огонь+Земля." },
+  { "id": "sea_flower", "name": "Морской Цветок", "element": "water", "grow_time_minutes": 20, "native_biome": "lunar", "sprite": "plants/sea_flower", "description": "Нежный синий цветок, раскрывающийся только в лунном свете. Основа водных рецептов." },
+  { "id": "pearl_moss", "name": "Жемчужный Мох", "element": "water", "grow_time_minutes": 40, "native_biome": "lunar", "sprite": "plants/pearl_moss", "description": "Мягкий мох с перламутровыми бусинами росы. Любимая еда Акваринта (+20%)." },
+  { "id": "root_of_power", "name": "Корень Силы", "element": "earth", "grow_time_minutes": 25, "native_biome": "crystal", "sprite": "plants/root_of_power", "description": "Толстый узловатый корень, налитый силой земли. Основа земляных рецептов." },
+  { "id": "stone_fruit", "name": "Каменный Плод", "element": "earth", "grow_time_minutes": 60, "native_biome": "crystal", "sprite": "plants/stone_fruit", "description": "Твёрдый снаружи, сочный внутри. Любимая еда Терравора (+20%)." },
+  { "id": "storm_pepper", "name": "Грозовой Перец", "element": "storm", "grow_time_minutes": 20, "native_biome": "storm", "sprite": "plants/storm_pepper", "description": "Острый перец, искрящийся статикой при касании. Основа грозовых рецептов." },
+  { "id": "ice_rose", "name": "Ледяная Роза", "element": "ice", "grow_time_minutes": 30, "native_biome": "ice", "sprite": "plants/ice_rose", "description": "Роза, выкованная будто изо льда. Основа ледяных рецептов. Не тает в тепле." },
+  { "id": "snow_mushroom", "name": "Снежный Гриб", "element": "ice", "grow_time_minutes": 90, "native_biome": "ice", "sprite": "plants/snow_mushroom", "description": "Холодный гриб вечной мерзлоты. Любимая еда Фростела (+20%)." },
+  { "id": "moon_lotus", "name": "Лунный Лотос", "element": "neutral", "grow_time_minutes": 120, "native_biome": "any", "sprite": "plants/moon_lotus", "description": "Серебристый лотос, цветущий ночью. Нейтрален, нужен для большинства водных гибридов." }
+]
