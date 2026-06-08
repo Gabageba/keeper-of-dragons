@@ -4,6 +4,7 @@ import { DATA_MANIFEST } from '@/data/manifest';
 import { ContentLoader } from '@/systems/ContentLoader';
 import { GameState } from '@/systems/GameState';
 import { SaveManager } from '@/systems/SaveManager';
+import { AutoSave } from '@/systems/AutoSave';
 
 /**
  * PreloadScene — показывает прогресс-бар и грузит JSON-контент и спрайты
@@ -29,7 +30,15 @@ export class PreloadScene extends Phaser.Scene {
     ContentLoader.init(this);
     GameState.init(SaveManager.load() ?? SaveManager.createNew());
 
-    this.scene.start('IslandScene');
+    const summary = GameState.applyOfflineProgress();
+    AutoSave.start();
+
+    const hasGains =
+      Object.values(summary.resources_gained).some(v => v > 0) ||
+      summary.breeding_completed ||
+      summary.eggs_hatched > 0;
+
+    this.scene.start('IslandScene', hasGains ? { offlineSummary: summary } : undefined);
     this.scene.launch('UIScene');
   }
 

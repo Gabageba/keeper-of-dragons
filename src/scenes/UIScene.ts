@@ -33,6 +33,10 @@ export class UIScene extends Phaser.Scene {
     this.addMenuButton(GAME_WIDTH / 2 - 90, GAME_HEIGHT - 28, 'Рынок', () => Navigation.openModal('MarketScene'));
     this.addMenuButton(GAME_WIDTH / 2 + 90, GAME_HEIGHT - 28, 'Скрещивание', () => Navigation.openModal('BreedingScene'));
     this.addMenuButton(GAME_WIDTH / 2 + 270, GAME_HEIGHT - 28, 'Карта', () => Navigation.gotoMap());
+
+    if (import.meta.env.DEV) {
+      this.addDevToggle();
+    }
   }
 
   private buildStatusText(): string {
@@ -55,6 +59,27 @@ export class UIScene extends Phaser.Scene {
     EventBus.off('coins:changed', this.onCoinsChanged, this);
     EventBus.off('gems:changed', this.onGemsChanged, this);
     EventBus.off('xp:changed', this.onXpChanged, this);
+  }
+
+  private addDevToggle(): void {
+    const btn = this.add
+      .text(GAME_WIDTH - 12, 28, '[DEV]', {
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        color: '#ff6b6b',
+      })
+      .setOrigin(1, 0.5)
+      .setInteractive({ cursor: 'pointer' });
+
+    btn.on('pointerup', () => {
+      if (this.scene.isActive('DevMenuScene')) {
+        this.scene.stop('DevMenuScene');
+      } else {
+        this.scene.launch('DevMenuScene');
+      }
+    });
+    btn.on('pointerover', () => btn.setAlpha(0.7));
+    btn.on('pointerout', () => btn.setAlpha(1));
   }
 
   private addMenuButton(x: number, y: number, label: string, callback: () => void): void {

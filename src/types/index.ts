@@ -181,3 +181,10 @@ export interface EggState {
   started_at: number;
   ready_at: number;
 }
+
+export interface OfflineSummary {
+  elapsed_ms: number;
+  resources_gained: Record<string, number>;
+  breeding_completed: boolean;
+  eggs_hatched: number;
+}

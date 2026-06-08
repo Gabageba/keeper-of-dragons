@@ -7,6 +7,7 @@ import { BreedingScene } from '@/scenes/BreedingScene';
 import { BookScene } from '@/scenes/BookScene';
 import { MarketScene } from '@/scenes/MarketScene';
 import { MapScene } from '@/scenes/MapScene';
+import { DevMenuScene } from '@/scenes/DevMenuScene';
 
 /** Размер одной клетки сетки острова в пикселях (см. GDD «Сетка острова»). */
 export const TILE_SIZE = 64;
@@ -30,5 +31,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     antialias: true,
   },
   // Порядок важен: BootScene стартует первой.
-  scene: [BootScene, PreloadScene, IslandScene, UIScene, BreedingScene, BookScene, MarketScene, MapScene],
+  scene: [BootScene, PreloadScene, IslandScene, UIScene, BreedingScene, BookScene, MarketScene, MapScene, DevMenuScene],
 };

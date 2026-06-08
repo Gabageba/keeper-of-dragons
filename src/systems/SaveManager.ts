@@ -1,21 +1,16 @@
 import type { SaveData } from '@/types';
 
 const SAVE_KEY = 'dragons_save_v1';
+const BACKUP_KEY = 'dragons_save_backup';
 const SAVE_VERSION = 1;
 
-/**
- * SaveManager — загрузка/сохранение прогресса в LocalStorage (JSON-снимок).
- * Таймеры считаются от system timestamp, серверной валидации нет.
- * См. GDD «Сохранение прогресса» и docs/tasks/04-save-load-system.md.
- */
 export const SaveManager = {
   load(): SaveData | null {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     try {
       const data = JSON.parse(raw) as SaveData;
-      // TODO: миграции при изменении version (task-04).
-      return data;
+      return migrate(data);
     } catch {
       console.warn('[SaveManager] повреждённое сохранение, игнорирую');
       return null;
@@ -23,12 +18,14 @@ export const SaveManager = {
   },
 
   save(data: SaveData): void {
+    const current = localStorage.getItem(SAVE_KEY);
+    if (current) localStorage.setItem(BACKUP_KEY, current);
+
     data.version = SAVE_VERSION;
     data.last_save = Date.now();
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
   },
 
-  /** Стартовый стейт нового игрока (см. GDD «MVP»). */
   createNew(): SaveData {
     return {
       version: SAVE_VERSION,
@@ -49,5 +46,14 @@ export const SaveManager = {
 
   reset(): void {
     localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(BACKUP_KEY);
   },
 };
+
+function migrate(data: SaveData): SaveData {
+  switch (data.version) {
+    // case 1: return migrateV1toV2(data);
+    default:
+      return data;
+  }
+}
