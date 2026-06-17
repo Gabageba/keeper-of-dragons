@@ -1,69 +1,71 @@
-# 01 — Архитектура сцен и переходы
+# 01 — Архитектура слоёв (Zustand / Phaser / React)
 
-**Фаза:** 0 — Фундамент · **Зависит от:** 00
+**Фаза:** 0 — Фундамент · **Статус:** ✅ выполнено · **Зависит от:** 00
 
 ## Цель
 
-Выстроить набор сцен Phaser и правила переходов между ними так, чтобы UI-оверлей
-всегда был поверх игры, а модальные экраны (Книга, Рынок, Скрещивание) открывались
-без перезагрузки острова.
+Чистое разделение ответственности: **Zustand** — единственный источник правды
+(логика + состояние), **Phaser** — только рендер острова, **React** — весь UI
+поверх canvas. Модальные экраны (Книга, Скрещивание, Заказы, Инвентарь) — React,
+открываются без перезагрузки острова.
 
-## Сцены (из GDD «Архитектура сцен Phaser»)
+## Слои
 
-| Сцена | Назначение | Когда создаётся |
+```
+Zustand (store/)  ──источник правды──►  React (ui/)        весь UI поверх canvas
+      ▲                                     │
+      │ subscribe (storeBridge)             │ usePhaserBridge (команды)
+      │ колбэки в registry                  ▼
+   Phaser (phaser/) ──────────────────►  рендер острова (только визуал)
+```
+
+## Сцены Phaser
+
+| Сцена | Назначение | Когда |
 |---|---|---|
-| `BootScene` | Загрузка конфигов и ассетов прогресс-бара | первой |
-| `PreloadScene` | Прогресс-бар, загрузка JSON и спрайтов острова | после Boot |
-| `IslandScene` | Главная: остров, гнёзда, сады, тапы | после Preload |
-| `UIScene` | Постоянный оверлей: валюты, уровень, меню | `launch` поверх Island |
-| `BreedingScene` | UI скрещивания (родители + растения) | модально по кнопке |
-| `BookScene` | Книга Драконов | модально |
-| `MarketScene` | Заказы Совета | модально |
-| `MapScene` | Карта архипелага, выбор острова | по кнопке «Карта» |
+| `BootScene` | Прогресс-бар, загрузка JSON/спрайтов, инициализация стора и оффлайна (через мост), старт Island | первой |
+| `IslandScene` | Рендер острова: `TileGrid`, `BuildingSprite`, `DragonSprite`, ghost-превью, камера, ввод | после Boot |
+| `MapScene` | Карта архипелага (каркас) | по кнопке «Карта» |
 
-## Что делать
+UIScene/ModalScene/BreedingScene/BookScene/MarketScene **удалены** — это всё теперь
+React-компоненты в `ui/`.
 
-1. **Базовый класс модалки.** Создать `src/scenes/ModalScene.ts` (или миксин) с
-   общей логикой: затемнённый фон, кнопка закрытия, блокировка тапов на нижней
-   сцене, метод `close()` → `this.scene.stop()`. От него наследуют Breeding/Book/Market.
-2. **Менеджер навигации.** Тонкий помощник `src/systems/Navigation.ts`:
-   - `openModal(key)` — `scene.launch(key)` + `scene.bringToTop('UIScene')` если нужно;
-   - `closeModal(key)`;
-   - `gotoIsland(islandId)` — рестарт `IslandScene` с `data: { islandId }`;
-   - `gotoMap()`.
-   Это убирает разбросанные по коду `this.scene.start(...)`.
-3. **Порядок отрисовки.** `UIScene` запускается через `launch` (параллельно), не
-   `start`. Модалки запускаются поверх Island, но **под** UIScene (валюты видны).
-   Контролировать через `scene.bringToTop`/`sendToBack`.
-4. **Передача данных между сценами.** Через `init(data)` сцены и через глобальный
-   стор (см. task-03), а не через реестр Phaser напрямую — чтобы был один источник.
-5. **Пауза острова при модалке.** При открытии модалки — `this.scene.pause('IslandScene')`
-   (таймеры всё равно от timestamp, но это останавливает лишние апдейты/тапы).
+## Правила
+
+1. **Phaser не импортирует стор.** Сцена получает `IslandCallbacks` из
+   `game.registry`: запросы читают транзиентную сетку (только чтение), команды
+   вызывают экшены стора, UI-колбэки пишут в `useUIStore`.
+2. **`phaser/bridge/storeBridge.ts`** — единственная точка связи: кладёт колбэки в
+   registry, подписывается на стор (`subscribeWithSelector`) и дёргает методы синка
+   визуала сцены (`syncBuildings`/`syncGround`).
+3. **React → Phaser команды** идут через `hooks/usePhaserBridge.ts` (вход в режим
+   стройки/перемещения, ghost-кнопки, переключение на карту) — по ссылке на сцену
+   из `phaser/gameRef.ts`.
+4. **Модалки** — React (`ui/modals/`), состояние открытия — в `useUIStore`
+   (`activeModal`), не в Phaser. Остров не перезагружается.
+5. **Переключение острова** — `useGameStore.setCurrentIsland(id)` (пересобирает
+   сетку); карта — `MapScene` поверх уснувшей `IslandScene`.
 
 ## Структура файлов
 
 ```
-src/scenes/
-  BootScene.ts        (есть)
-  PreloadScene.ts     (есть)
-  IslandScene.ts      (есть)
-  UIScene.ts          (есть)
-  ModalScene.ts       (новый — базовый класс)
-  BreedingScene.ts    (заглушка → task-11)
-  BookScene.ts        (заглушка → task-13)
-  MarketScene.ts      (заглушка → task-14)
-  MapScene.ts         (заглушка → task-17)
-src/systems/
-  Navigation.ts       (новый)
+src/phaser/
+  PhaserGame.tsx          монтирует canvas, создаёт Phaser.Game, поднимает мост
+  gameRef.ts              ссылка на Game/IslandScene для команд React→Phaser
+  scenes/{BootScene,IslandScene,MapScene}.ts
+  objects/{TileGrid,BuildingSprite,DragonSprite}.ts
+  bridge/{storeBridge.ts, types.ts}
+src/ui/{hud,island,modals}/  — весь React-интерфейс
+src/hooks/{useGameTick,usePhaserBridge}.ts
 ```
 
 ## Definition of Done
 
-- [ x ] Открытие/закрытие любой модалки не перезагружает остров.
-- [ x ] UIScene с валютами видна поверх всех модалок.
-- [ x ] Тап по острову заблокирован, пока открыта модалка.
-- [ x ] Переход на карту и обратно работает через `Navigation`.
+- [x] Открытие/закрытие любой модалки не перезагружает остров.
+- [x] HUD с валютами виден поверх canvas (React, не Phaser-сцена).
+- [x] Phaser-сцены не импортируют стор — только через мост/registry.
+- [x] Переход на карту и обратно работает (`MapScene` ↔ `IslandScene`).
 
 ## Ссылки на GDD
 
-- «Архитектура сцен Phaser».
+- «Техническая база» → Стек, Архитектура слоёв, Сцены Phaser.

@@ -1,0 +1,14 @@
+[
+  { "id": "nest",         "name": "Гнездо",         "type": "nest",         "w": 2, "h": 2, "cost": 100,  "unlock_level": 1 },
+  { "id": "incubator",    "name": "Инкубатор",       "type": "incubator",    "w": 2, "h": 2, "cost": 200,  "unlock_level": 1 },
+  { "id": "breeding_hall","name": "Зал Скрещивания", "type": "breeding",     "w": 3, "h": 2, "cost": 500,  "unlock_level": 3 },
+  { "id": "market",       "name": "Рынок",           "type": "market",       "w": 2, "h": 2, "cost": 300,  "unlock_level": 2 },
+  { "id": "library",      "name": "Библиотека",      "type": "library",      "w": 2, "h": 3, "cost": 400,  "unlock_level": 2 },
+  { "id": "forge",        "name": "Кузница",         "type": "forge",        "w": 3, "h": 2, "cost": 350,  "unlock_level": 3 },
+  { "id": "map_table",    "name": "Картостол",       "type": "map_table",    "w": 2, "h": 2, "cost": 200,  "unlock_level": 2 },
+  { "id": "temple",       "name": "Храм",            "type": "temple",       "w": 3, "h": 3, "cost": 1000, "unlock_level": 5 },
+  { "id": "keepers_hall", "name": "Зал Хранителя",  "type": "keepers_hall", "w": 3, "h": 3, "cost": 1500, "unlock_level": 7 },
+  { "id": "decor",        "name": "Декор",           "type": "decor",        "w": 1, "h": 1, "cost": 50,   "unlock_level": 1 },
+  { "id": "biome_garden", "name": "Биом-сад",        "type": "garden",       "w": 3, "h": 3, "cost": 600,  "unlock_level": 2 },
+  { "id": "cosmic_garden","name": "Космосад",        "type": "garden",       "w": 4, "h": 4, "cost": 2000, "unlock_level": 8 }
+]

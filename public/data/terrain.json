@@ -1,0 +1,7 @@
+{
+  ".": { "kind": "sea",      "name": "Море",   "land": false, "buildable": false, "color": "#1a3a6e" },
+  "g": { "kind": "ground",   "name": "Земля",  "land": true,  "buildable": true,  "unlocked": false, "color": "#3d7a2a" },
+  "G": { "kind": "ground",   "name": "Земля",  "land": true,  "buildable": true,  "unlocked": true,  "color": "#3d7a2a" },
+  "^": { "kind": "mountain", "name": "Горы",   "land": true,  "buildable": false, "color": "#6e6862" },
+  "~": { "kind": "water",    "name": "Вода",   "land": true,  "buildable": false, "color": "#2d5a8e" }
+}

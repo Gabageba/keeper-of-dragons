@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ashen",
+    "name": "Пепельный остров",
+    "biome": "volcanic",
+    "unlock_level": 1,
+    "unlock_cost": 0,
+    "map": [
+      "......gggggggg......",
+      ".....gggggggggg.....",
+      "....gggggggggggg....",
+      "...ggggg^^^^ggggg...",
+      "..ggggggg^^ggggggg..",
+      ".ggggGGGGGGGGGGgggg.",
+      "gggggGGGGGGGGGGggggg",
+      "gggggGGGGGGGGGGggggg",
+      "gggggGGGGGGGGGGggggg",
+      "gggggGGGGGGGGGGggggg",
+      ".ggggGGGGGGGGGGgggg.",
+      "..gggggggggggggggg..",
+      "...gggggggggggggg...",
+      "....gggggggggggg....",
+      ".....gggggggggg.....",
+      "......gggggggg......"
+    
+    ]
+  }
+]

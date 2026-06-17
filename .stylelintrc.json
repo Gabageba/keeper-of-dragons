@@ -1,0 +1,17 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "selector-class-pattern": "[a-z]+([A-Z][a-z0-9]+)*",
+    "custom-property-pattern": "^_?[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+    "rule-empty-line-before": [
+      "always-multi-line",
+      {
+        "except": ["first-nested"],
+        "ignore": ["after-comment"]
+      }
+    ],
+    "import-notation": "string",
+    "declaration-property-value-no-unknown": null,
+    "at-rule-no-unknown": null
+  }
+}

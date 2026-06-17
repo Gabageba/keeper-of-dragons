@@ -20,8 +20,8 @@
 4. **Экран/вырез.** `@capacitor/status-bar`, безопасные зоны, ориентация (заблок.
    портрет или поддержать обе — решить). Splash screen (`@capacitor/splash-screen`).
 5. **Хранилище.** LocalStorage работает в WebView, но для надёжности на мобилке —
-   `@capacitor/preferences` или IndexedDB (стабильнее на iOS). Абстрагировать в
-   `SaveManager` (task-04).
+   `@capacitor/preferences` или IndexedDB (стабильнее на iOS). Подменить `storage`
+   у Zustand `persist` соответствующим адаптером (task-04).
 6. **Производительность.** Проверить WebGL в WebView, FPS, лимиты частиц (task-28),
    размер атласов (память). Тест на реальном среднем устройстве.
 7. **Иконки/сплэш.** Сгенерировать (`@capacitor/assets`) из исходников арта.

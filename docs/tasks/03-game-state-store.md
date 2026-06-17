@@ -1,49 +1,47 @@
-# 03 — Глобальный стейт и шина событий
+# 03 — Глобальный стейт (Zustand)
 
-**Фаза:** 0 — Фундамент · **Зависит от:** 02
+**Фаза:** 0 — Фундамент · **Статус:** ✅ выполнено · **Зависит от:** 02
 
 ## Цель
 
-Один источник правды о состоянии игрока (`SaveData`) + реактивные уведомления об
-изменениях, чтобы UIScene и игровые объекты обновлялись автоматически (валюты,
-уровень, ресурсы), без ручной синхронизации между сценами.
+Один источник правды о состоянии игрока на **Zustand**. Вся игровая логика и данные
+живут в сторе; React-компоненты подписываются хуками-селекторами и обновляются
+автоматически, а Phaser читает состояние через мост. Прежние `GameState` (синглтон)
+и `EventBus` (шина) больше не нужны — Zustand даёт и стор, и реактивность.
 
-## Что делать
+## Что сделано
 
-1. **Стор `src/systems/GameState.ts`.** Обёртка над `SaveData`:
-   - хранит текущий снимок (загружается из `SaveManager` при старте, см. task-04);
-   - геттеры: `coins`, `gems`, `level`, `resourceOf(id)`, `dragons`, `gardens`;
-   - мутации с проверками: `addCoins(n)`, `spendCoins(n): boolean`,
-     `addResource(id, n)`, `spendResource(id, n): boolean`, `addXp(n)`,
-     `addDragon(state)`, `discoverInBook(id)`;
-   - каждая мутация эмитит событие через шину (ниже) и помечает «dirty» для автосейва.
-2. **Шина событий `src/systems/EventBus.ts`.** Тонкая обёртка над
-   `Phaser.Events.EventEmitter` (один глобальный инстанс) с типизированными
-   событиями:
-   ```ts
-   type GameEvents = {
-     'coins:changed': number;
-     'gems:changed': number;
-     'resource:changed': { id: string; amount: number };
-     'xp:changed': { xp: number; level: number };
-     'dragon:added': DragonState;
-     'book:discovered': string;
-   };
-   ```
-   Типизация через дженерик-обёртку `on<K>(event, handler)` / `emit<K>(event, payload)`.
-3. **Подписка UI.** UIScene подписывается на `coins:changed`, `gems:changed`,
-   `xp:changed` и обновляет тексты. Игровые объекты — на нужные им события.
-   Не забывать отписку в `shutdown` сцены.
-4. **Без глобальных синглтонов-спагетти.** `GameState` и `EventBus` — единственные
-   глобальные синглтоны. Всё остальное получает их по импорту, не через `window`.
+1. **Один стор со слайсами** `src/store/useGameStore.ts` (`create` + `persist` +
+   `subscribeWithSelector`), собранный из слайсов `src/store/slices/`:
+   - `gameSlice` — `coins`, `gems`, `player_level`, `xp`, `resources`,
+     `unlocked_islands`, `book_discovered` + мутации (`addCoins`, `spendCoins`,
+     `addGems`, `spendGems`, `addResource`, `spendResource`, `addXp`,
+     `discoverInBook`, `unlockIsland`);
+   - `dragonsSlice` — `dragons` + `addDragon`, `collectResource`;
+   - `islandSlice` — `placements`, `cleared_cells`, `currentIslandId`, транзиентная
+     `grid` (GridSystem) + `setCurrentIsland`, `placeBuilding`, `moveBuilding`,
+     `removeBuilding`, `clearCell`;
+   - `gardenSlice`, `breedingSlice` — каркас (растения/скрещивание/инкубатор);
+   - корень — `version`, `last_save`, `tick`, `applyOffline`, `reset`.
+   Кросс-слайс доступ (cap ресурсов зависит от драконов) — через `get()`.
+2. **Проверки в мутациях.** `spendCoins`/`spendGems`/`spendResource` возвращают
+   `false` и не уходят в минус; `placeBuilding`/`clearCell` валидируют и списывают.
+3. **Селектор-хуки** `useDragonsStore`/`useIslandStore`/`useGardenStore`/
+   `useBreedingStore` — тонкие фасады над корневым стором (через `useShallow` для
+   групп экшенов). Базовые валюты читаются прямо из `useGameStore`.
+4. **Эфемерный UI-стор** `src/store/useUIStore.ts` — модалки, панели, позиция
+   ghost-кнопок, `gameReady`, оффлайн-сводка. Не сохраняется. Сюда Phaser пишет
+   через колбэки моста.
+5. **Реактивность.** React — хуки-селекторы. Phaser — `useGameStore.subscribe`
+   через мост (`storeBridge`), отписка при размонтировании `PhaserGame`.
 
 ## Definition of Done
 
-- [ x ] `GameState.spendCoins` возвращает `false` и не уходит в минус при нехватке.
-- [ x ] Изменение монет мгновенно отражается в UIScene (через событие).
-- [ x ] Все мутации проходят через стор (нет прямой записи в `SaveData` из сцен).
-- [ x ] Подписки корректно снимаются при остановке сцены (нет утечек/двойных хэндлеров).
+- [x] `spendCoins` возвращает `false` и не уходит в минус при нехватке.
+- [x] Изменение монет мгновенно отражается в HUD (хук-селектор).
+- [x] Все мутации проходят через стор (нет прямой записи в состояние из сцен).
+- [x] Подписки моста снимаются при размонтировании (нет утечек).
 
 ## Ссылки на GDD
 
-- «Сохранение прогресса (JSON-снимок)» — структура того, что хранит стор.
+- «Техническая база» → Состояние (Zustand), «Сохранение прогресса (JSON-снимок)».

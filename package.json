@@ -1,14 +1,15 @@
 {
   "name": "dragons-game",
   "version": "0.1.0",
-  "description": "Архипелаг Драконов — чиби драконья ферма-коллекционер на Phaser 3",
+  "description": "Хранитель Драконов (Keeper of Dragons) — Расти, корми, обнимай · чиби драконья ферма-коллекционер на Phaser 3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
+    "lint:css": "stylelint \"src/**/*.css\"",
     "format": "prettier --write src"
   },
   "keywords": [
@@ -20,16 +21,50 @@
   ],
   "author": "",
   "license": "MIT",
+  "overrides": {
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-prettier": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-react": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-react-hooks": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-react-refresh": {
+      "eslint": "$eslint"
+    }
+  },
   "dependencies": {
-    "phaser": "^3.80.1"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "phaser": "^3.80.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.13.5",
     "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import-x": "^4.16.2",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
     "prettier": "^3.8.3",
+    "stylelint": "^17.13.0",
+    "stylelint-config-standard": "^40.0.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.0"
   }

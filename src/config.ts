@@ -1,35 +1,13 @@
-import Phaser from 'phaser';
-import { BootScene } from '@/scenes/BootScene';
-import { PreloadScene } from '@/scenes/PreloadScene';
-import { IslandScene } from '@/scenes/IslandScene';
-import { UIScene } from '@/scenes/UIScene';
-import { BreedingScene } from '@/scenes/BreedingScene';
-import { BookScene } from '@/scenes/BookScene';
-import { MarketScene } from '@/scenes/MarketScene';
-import { MapScene } from '@/scenes/MapScene';
-import { DevMenuScene } from '@/scenes/DevMenuScene';
-
 /** Размер одной клетки сетки острова в пикселях (см. GDD «Сетка острова»). */
 export const TILE_SIZE = 64;
 
-/** Базовое логическое разрешение. Масштабируется под экран через Scale.FIT. */
-export const GAME_WIDTH = 1280;
-export const GAME_HEIGHT = 720;
+/** Изометрия: половина ширины ромба-тайла. */
+export const ISO_HALF_W = TILE_SIZE; // 64 px
+/** Изометрия: половина высоты ромба-тайла. */
+export const ISO_HALF_H = TILE_SIZE / 2; // 32 px
+/** Визуальная высота здания (количество пикселей от земли до крыши). */
+export const ISO_BLDG_H = 28;
 
-export const gameConfig: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  parent: 'game',
-  backgroundColor: '#0d0b14',
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
-  },
-  render: {
-    pixelArt: false,
-    antialias: true,
-  },
-  // Порядок важен: BootScene стартует первой.
-  scene: [BootScene, PreloadScene, IslandScene, UIScene, BreedingScene, BookScene, MarketScene, MapScene, DevMenuScene],
-};
+/** Базовое логическое разрешение. Масштабируется под экран через Scale.FIT. */
+export const GAME_WIDTH = 1920;
+export const GAME_HEIGHT = 1080;
