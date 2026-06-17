@@ -8,7 +8,6 @@ import {
   isoCells,
   cellToWorld,
   worldToCell,
-  islandRect,
   islandOrigin,
 } from '@/systems/iso';
 import TileGrid, { SEA_PAD_X, SEA_PAD_Y } from '../objects/TileGrid';
@@ -22,7 +21,6 @@ const LONG_PRESS_MS = 450;
 const DRAG_THRESHOLD = 6; // px
 const ZOOM_MAX = 2.0;
 const SEA_COLOR = 0x1a3a6e;
-const OCEAN_SCROLL = 1; // лишние изо-тайлы открытого океана за нарисованным морем
 
 const enum Mode {
   IDLE,
@@ -179,27 +177,21 @@ class IslandScene extends Phaser.Scene {
       }
     }
 
-    const scrollPadX = SEA_PAD_X + 2 * OCEAN_SCROLL * ISO_HALF_W;
-    const scrollPadY = SEA_PAD_Y + 2 * OCEAN_SCROLL * ISO_HALF_H;
-
-    const bounds = isFinite(xMin)
-      ? {
-          x: xMin - scrollPadX,
-          y: yMin - scrollPadY,
-          w: xMax - xMin + scrollPadX * 2,
-          h: yMax - yMin + scrollPadY * 2,
-        }
-      : islandRect(this.originX, this.originY, grid.cols, grid.rows, scrollPadX, scrollPadY);
-    cam.setBounds(bounds.x, bounds.y, bounds.w, bounds.h);
-
-    const fitW = isFinite(xMin) ? xMax - xMin + SEA_PAD_X * 2 : bounds.w;
-    const fitH = isFinite(yMin) ? yMax - yMin + SEA_PAD_Y * 2 : bounds.h;
+    const fitW = isFinite(xMin) ? xMax - xMin + SEA_PAD_X * 2 : GAME_WIDTH;
+    const fitH = isFinite(yMin) ? yMax - yMin + SEA_PAD_Y * 2 : GAME_HEIGHT;
     this.zoomMin = Phaser.Math.Clamp(
       Math.min(GAME_WIDTH / fitW, GAME_HEIGHT / fitH),
       0.1,
       ZOOM_MAX,
     );
     cam.setZoom(this.zoomMin);
+
+    // Bounds равны viewport при zoomMin → при минимальном зуме камера не двигается.
+    const viewW = GAME_WIDTH / this.zoomMin;
+    const viewH = GAME_HEIGHT / this.zoomMin;
+    const landCX = isFinite(xMin) ? (xMin + xMax) / 2 : this.originX;
+    const landCY = isFinite(yMin) ? (yMin + yMax) / 2 : this.originY;
+    cam.setBounds(landCX - viewW / 2, landCY - viewH / 2, viewW, viewH);
 
     const centre = this.tileTop((grid.cols - 1) / 2, (grid.rows - 1) / 2);
     cam.scrollX = centre.x - GAME_WIDTH / 2;
