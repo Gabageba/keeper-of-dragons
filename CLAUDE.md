@@ -46,6 +46,18 @@ modal: MODAL_KEY.ORDERS
 ```
 
 This applies to all sets of named string (or number) constants — modal keys, status codes, event names, etc.
+This includes **all domain enums** already declared in `src/types/`: `DRAGON_STAGE`, `ELEMENT`, `RARITY`. Never compare or assign their values with string literals:
+
+```ts
+// wrong
+dragon.stage === 'adult'
+stage: 'baby'
+
+// correct
+dragon.stage === DRAGON_STAGE.ADULT
+stage: DRAGON_STAGE.BABY
+```
+
 `EnumLiteralsOf` is defined in `src/types/enumLiteralsOf.ts`.
 
 ## Functions and Exports

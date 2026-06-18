@@ -3,6 +3,7 @@ import { useGameStore } from '@store/useGameStore';
 import { useUIStore } from '@store/useUIStore';
 import { GAME_SAVE_STORAGE_KEY } from '@/consts/storage';
 import ContentLoader from '@game/systems/ContentLoader';
+import { DRAGON_STAGE } from '@/types/dragon';
 
 const DEV_PANEL_WIDTH = 220;
 const ONE_HOUR_MS = 3_600_000;
@@ -81,14 +82,15 @@ const styles = {
   `,
 };
 
-const simulateOfflineHour = () => {
+const simulateOffline = (hours: number) => {
   const raw = localStorage.getItem(GAME_SAVE_STORAGE_KEY);
   if (!raw) return;
   const save = JSON.parse(raw) as { state: Record<string, unknown> };
   const state = save.state;
-  state.last_save = (state.last_save as number) - ONE_HOUR_MS;
+  const delta = hours * ONE_HOUR_MS;
+  state.last_save = (state.last_save as number) - delta;
   for (const d of (state.dragons as { last_collected: number }[]) ?? []) {
-    if (d.last_collected > 0) d.last_collected -= ONE_HOUR_MS;
+    if (d.last_collected > 0) d.last_collected -= delta;
   }
   localStorage.setItem(GAME_SAVE_STORAGE_KEY, JSON.stringify(save));
   window.location.reload();
@@ -145,8 +147,32 @@ function DevMenu() {
             uid: dragonUid,
             id: def.id,
             level: 1,
-            stage: 'adult',
+            stage: DRAGON_STAGE.ADULT,
             feedings: 10,
+            last_collected: Date.now(),
+          });
+          store.discoverInBook(def.id);
+          const islandId = store.currentIslandId;
+          const freeNest = (store.placements[islandId] ?? []).find((p) => {
+            const b = ContentLoader.building(p.buildingId);
+            return b?.type === 'nest' && !p.refId;
+          });
+          if (freeNest) store.updatePlacementRef(freeNest.uid, dragonUid);
+        }}
+      />
+      <DevBtn
+        label="+ детёныш дракона"
+        onClick={() => {
+          const def = ContentLoader.allDragons()[0];
+          if (!def) return;
+          const store = useGameStore.getState();
+          const dragonUid = `dev_${Date.now()}`;
+          store.addDragon({
+            uid: dragonUid,
+            id: def.id,
+            level: 1,
+            stage: DRAGON_STAGE.BABY,
+            feedings: 0,
             last_collected: Date.now(),
           });
           store.discoverInBook(def.id);
@@ -162,7 +188,9 @@ function DevMenu() {
       <div css={styles.divider} />
 
       <div css={styles.sectionLabel}>СИМУЛЯЦИЯ</div>
-      <DevBtn label="1ч оффлайн → reload" variant="warning" onClick={simulateOfflineHour} />
+      <DevBtn label="1ч оффлайн → reload" variant="warning" onClick={() => simulateOffline(1)} />
+      <DevBtn label="12ч оффлайн → reload" variant="warning" onClick={() => simulateOffline(12)} />
+
       <DevBtn label="Завершить таймеры" variant="warning" onClick={completeAllTimers} />
 
       <div css={styles.divider} />

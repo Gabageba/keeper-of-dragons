@@ -7,6 +7,7 @@ import {
   cellToWorld,
 } from '@game/shared/iso';
 import ContentLoader from '@game/systems/ContentLoader';
+import { DRAGON_STAGE } from '@/types/dragon';
 import type { DragonState } from '@/types/dragon';
 import type { Placement } from '@/types/island';
 import type { GetAccumulated } from '@/types/dragon';
@@ -56,15 +57,18 @@ class NestSprite {
       const def = ContentLoader.dragon(dragon.id);
       const color = placeholderDragonColor(def?.element);
 
-      if (dragon.stage === 'adult') {
+      if (dragon.stage === DRAGON_STAGE.ADULT) {
         children.push(scene.add.arc(roofCenterX, roofCenterY, 12, 0, 360, false, color, 0.88));
+      } else {
+        children.push(scene.add.arc(roofCenterX, roofCenterY, 7, 0, 360, false, color, 0.45));
       }
 
       const dragonName = dragon.nickname ?? def?.name ?? '';
       if (dragonName) {
+        const stageTag = dragon.stage !== DRAGON_STAGE.ADULT ? ` [${dragon.stage}]` : '';
         children.push(
           scene.add
-            .text(roofCenterX, roofNorthY - 12, dragonName, {
+            .text(roofCenterX, roofNorthY - 12, dragonName + stageTag, {
               ...PHASER_LABEL_STYLE,
               fontSize: '10px',
             })
@@ -106,7 +110,7 @@ class NestSprite {
   }
 
   refresh(): void {
-    if (!this.dragon || this.dragon.stage !== 'adult') {
+    if (!this.dragon || this.dragon.stage !== DRAGON_STAGE.ADULT) {
       this.hideBubble();
       return;
     }
