@@ -1,13 +1,9 @@
 import type { StoreApi } from 'zustand';
-import type GridSystem from '@/systems/GridSystem';
-import type {
-  DragonState,
-  BreedingProgress,
-  EggState,
-  GardenState,
-  Placement,
-  OfflineSummary,
-} from '@/types';
+import type GridSystem from '@game/systems/GridSystem';
+import type { DragonState, BreedingProgress, EggState } from '@/types/dragon';
+import type { GardenState } from '@/types/plant';
+import type { Placement } from '@/types/island';
+import type { OfflineSummary } from '@/types/save';
 
 // ─── срезы (slices) ─────────────────────────────────────────────────────────
 
@@ -53,6 +49,8 @@ export interface IslandSlice {
   moveBuilding: (uid: string, x: number, y: number, w: number, h: number) => PlaceResult;
   removeBuilding: (uid: string) => void;
   clearCell: (cx: number, cy: number, cost: number) => PlaceResult;
+  /** Привязывает/отвязывает дракона (или другой объект) к размещённой постройке. */
+  updatePlacementRef: (uid: string, refId: string | null) => void;
 }
 
 export interface GardenSlice {
@@ -101,4 +99,4 @@ export type SliceCreator<T> = (
 ) => T;
 
 /** Максимум ресурса каждого типа, если нет дракона с infinite_storage. */
-export const STORAGE_CAP = 1_000;
+export const MAX_RESOURCE_PER_TYPE = 1_000;

@@ -1,17 +1,19 @@
-// Типы острова, рельефа и размещений. Соответствуют JSON-схемам из GDD.
-
 import type { Element } from './dragon';
+import type { EnumLiteralsOf } from './enumLiteralsOf';
 
-export type BiomeType =
-  | 'volcanic'
-  | 'lunar'
-  | 'storm'
-  | 'crystal'
-  | 'ice'
-  | 'air'
-  | 'nature'
-  | 'shadow'
-  | 'cosmic';
+// Типы острова, рельефа и размещений. Соответствуют JSON-схемам из GDD.
+export const BIOME = {
+  VOLCANIC: 'volcanic',
+  LUNAR: 'lunar',
+  STORM: 'storm',
+  CRYSTAL: 'crystal',
+  ICE: 'ice',
+  AIR: 'air',
+  NATURE: 'nature',
+  SHADOW: 'shadow',
+  COSMIC: 'cosmic',
+} as const;
+export type Biome = EnumLiteralsOf<typeof BIOME>;
 
 /**
  * Тип клетки острова (data/terrain.json). Легенда символов общая для всех островов:
@@ -42,7 +44,7 @@ export interface TerrainDef {
 export interface IslandDef {
   id: string;
   name: string;
-  biome: BiomeType;
+  biome: Biome;
   unlock_level: number;
   unlock_cost: number;
   /** Карта острова. Каждый символ — ключ в terrain.json. Строки могут быть разной длины. */
@@ -71,4 +73,9 @@ export interface ExpeditionRouteDef {
   required_dragon_element?: Element;
   reward_resources: { resource: string; min: number; max: number }[];
   sprite: string;
+}
+
+export interface IslandPoint {
+  x: number;
+  y: number;
 }

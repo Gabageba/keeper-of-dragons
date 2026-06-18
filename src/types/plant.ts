@@ -1,7 +1,7 @@
 // Типы растений и садов. Соответствуют JSON-схемам из GDD.
 
 import type { Element } from './dragon';
-import type { BiomeType } from './island';
+import type { Biome } from './island';
 
 /** Определение растения (data/plants.json). */
 export interface PlantDef {
@@ -9,7 +9,7 @@ export interface PlantDef {
   name: string;
   element: Element | 'neutral';
   grow_time_minutes: number;
-  native_biome: BiomeType | 'any';
+  native_biome: Biome | 'any';
   sprite: string;
   description: string;
 }
@@ -20,6 +20,6 @@ export interface PlantSlotState {
 }
 
 export interface GardenState {
-  biome: BiomeType;
+  biome: Biome;
   slots: PlantSlotState[];
 }

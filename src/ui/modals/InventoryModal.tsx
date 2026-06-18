@@ -1,5 +1,7 @@
 import PlaceholderModal from './PlaceholderModal';
 
-export default function InventoryModal() {
+function InventoryModal() {
   return <PlaceholderModal modal="inventory" title="Инвентарь" note="(task-15)" />;
 }
+
+export default InventoryModal;

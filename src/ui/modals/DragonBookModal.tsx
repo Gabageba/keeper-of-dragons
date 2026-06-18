@@ -1,5 +1,7 @@
 import PlaceholderModal from './PlaceholderModal';
 
-export default function DragonBookModal() {
+function DragonBookModal() {
   return <PlaceholderModal modal="book" title="Книга Драконов" note="(task-13)" />;
 }
+
+export default DragonBookModal;

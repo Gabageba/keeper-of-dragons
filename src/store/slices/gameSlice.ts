@@ -1,13 +1,11 @@
-import ContentLoader from '@/systems/ContentLoader';
+import ContentLoader from '@game/systems/ContentLoader';
 import type { GameStore, GameSlice, SliceCreator } from '../types';
-import { STORAGE_CAP } from '../types';
+import { MAX_RESOURCE_PER_TYPE } from '../types';
 
-// XP, необходимый для достижения уровня N (1-индекс, уровень 1 = 0 общего XP).
 export function xpForLevel(level: number): number {
   return level <= 1 ? 0 : (level - 1) * 100 * level;
 }
 
-/** Есть ли взрослый дракон с бесконечным хранилищем (снимает cap ресурсов). */
 export const hasInfiniteStorage = (store: GameStore): boolean => {
   return store.dragons.some(
     (d) => d.stage === 'adult' && ContentLoader.dragon(d.id)?.global_bonus === 'infinite_storage',
@@ -40,7 +38,7 @@ export const createGameSlice: SliceCreator<GameSlice> = (set, get) => ({
   },
 
   addResource: (id, n) => {
-    const cap = hasInfiniteStorage(get()) ? Infinity : STORAGE_CAP;
+    const cap = hasInfiniteStorage(get()) ? Infinity : MAX_RESOURCE_PER_TYPE;
     set((s) => ({
       resources: { ...s.resources, [id]: Math.min((s.resources[id] ?? 0) + n, cap) },
     }));

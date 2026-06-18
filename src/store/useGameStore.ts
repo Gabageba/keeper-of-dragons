@@ -1,36 +1,16 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
-import ContentLoader from '@/systems/ContentLoader';
-import type { OfflineSummary } from '@/types';
+import ContentLoader from '@game/systems/ContentLoader';
+import type { OfflineSummary } from '@/types/save';
 import type { GameStore } from './types';
-import { STORAGE_CAP } from './types';
+import { MAX_RESOURCE_PER_TYPE } from './types';
+import { SAVE_DATA_FIELDS } from './persistedFields';
+import { GAME_SAVE_STORAGE_KEY } from '@/consts/storage';
 import { createGameSlice, hasInfiniteStorage } from './slices/gameSlice';
 import { createDragonsSlice, producedAmount } from './slices/dragonsSlice';
 import { createIslandSlice } from './slices/islandSlice';
 import { createGardenSlice } from './slices/gardenSlice';
 import { createBreedingSlice } from './slices/breedingSlice';
-
-export const STORE_KEY = 'dragons-game';
-
-/** Поля, попадающие в сохранение (всё кроме экшенов и транзиентной сетки). */
-const PERSISTED_KEYS = [
-  'version',
-  'last_save',
-  'player_level',
-  'xp',
-  'coins',
-  'gems',
-  'resources',
-  'unlocked_islands',
-  'book_discovered',
-  'dragons',
-  'currentIslandId',
-  'placements',
-  'cleared_cells',
-  'gardens',
-  'breeding',
-  'incubator',
-] as const;
 
 export const useGameStore = create<GameStore>()(
   subscribeWithSelector(
@@ -48,7 +28,7 @@ export const useGameStore = create<GameStore>()(
         tick: () => {
           // Производство, рост растений и инкубация считаются от timestamp'ов, поэтому
           // тик не мутирует состояние постоянно. Хук остаётся точкой входа для
-          // будущих таймеров (правило 3 архитектуры). См. [[useGameTick]].
+          // будущих таймеров. См. [[useGameTick]].
         },
 
         applyOffline: (): OfflineSummary => {
@@ -70,7 +50,7 @@ export const useGameStore = create<GameStore>()(
             if (produced <= 0) return dragon;
 
             if (!infinite) {
-              produced = Math.min(produced, STORAGE_CAP - (resources[def.resource] ?? 0));
+              produced = Math.min(produced, MAX_RESOURCE_PER_TYPE - (resources[def.resource] ?? 0));
               if (produced <= 0) return dragon;
             }
 
@@ -108,12 +88,12 @@ export const useGameStore = create<GameStore>()(
         },
       }),
       {
-        name: STORE_KEY,
+        name: GAME_SAVE_STORAGE_KEY,
         version: 1,
         // Сохраняем один GDD-совместимый блоб; транзиентную сетку и экшены исключаем.
         partialize: (s) =>
           Object.fromEntries(
-            PERSISTED_KEYS.map((k) => [k, k === 'last_save' ? Date.now() : s[k]]),
+            SAVE_DATA_FIELDS.map((k) => [k, k === 'last_save' ? Date.now() : s[k]]),
           ) as Partial<GameStore>,
       },
     ),

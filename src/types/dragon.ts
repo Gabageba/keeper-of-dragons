@@ -1,21 +1,39 @@
+import type { EnumLiteralsOf } from './enumLiteralsOf';
+import type { Biome } from './island';
+
 // Типы драконов, рецептов скрещивания и их состояния. Соответствуют JSON из GDD.
+export const ELEMENT = {
+  FIRE: 'fire',
+  WATER: 'water',
+  EARTH: 'earth',
+  STORM: 'storm',
+  ICE: 'ice',
+  WIND: 'wind',
+  NATURE: 'nature',
+  LIGHT: 'light',
+  SHADOW: 'shadow',
+  COSMOS: 'cosmos',
+  TIME: 'time',
+} as const;
+export type Element = EnumLiteralsOf<typeof ELEMENT>;
 
-import type { BiomeType } from './island';
+export const RARITY = {
+  COMMON: 'common',
+  UNCOMMON: 'uncommon',
+  RARE: 'rare',
+  EPIC: 'epic',
+  LEGENDARY: 'legendary',
+  MYTHIC: 'mythic',
+  ANCIENT: 'ancient',
+} as const;
+export type Rarity = EnumLiteralsOf<typeof RARITY>;
 
-export type Element =
-  | 'fire'
-  | 'water'
-  | 'earth'
-  | 'storm'
-  | 'ice'
-  | 'wind'
-  | 'nature'
-  | 'light'
-  | 'shadow'
-  | 'cosmos'
-  | 'time';
-
-export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'ancient';
+export const DRAGON_STAGE = {
+  EGG: 'egg',
+  BABY: 'baby',
+  ADULT: 'adult',
+} as const;
+type DragonStage = EnumLiteralsOf<typeof DRAGON_STAGE>;
 
 /** Определение вида дракона (статичный контент, data/dragons.json). */
 export interface DragonDef {
@@ -28,8 +46,8 @@ export interface DragonDef {
   favorite_food: string[];
   disliked_food: string[];
   food_bonus: number;
-  favorite_biome: BiomeType | null;
-  disliked_biome: BiomeType | null;
+  favorite_biome: Biome | null;
+  disliked_biome: Biome | null;
   biome_buff: number;
   biome_debuff: number;
   adaptive: boolean;
@@ -60,10 +78,10 @@ export interface DragonState {
   id: string; // ссылка на DragonDef.id
   nickname?: string;
   level: number;
-  stage: 'egg' | 'baby' | 'adult';
+  stage: DragonStage;
   feedings: number; // сколько раз покормлен (для взросления)
   last_collected: number; // timestamp
-  biome?: BiomeType; // рядом с каким биомом стоит гнездо
+  biome?: Biome; // рядом с каким биомом стоит гнездо
   parent_ids?: [string, string];
 }
 
@@ -80,3 +98,6 @@ export interface EggState {
   started_at: number;
   ready_at: number;
 }
+
+export type AccumulatedInfo = { amount: number; atCap: boolean };
+export type GetAccumulated = (dragonUid: string) => AccumulatedInfo;

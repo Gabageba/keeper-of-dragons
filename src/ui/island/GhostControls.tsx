@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
-import { useUIStore } from '@/store/useUIStore';
-import usePhaserBridge from '@/hooks/usePhaserBridge';
+import { useUIStore } from '@store/useUIStore';
+import usePhaserBridge from '@/ui/shared/hooks/usePhaserBridge';
 
 const styles = {
   container: css`

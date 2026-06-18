@@ -1,0 +1,18 @@
+export const SAVE_DATA_FIELDS = [
+  'version',
+  'last_save',
+  'player_level',
+  'xp',
+  'coins',
+  'gems',
+  'resources',
+  'unlocked_islands',
+  'book_discovered',
+  'dragons',
+  'currentIslandId',
+  'placements',
+  'cleared_cells',
+  'gardens',
+  'breeding',
+  'incubator',
+] as const;

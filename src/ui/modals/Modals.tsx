@@ -3,8 +3,7 @@ import BreedingModal from './BreedingModal';
 import OrdersModal from './OrdersModal';
 import InventoryModal from './InventoryModal';
 
-/** Все модалки поверх canvas. Каждая сама решает, показываться ли по activeModal. */
-export default function Modals() {
+function Modals() {
   return (
     <>
       <DragonBookModal />
@@ -14,3 +13,5 @@ export default function Modals() {
     </>
   );
 }
+
+export default Modals;

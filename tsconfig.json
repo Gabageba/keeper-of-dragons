@@ -20,7 +20,12 @@
     "useDefineForClassFields": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@game/*": ["src/game/*"],
+      "@ui/*": ["src/ui/*"],
+      "@store/*": ["src/store/*"],
+      "@config/*": ["src/config/*"]
     }
   },
   "include": ["src"]

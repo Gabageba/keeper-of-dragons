@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
-import { useUIStore } from '@/store/useUIStore';
-import { useGameStore } from '@/store/useGameStore';
-import usePhaserBridge from '@/hooks/usePhaserBridge';
+import { useUIStore } from '@store/useUIStore';
+import { useGameStore } from '@store/useGameStore';
+import usePhaserBridge from '@/ui/shared/hooks/usePhaserBridge';
 import PanelButton from './PanelButton';
 
 const styles = {

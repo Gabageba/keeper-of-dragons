@@ -1,15 +1,14 @@
-import GridSystem from '@/systems/GridSystem';
-import ContentLoader from '@/systems/ContentLoader';
-import type { Placement } from '@/types';
+import GridSystem from '@game/systems/GridSystem';
+import ContentLoader from '@game/systems/ContentLoader';
+import type { Placement } from '@/types/island';
 import type { GameStore, IslandSlice, SliceCreator } from '../types';
 
 let uidCounter = 0;
-const genUid = (): string => {
+const generatePlacementUid = (): string => {
   return `p${Date.now().toString(36)}${(uidCounter++).toString(36)}`;
 };
 
-/** Строит сетку острова и заселяет её уже размещёнными постройками. */
-const buildGrid = (store: GameStore, islandId: string): GridSystem | null => {
+const buildIslandGrid = (store: GameStore, islandId: string): GridSystem | null => {
   const def = ContentLoader.island(islandId);
   if (!def) return null;
   const cleared = store.cleared_cells[islandId] ?? [];
@@ -25,7 +24,7 @@ export const createIslandSlice: SliceCreator<IslandSlice> = (set, get) => ({
   grid: null,
 
   setCurrentIsland: (id) => {
-    set({ currentIslandId: id, grid: buildGrid(get(), id) });
+    set({ currentIslandId: id, grid: buildIslandGrid(get(), id) });
   },
 
   placeBuilding: (buildingId, x, y, w, h) => {
@@ -35,7 +34,7 @@ export const createIslandSlice: SliceCreator<IslandSlice> = (set, get) => ({
     const cost = ContentLoader.building(buildingId)?.cost ?? 0;
     if (!get().spendCoins(cost)) return { ok: false, reason: `Нужно ${cost} монет` };
 
-    const placement: Placement = { uid: genUid(), buildingId, x, y, w, h };
+    const placement: Placement = { uid: generatePlacementUid(), buildingId, x, y, w, h };
     grid.place(placement);
     set((s) => ({
       placements: {
@@ -89,5 +88,17 @@ export const createIslandSlice: SliceCreator<IslandSlice> = (set, get) => ({
       },
     }));
     return { ok: true };
+  },
+
+  updatePlacementRef: (uid, refId) => {
+    const { currentIslandId } = get();
+    set((s) => ({
+      placements: {
+        ...s.placements,
+        [currentIslandId]: (s.placements[currentIslandId] ?? []).map((p) =>
+          p.uid === uid ? { ...p, refId: refId ?? undefined } : p,
+        ),
+      },
+    }));
   },
 });

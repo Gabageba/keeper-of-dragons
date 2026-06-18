@@ -1,5 +1,7 @@
 import PlaceholderModal from './PlaceholderModal';
 
-export default function BreedingModal() {
+function BreedingModal() {
   return <PlaceholderModal modal="breeding" title="Скрещивание" note="(task-11)" />;
 }
+
+export default BreedingModal;

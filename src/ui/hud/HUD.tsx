@@ -1,6 +1,6 @@
-import { useUIStore } from '@/store/useUIStore';
-import StatusBar from './StatusBar';
-import MenuBar from './MenuBar';
+import { useUIStore } from '@store/useUIStore';
+import StatusBar from './StatusBar/StatusBar';
+import MenuBar from './MenuBar/MenuBar';
 import OfflineSummary from './OfflineSummary';
 
 /** Постоянный игровой HUD: статус-бар, нижнее меню, оффлайн-сводка. */

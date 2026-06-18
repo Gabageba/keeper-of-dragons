@@ -1,11 +1,7 @@
-import ContentLoader from '@/systems/ContentLoader';
-import type { DragonDef, DragonState } from '@/types';
+import ContentLoader from '@game/systems/ContentLoader';
+import type { DragonDef, DragonState } from '@/types/dragon';
 import type { DragonsSlice, SliceCreator } from '../types';
 
-/**
- * Сколько ресурса произвёл взрослый дракон с момента last_collected до now,
- * с учётом биом-баффов. Без учёта cap (cap применяется при начислении).
- */
 export const producedAmount = (dragon: DragonState, def: DragonDef, now: number): number => {
   if (dragon.stage !== 'adult' || dragon.last_collected === 0) return 0;
 

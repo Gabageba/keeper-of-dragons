@@ -1,15 +1,14 @@
 import { create } from 'zustand';
-import type { OfflineSummary } from '@/types';
+import type { OfflineSummary } from '@/types/save';
+import type { ModalKey } from '@/types/modal';
 
-export type ModalKey = 'book' | 'breeding' | 'orders' | 'inventory';
-
-export interface ActionPanelData {
+interface ActionPanelData {
   uid: string;
   name: string;
   buildingId: string;
 }
 
-export interface ClearPanelData {
+interface ClearPanelData {
   cx: number;
   cy: number;
   cost: number;

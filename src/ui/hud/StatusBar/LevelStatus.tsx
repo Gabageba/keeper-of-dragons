@@ -1,5 +1,5 @@
 import levelIcon from '@/assets/icons/level.png';
-import { xpForLevel } from '@/store/slices/gameSlice';
+import { xpForLevel } from '@store/slices/gameSlice';
 import styles from './styles';
 
 type Props = {

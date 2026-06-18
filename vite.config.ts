@@ -14,6 +14,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
+      '@game': fileURLToPath(new URL('./src/game', import.meta.url)),
+      '@ui': fileURLToPath(new URL('./src/ui', import.meta.url)),
+      '@store': fileURLToPath(new URL('./src/store', import.meta.url)),
+      '@config': fileURLToPath(new URL('./src/config', import.meta.url)),
     },
   },
   server: {

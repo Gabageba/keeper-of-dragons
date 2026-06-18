@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { useUIStore } from '@/store/useUIStore';
+import { useUIStore } from '@store/useUIStore';
 
 const styles = {
   btn: css`

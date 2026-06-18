@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
-import { useUIStore } from '@/store/useUIStore';
-import { useGameStore } from '@/store/useGameStore';
+import { useUIStore } from '@store/useUIStore';
+import { useGameStore } from '@store/useGameStore';
 import PanelButton from './PanelButton';
 
 const styles = {

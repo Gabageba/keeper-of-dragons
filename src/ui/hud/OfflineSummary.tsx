@@ -1,4 +1,53 @@
-import { useUIStore } from '@/store/useUIStore';
+import { css } from '@emotion/react';
+import { useUIStore } from '@store/useUIStore';
+
+const styles = {
+  overlay: css`
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    pointer-events: auto;
+    cursor: pointer;
+  `,
+  card: css`
+    background: #1e1a2e;
+    border: 1px solid #c9a84c;
+    border-radius: 8px;
+    padding: 28px 40px;
+    min-width: 320px;
+    text-align: center;
+    font-family: serif;
+    cursor: default;
+  `,
+  elapsed: css`
+    color: #d4cce8;
+    font-size: 20px;
+    line-height: 2;
+  `,
+  gainsList: css`
+    margin-top: 8px;
+  `,
+  gainRow: css`
+    color: #c9a84c;
+    font-size: 18px;
+    line-height: 1.8;
+  `,
+  notice: css`
+    color: #d4cce8;
+    font-size: 18px;
+    margin-top: 6px;
+  `,
+  dismissHint: css`
+    color: #9a8ab8;
+    font-size: 15px;
+    margin-top: 20px;
+    cursor: pointer;
+  `,
+};
 
 function OfflineSummary() {
   const offlineSummary = useUIStore((s) => s.offlineSummary);
@@ -14,41 +63,14 @@ function OfflineSummary() {
   const gains = Object.entries(resources_gained).filter(([, v]) => v > 0);
 
   return (
-    <div
-      onClick={dismiss}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.65)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-        pointerEvents: 'auto',
-        cursor: 'pointer',
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: '#1e1a2e',
-          border: '1px solid #c9a84c',
-          borderRadius: 8,
-          padding: '28px 40px',
-          minWidth: 320,
-          textAlign: 'center',
-          fontFamily: 'serif',
-          cursor: 'default',
-        }}
-      >
-        <div style={{ color: '#d4cce8', fontSize: 20, lineHeight: 2 }}>
-          Пока вас не было: {timeStr}
-        </div>
+    <div onClick={dismiss} css={styles.overlay}>
+      <div onClick={(e) => e.stopPropagation()} css={styles.card}>
+        <div css={styles.elapsed}>Пока вас не было: {timeStr}</div>
 
         {gains.length > 0 && (
-          <div style={{ marginTop: 8 }}>
+          <div css={styles.gainsList}>
             {gains.map(([resource, amount]) => (
-              <div key={resource} style={{ color: '#c9a84c', fontSize: 18, lineHeight: 1.8 }}>
+              <div key={resource} css={styles.gainRow}>
                 + {amount}
                 {'  '}
                 {resource}
@@ -57,19 +79,10 @@ function OfflineSummary() {
           </div>
         )}
 
-        {breeding_completed && (
-          <div style={{ color: '#d4cce8', fontSize: 18, marginTop: 6 }}>Скрещивание завершено!</div>
-        )}
-        {eggs_hatched > 0 && (
-          <div style={{ color: '#d4cce8', fontSize: 18, marginTop: 6 }}>
-            Вылупилось яиц: {eggs_hatched}
-          </div>
-        )}
+        {breeding_completed && <div css={styles.notice}>Скрещивание завершено!</div>}
+        {eggs_hatched > 0 && <div css={styles.notice}>Вылупилось яиц: {eggs_hatched}</div>}
 
-        <div
-          onClick={dismiss}
-          style={{ color: '#9a8ab8', fontSize: 15, marginTop: 20, cursor: 'pointer' }}
-        >
+        <div onClick={dismiss} css={styles.dismissHint}>
           Нажмите, чтобы продолжить
         </div>
       </div>

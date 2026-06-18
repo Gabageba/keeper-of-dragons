@@ -1,4 +1,4 @@
-import token from '@/models/token';
+import token from '@ui/shared/token';
 import { css } from '@emotion/react';
 
 const styles = {

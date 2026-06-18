@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
-import { useGameStore } from '@/store/useGameStore';
-import { useUIStore } from '@/store/useUIStore';
-import usePhaserBridge from '@/hooks/usePhaserBridge';
-import ContentLoader from '@/systems/ContentLoader';
+import { useGameStore } from '@store/useGameStore';
+import { useUIStore } from '@store/useUIStore';
+import usePhaserBridge from '@/ui/shared/hooks/usePhaserBridge';
+import ContentLoader from '@game/systems/ContentLoader';
 
 const COLS = 2;
 const BTN_W = 190;
