@@ -1,20 +1,33 @@
 import { useEffect, useRef } from 'react';
+import { css } from '@emotion/react';
 import { useUIStore } from '@/store/useUIStore';
 import usePhaserBridge from '@/hooks/usePhaserBridge';
 
-const BTN: React.CSSProperties = {
-  width: 88,
-  height: 30,
-  fontFamily: 'serif',
-  fontSize: 13,
-  color: '#c9a84c',
-  background: '#2a1e40',
-  border: '1px solid #4a3a6e',
-  cursor: 'pointer',
-  padding: 0,
+const styles = {
+  container: css`
+    position: fixed;
+    display: none;
+    gap: 8px;
+    z-index: 210;
+    pointer-events: auto;
+  `,
+  btn: css`
+    width: 88px;
+    height: 30px;
+    font-family: serif;
+    font-size: 13px;
+    color: #c9a84c;
+    background: #2a1e40;
+    border: 1px solid #4a3a6e;
+    cursor: pointer;
+    padding: 0;
+    &:hover {
+      background: #3a2e60;
+    }
+  `,
 };
 
-export default function GhostControls() {
+function GhostControls() {
   const containerRef = useRef<HTMLDivElement>(null);
   const bridge = usePhaserBridge();
 
@@ -36,40 +49,19 @@ export default function GhostControls() {
     return useUIStore.subscribe((s) => apply(s.ghostControls));
   }, []);
 
-  const hover = (e: React.MouseEvent<HTMLButtonElement>, on: boolean) => {
-    const el = e.currentTarget;
-    el.style.background = on ? '#3a2e60' : '#2a1e40';
-  };
-
   return (
-    <div
-      ref={containerRef}
-      style={{ position: 'fixed', display: 'none', gap: 8, zIndex: 210, pointerEvents: 'auto' }}
-    >
-      <button
-        style={BTN}
-        onMouseOver={(e) => hover(e, true)}
-        onMouseOut={(e) => hover(e, false)}
-        onClick={bridge.ghostRotate}
-      >
+    <div ref={containerRef} css={styles.container}>
+      <button css={styles.btn} onClick={bridge.ghostRotate}>
         ↻ Повернуть
       </button>
-      <button
-        style={BTN}
-        onMouseOver={(e) => hover(e, true)}
-        onMouseOut={(e) => hover(e, false)}
-        onClick={bridge.ghostConfirm}
-      >
+      <button css={styles.btn} onClick={bridge.ghostConfirm}>
         ✔ Готово
       </button>
-      <button
-        style={BTN}
-        onMouseOver={(e) => hover(e, true)}
-        onMouseOut={(e) => hover(e, false)}
-        onClick={bridge.ghostCancel}
-      >
+      <button css={styles.btn} onClick={bridge.ghostCancel}>
         ✕ Отмена
       </button>
     </div>
   );
 }
+
+export default GhostControls;

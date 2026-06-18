@@ -1,16 +1,45 @@
-import { useState } from 'react';
+import { css } from '@emotion/react';
 import { useUIStore } from '@/store/useUIStore';
 import { useGameStore } from '@/store/useGameStore';
 import usePhaserBridge from '@/hooks/usePhaserBridge';
+import PanelButton from './PanelButton';
+
+const styles = {
+  overlay: css`
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(19, 16, 30, 0.97);
+    border: 1px solid #4a3a6e;
+    border-radius: 6px;
+    padding: 16px 20px;
+    z-index: 30;
+    pointer-events: auto;
+    font-family: serif;
+    min-width: 260px;
+    text-align: center;
+  `,
+  name: css`
+    color: #d4cce8;
+    font-size: 15px;
+    margin-bottom: 14px;
+  `,
+  actions: css`
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  `,
+};
 
 function ActionPanel() {
   const actionPanel = useUIStore((s) => s.actionPanel);
-  const close = () => useUIStore.getState().setActionPanel(null);
   const bridge = usePhaserBridge();
 
   if (!actionPanel) return null;
 
   const { uid, name } = actionPanel;
+  const close = () => useUIStore.getState().setActionPanel(null);
 
   const handleMove = () => {
     bridge.enterMoveMode(uid);
@@ -23,61 +52,15 @@ function ActionPanel() {
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        background: 'rgba(19, 16, 30, 0.97)',
-        border: '1px solid #4a3a6e',
-        borderRadius: 6,
-        padding: '16px 20px',
-        zIndex: 30,
-        pointerEvents: 'auto',
-        fontFamily: 'serif',
-        minWidth: 260,
-        textAlign: 'center',
-      }}
-    >
-      <div style={{ color: '#d4cce8', fontSize: 15, marginBottom: 14 }}>{name}</div>
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+    <div css={styles.overlay}>
+      <div css={styles.name}>{name}</div>
+      <div css={styles.actions}>
         <PanelButton label="Переместить" onClick={handleMove} />
-        <PanelButton label="Снести" onClick={handleDemolish} color="#ff6b6b" />
+        <PanelButton label="Снести" onClick={handleDemolish} variant="danger" />
         <PanelButton label="Отмена" onClick={close} />
       </div>
     </div>
   );
 }
-export default ActionPanel;
 
-function PanelButton({
-  label,
-  onClick,
-  color = '#c9a84c',
-}: {
-  label: string;
-  onClick: () => void;
-  color?: string;
-}) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        fontFamily: 'serif',
-        fontSize: 13,
-        color,
-        background: hovered ? '#3a2e60' : '#2a1e40',
-        border: '1px solid #4a3a6e',
-        borderRadius: 3,
-        padding: '6px 12px',
-        cursor: 'pointer',
-      }}
-    >
-      {label}
-    </button>
-  );
-}
+export default ActionPanel;
