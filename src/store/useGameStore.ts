@@ -1,13 +1,11 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
-import ContentLoader from '@game/systems/ContentLoader';
 import type { OfflineSummary } from '@/types/save';
 import type { GameStore } from './types';
-import { MAX_RESOURCE_PER_TYPE } from './types';
 import { SAVE_DATA_FIELDS } from './persistedFields';
 import { GAME_SAVE_STORAGE_KEY } from '@/consts/storage';
-import { createGameSlice, hasInfiniteStorage } from './slices/gameSlice';
-import { createDragonsSlice, producedAmount } from './slices/dragonsSlice';
+import { createGameSlice } from './slices/gameSlice';
+import { createDragonsSlice } from './slices/dragonsSlice';
 import { createIslandSlice } from './slices/islandSlice';
 import { createGardenSlice } from './slices/gardenSlice';
 import { createBreedingSlice } from './slices/breedingSlice';
@@ -35,36 +33,12 @@ export const useGameStore = create<GameStore>()(
           const now = Date.now();
           const state = get();
           const elapsed_ms = now - state.last_save;
-          const infinite = hasInfiniteStorage(state);
-
-          const resources = { ...state.resources };
-          const resources_gained: Record<string, number> = {};
-
-          const dragons = state.dragons.map((dragon) => {
-            if (dragon.stage !== 'adult') return dragon;
-            const def = ContentLoader.dragon(dragon.id);
-            if (!def) return dragon;
-            if (dragon.last_collected === 0) return { ...dragon, last_collected: now };
-
-            let produced = producedAmount(dragon, def, now);
-            if (produced <= 0) return dragon;
-
-            if (!infinite) {
-              produced = Math.min(produced, MAX_RESOURCE_PER_TYPE - (resources[def.resource] ?? 0));
-              if (produced <= 0) return dragon;
-            }
-
-            resources[def.resource] = (resources[def.resource] ?? 0) + produced;
-            resources_gained[def.resource] = (resources_gained[def.resource] ?? 0) + produced;
-            return { ...dragon, last_collected: now };
-          });
 
           const breeding_completed =
             !!state.breeding.active && state.breeding.active.ready_at <= now;
           const eggs_hatched = state.incubator.filter((e) => e.ready_at <= now).length;
 
-          set({ resources, dragons });
-          return { elapsed_ms, resources_gained, breeding_completed, eggs_hatched };
+          return { elapsed_ms, breeding_completed, eggs_hatched };
         },
 
         reset: () => {

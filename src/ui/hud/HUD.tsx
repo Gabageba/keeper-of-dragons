@@ -2,6 +2,8 @@ import { useUIStore } from '@store/useUIStore';
 import StatusBar from './StatusBar/StatusBar';
 import MenuBar from './MenuBar/MenuBar';
 import OfflineSummary from './OfflineSummary';
+import ResourceBar from './ResourceBar/ResourceBar';
+import MessageToast from './MessageToast/MessageToast';
 
 /** Постоянный игровой HUD: статус-бар, нижнее меню, оффлайн-сводка. */
 function HUD() {
@@ -11,8 +13,10 @@ function HUD() {
   return (
     <>
       <StatusBar />
+      <ResourceBar />
       <MenuBar />
       <OfflineSummary />
+      <MessageToast />
     </>
   );
 }

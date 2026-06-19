@@ -5,4 +5,5 @@ export const PHASER_LABEL_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   align: 'center',
   stroke: '#000000',
   strokeThickness: 2,
+  resolution: window.devicePixelRatio,
 };

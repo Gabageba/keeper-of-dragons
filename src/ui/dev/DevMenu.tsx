@@ -4,6 +4,7 @@ import { useUIStore } from '@store/useUIStore';
 import { GAME_SAVE_STORAGE_KEY } from '@/consts/storage';
 import ContentLoader from '@game/systems/ContentLoader';
 import { DRAGON_STAGE } from '@/types/dragon';
+import { RENDER_MODE, CURRENT_RENDER_MODE, DEV_RENDER_MODE_LS_KEY } from '@/consts/renderMode';
 
 const DEV_PANEL_WIDTH = 220;
 const ONE_HOUR_MS = 3_600_000;
@@ -79,6 +80,30 @@ const styles = {
   `,
   btnDanger: css`
     color: #ff4444;
+  `,
+  modeToggle: css`
+    display: flex;
+    gap: 4px;
+    padding: 2px 8px;
+  `,
+  modeBtn: css`
+    flex: 1;
+    background: #1e1a2e;
+    border: 1px solid #2e2845;
+    border-radius: 3px;
+    padding: 6px 4px;
+    font-size: 11px;
+    font-family: monospace;
+    color: #4a3a6b;
+    cursor: pointer;
+    &:hover {
+      background: #2e2845;
+    }
+  `,
+  modeBtnActive: css`
+    background: #2e2845;
+    border-color: #7a6f99;
+    color: #d4cce8;
   `,
 };
 
@@ -192,6 +217,24 @@ function DevMenu() {
       <DevBtn label="12ч оффлайн → reload" variant="warning" onClick={() => simulateOffline(12)} />
 
       <DevBtn label="Завершить таймеры" variant="warning" onClick={completeAllTimers} />
+
+      <div css={styles.divider} />
+
+      <div css={styles.sectionLabel}>РЕНДЕР ДРАКОНОВ</div>
+      <div css={styles.modeToggle}>
+        {([RENDER_MODE.WIREFRAME, RENDER_MODE.TEXTURED] as const).map((mode) => (
+          <button
+            key={mode}
+            css={[styles.modeBtn, CURRENT_RENDER_MODE === mode && styles.modeBtnActive]}
+            onClick={() => {
+              localStorage.setItem(DEV_RENDER_MODE_LS_KEY, mode);
+              window.location.reload();
+            }}
+          >
+            {mode === RENDER_MODE.WIREFRAME ? 'wireframe' : 'textured'}
+          </button>
+        ))}
+      </div>
 
       <div css={styles.divider} />
 

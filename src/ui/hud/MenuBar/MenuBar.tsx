@@ -22,6 +22,7 @@ function MenuBar() {
         <MenuButton key={modal} label={label} onClick={() => openModal(modal)} />
       ))}
       <MenuButton label="Карта" onClick={bridge.showMap} />
+      <MenuButton label="Собрать всё" onClick={bridge.collectAllNests} />
       {import.meta.env.DEV && (
         <button onClick={toggleDevMenu} css={styles.devButton}>
           [DEV]

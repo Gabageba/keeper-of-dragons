@@ -31,10 +31,11 @@ const styles = {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url(${Background});
+    background-color: #564c6b;
+    /* background-image: url(${Background});
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center; */
   `,
   closeButton: (hovered: boolean) => css`
     position: absolute;

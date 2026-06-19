@@ -43,6 +43,7 @@ export interface DragonDef {
   rarity: Rarity;
   resource: string;
   production_per_hour: number;
+  storage_cap: number;
   favorite_food: string[];
   disliked_food: string[];
   food_bonus: number;

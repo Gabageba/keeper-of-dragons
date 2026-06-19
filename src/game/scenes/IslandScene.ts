@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { useUIStore } from '@store/useUIStore';
 import {
   ISO_TILE_HALF_WIDTH,
   ISO_TILE_HALF_HEIGHT,
@@ -12,7 +13,6 @@ import {
   calcIslandOrigin,
   topFaceVertices,
 } from '@game/shared/iso';
-import { GAME_CANVAS_WIDTH, GAME_CANVAS_HEIGHT } from '@game/shared/game';
 import ContentLoader from '@game/systems/ContentLoader';
 import type GridSystem from '@game/systems/GridSystem';
 import TileGrid from '@game/objects/TileGrid';
@@ -71,7 +71,6 @@ class IslandScene extends Phaser.Scene {
   private minZoom = 0.5;
   private ignoreNextPointerUp = false;
 
-  private messageText: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super('IslandScene');
@@ -184,29 +183,32 @@ class IslandScene extends Phaser.Scene {
       }
     }
 
-    const fitW = isFinite(xMin) ? xMax - xMin + OCEAN_PADDING_X * 2 : GAME_CANVAS_WIDTH;
-    const fitH = isFinite(yMin) ? yMax - yMin + OCEAN_PADDING_Y * 2 : GAME_CANVAS_HEIGHT;
+    const fitW = isFinite(xMin) ? xMax - xMin + OCEAN_PADDING_X * 2 : cam.width;
+    const fitH = isFinite(yMin) ? yMax - yMin + OCEAN_PADDING_Y * 2 : cam.height;
     this.minZoom = Phaser.Math.Clamp(
-      Math.min(GAME_CANVAS_WIDTH / fitW, GAME_CANVAS_HEIGHT / fitH),
+      Math.min(cam.width / fitW, cam.height / fitH),
       0.1,
-      CAMERA_MAX_ZOOM,
+      CAMERA_MAX_ZOOM * (window.devicePixelRatio || 1),
     );
     cam.setZoom(this.minZoom);
 
-    const viewW = GAME_CANVAS_WIDTH / this.minZoom;
-    const viewH = GAME_CANVAS_HEIGHT / this.minZoom;
+    const viewW = cam.width / this.minZoom;
+    const viewH = cam.height / this.minZoom;
     const landCX = isFinite(xMin) ? (xMin + xMax) / 2 : this.originX;
     const landCY = isFinite(yMin) ? (yMin + yMax) / 2 : this.originY;
     cam.setBounds(landCX - viewW / 2, landCY - viewH / 2, viewW, viewH);
 
     const centre = this.tileTop((grid.cols - 1) / 2, (grid.rows - 1) / 2);
-    cam.scrollX = centre.x - GAME_CANVAS_WIDTH / 2;
-    cam.scrollY = centre.y - GAME_CANVAS_HEIGHT / 2;
+    cam.centerOn(centre.x, centre.y);
   }
 
   private zoomToward(delta: number, screenX: number, screenY: number): void {
     const cam = this.cameras.main;
-    const newZoom = Phaser.Math.Clamp(cam.zoom + delta, this.minZoom, CAMERA_MAX_ZOOM);
+    const newZoom = Phaser.Math.Clamp(
+      cam.zoom + delta,
+      this.minZoom,
+      CAMERA_MAX_ZOOM * (window.devicePixelRatio || 1),
+    );
     if (newZoom === cam.zoom) return;
     const world = this.screenToWorld(screenX, screenY);
     cam.setZoom(newZoom);
@@ -342,9 +344,10 @@ class IslandScene extends Phaser.Scene {
       const p = this.callbacks.getPlacements().find((x) => x.uid === uid);
       const def = p ? ContentLoader.building(p.buildingId) : null;
       if (def?.type === 'nest') {
-        this.callbacks.collectNest(uid);
         const sprite = this.buildingSprites.get(uid);
-        if (sprite instanceof NestSprite) sprite.refresh();
+        if (sprite instanceof NestSprite && sprite.collecting) return;
+        this.callbacks.collectNest(uid);
+        if (sprite instanceof NestSprite) sprite.playCollect();
         return;
       }
       this.openActionPanel(uid);
@@ -463,8 +466,8 @@ class IslandScene extends Phaser.Scene {
 
     const { x: canvasX, y: canvasY } = this.worldToCanvas(peakX, peakY);
     const rect = this.game.canvas.getBoundingClientRect();
-    const sx = rect.width / GAME_CANVAS_WIDTH;
-    const sy = rect.height / GAME_CANVAS_HEIGHT;
+    const sx = rect.width / this.cameras.main.width;
+    const sy = rect.height / this.cameras.main.height;
 
     return {
       x: rect.left + canvasX * sx - TOTAL_BUTTONS_WIDTH / 2,
@@ -473,6 +476,15 @@ class IslandScene extends Phaser.Scene {
   }
 
   // ─── публичные команды (React → Phaser) ──────────────────────────────────────
+
+  collectAllNests(): void {
+    for (const [uid, sprite] of this.buildingSprites) {
+      if (sprite instanceof NestSprite && !sprite.collecting && sprite.hasResources) {
+        this.callbacks.collectNest(uid);
+        sprite.playCollect();
+      }
+    }
+  }
 
   enterBuildMode(buildingId: string): void {
     const def = ContentLoader.building(buildingId);
@@ -485,10 +497,7 @@ class IslandScene extends Phaser.Scene {
     this.showGhost(def.id, def.w, def.h);
 
     const cam = this.cameras.main;
-    const centre = this.cellAt(
-      cam.scrollX + GAME_CANVAS_WIDTH / (2 * cam.zoom),
-      cam.scrollY + GAME_CANVAS_HEIGHT / (2 * cam.zoom),
-    );
+    const centre = this.cellAt(cam.midPoint.x, cam.midPoint.y);
     const x = Phaser.Math.Clamp(centre.x, 0, grid.cols - def.w);
     const y = Phaser.Math.Clamp(centre.y, 0, grid.rows - def.h);
     const best = grid.nearestFreeCell(x, y, def.w, def.h) ?? { x, y };
@@ -536,7 +545,7 @@ class IslandScene extends Phaser.Scene {
   private tryPlaceBuilding(): void {
     const { cellX: x, cellY: y, w, h, buildingId } = this.ghost;
     const res = this.callbacks.placeBuilding(buildingId, x, y, w, h);
-    if (!res.ok) return this.showMessage(res.reason);
+    if (!res.ok) return useUIStore.getState().showToast(res.reason);
     this.exitGhostMode();
   }
 
@@ -544,32 +553,13 @@ class IslandScene extends Phaser.Scene {
     const { movingBuildingUid: uid, cellX: x, cellY: y, w, h } = this.ghost;
     if (!uid) return;
     const res = this.callbacks.moveBuilding(uid, x, y, w, h);
-    if (!res.ok) return this.showMessage(res.reason);
+    if (!res.ok) return useUIStore.getState().showToast(res.reason);
     this.exitGhostMode();
   }
 
   private exitGhostMode(): void {
     this.mode = Mode.IDLE;
     this.hideGhost();
-  }
-
-  private showMessage(text: string): void {
-    this.messageText?.destroy();
-    this.messageText = this.add
-      .text(GAME_CANVAS_WIDTH / 2, GAME_CANVAS_HEIGHT - 80, text, {
-        fontFamily: 'serif',
-        fontSize: '18px',
-        color: '#ff6b6b',
-        backgroundColor: '#13101ecc',
-        padding: { x: 10, y: 4 },
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(50);
-    this.time.delayedCall(2000, () => {
-      this.messageText?.destroy();
-      this.messageText = null;
-    });
   }
 
   private screenToWorld(sx: number, sy: number): { x: number; y: number } {

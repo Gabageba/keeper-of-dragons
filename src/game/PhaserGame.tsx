@@ -5,17 +5,14 @@ import BootScene from './scenes/BootScene';
 import IslandScene from './scenes/IslandScene';
 import MapScene from './scenes/MapScene';
 import { setGame } from './gameRef';
-import { GAME_CANVAS_WIDTH, GAME_CANVAS_HEIGHT } from './shared/game';
 import { createStoreBridge } from './bridge/createStorageBridge';
 
 const PHASER_GAME_CONFIG: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   backgroundColor: '#0d0b14',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: GAME_CANVAS_WIDTH,
-    height: GAME_CANVAS_HEIGHT,
   },
   render: { pixelArt: false, antialias: true },
   scene: [BootScene, IslandScene, MapScene],

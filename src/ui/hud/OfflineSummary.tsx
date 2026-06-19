@@ -28,14 +28,6 @@ const styles = {
     font-size: 20px;
     line-height: 2;
   `,
-  gainsList: css`
-    margin-top: 8px;
-  `,
-  gainRow: css`
-    color: #c9a84c;
-    font-size: 18px;
-    line-height: 1.8;
-  `,
   notice: css`
     color: #d4cce8;
     font-size: 18px;
@@ -55,29 +47,15 @@ function OfflineSummary() {
 
   if (!offlineSummary) return null;
 
-  const { elapsed_ms, resources_gained, breeding_completed, eggs_hatched } = offlineSummary;
+  const { elapsed_ms, breeding_completed, eggs_hatched } = offlineSummary;
   const hours = Math.floor(elapsed_ms / 3_600_000);
   const minutes = Math.floor((elapsed_ms % 3_600_000) / 60_000);
   const timeStr = hours > 0 ? `${hours} ч ${minutes} мин` : `${minutes} мин`;
-
-  const gains = Object.entries(resources_gained).filter(([, v]) => v > 0);
 
   return (
     <div onClick={dismiss} css={styles.overlay}>
       <div onClick={(e) => e.stopPropagation()} css={styles.card}>
         <div css={styles.elapsed}>Пока вас не было: {timeStr}</div>
-
-        {gains.length > 0 && (
-          <div css={styles.gainsList}>
-            {gains.map(([resource, amount]) => (
-              <div key={resource} css={styles.gainRow}>
-                + {amount}
-                {'  '}
-                {resource}
-              </div>
-            ))}
-          </div>
-        )}
 
         {breeding_completed && <div css={styles.notice}>Скрещивание завершено!</div>}
         {eggs_hatched > 0 && <div css={styles.notice}>Вылупилось яиц: {eggs_hatched}</div>}

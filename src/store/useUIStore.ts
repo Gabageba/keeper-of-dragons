@@ -27,6 +27,7 @@ interface UIState {
   clearPanel: ClearPanelData | null;
   ghostControls: { x: number; y: number } | null;
   offlineSummary: OfflineSummary | null;
+  toastMessage: string | null;
 
   setGameReady: (v: boolean) => void;
   openModal: (modal: ModalKey) => void;
@@ -38,7 +39,10 @@ interface UIState {
   setClearPanel: (data: ClearPanelData | null) => void;
   setGhostControls: (pos: { x: number; y: number } | null) => void;
   setOfflineSummary: (data: OfflineSummary | null) => void;
+  showToast: (text: string, durationMs?: number) => void;
 }
+
+let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useUIStore = create<UIState>((set) => ({
   gameReady: false,
@@ -49,6 +53,7 @@ export const useUIStore = create<UIState>((set) => ({
   clearPanel: null,
   ghostControls: null,
   offlineSummary: null,
+  toastMessage: null,
 
   setGameReady: (v) => set({ gameReady: v }),
   openModal: (modal) => set({ activeModal: modal, buildPanelOpen: false }),
@@ -60,4 +65,12 @@ export const useUIStore = create<UIState>((set) => ({
   setClearPanel: (data) => set({ clearPanel: data }),
   setGhostControls: (pos) => set({ ghostControls: pos }),
   setOfflineSummary: (data) => set({ offlineSummary: data }),
+  showToast: (text, durationMs = 2000) => {
+    if (toastTimer !== null) clearTimeout(toastTimer);
+    set({ toastMessage: text });
+    toastTimer = setTimeout(() => {
+      set({ toastMessage: null });
+      toastTimer = null;
+    }, durationMs);
+  },
 }));

@@ -33,10 +33,12 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
       if (!dragon || dragon.stage !== 'adult') return { amount: 0, atCap: false };
       const def = ContentLoader.dragon(dragon.id);
       if (!def) return { amount: 0, atCap: false };
-      const infinite = hasInfiniteStorage(s);
       const raw = producedAmount(dragon, def, Date.now());
-      const cap = infinite ? Infinity : MAX_RESOURCE_PER_TYPE;
-      return { amount: Math.min(raw, cap), atCap: !infinite && raw >= MAX_RESOURCE_PER_TYPE };
+      const atCap = raw >= def.storage_cap;
+      if (hasInfiniteStorage(s)) return { amount: raw, atCap };
+      const space = MAX_RESOURCE_PER_TYPE - (s.resources[def.resource] ?? 0);
+      const amount = Math.min(raw, Math.max(0, space));
+      return { amount, atCap };
     },
 
     openActionPanel: (uid, name, buildingId) =>
@@ -54,10 +56,7 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
     const store = useGameStore.getState();
     store.setCurrentIsland(store.currentIslandId);
     const summary = store.applyOffline();
-    const hasGains =
-      Object.values(summary.resources_gained).some((v) => v > 0) ||
-      summary.breeding_completed ||
-      summary.eggs_hatched > 0;
+    const hasGains = summary.breeding_completed || summary.eggs_hatched > 0;
     if (hasGains) useUIStore.getState().setOfflineSummary(summary);
     useUIStore.getState().setGameReady(true);
   });

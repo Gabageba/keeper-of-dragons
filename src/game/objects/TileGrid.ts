@@ -1,9 +1,6 @@
 import type Phaser from 'phaser';
 import {
   ISO_TILE_HALF_WIDTH,
-  ISO_TILE_HALF_HEIGHT,
-  OCEAN_PADDING_X,
-  OCEAN_PADDING_Y,
   isoCells,
   darkenColor,
   topFaceVertices,
@@ -16,9 +13,6 @@ const hexToInt = (hex: string): number => parseInt(hex.replace('#', ''), 16);
 
 const OCEAN_TILE_COLOR = 0x1a3a6e;
 
-const OCEAN_EXTRA_TILE_RADIUS = 8;
-// WebGL гарантирует MAX_TEXTURE_SIZE ≥ 4096. При OCEAN_EXTRA_TILE_RADIUS=8 и сетке 20×16
-// ширина фона = 4864 px → делим на чанки.
 const MAX_TEXTURE_WIDTH = 4096;
 const TILE_TEXTURE_KEY_PREFIX = '__tileGrid_';
 
@@ -75,17 +69,7 @@ class TileGrid {
     originY: number,
     grid: GridSystem,
   ): ChunkLayout {
-    const extCols = grid.cols + 2 * OCEAN_EXTRA_TILE_RADIUS;
-    const extRows = grid.rows + 2 * OCEAN_EXTRA_TILE_RADIUS;
-    const extOriginY = originY - 2 * OCEAN_EXTRA_TILE_RADIUS * ISO_TILE_HALF_HEIGHT;
-    const bounds = islandBoundingRect(
-      originX,
-      extOriginY,
-      extCols,
-      extRows,
-      OCEAN_PADDING_X,
-      OCEAN_PADDING_Y,
-    );
+    const bounds = islandBoundingRect(originX, originY, grid.cols, grid.rows, 0, 0);
     return {
       bounds,
       localOriginX: originX - bounds.x,
@@ -99,16 +83,11 @@ class TileGrid {
     grid: GridSystem,
     { bounds, localOriginX, localOriginY, chunkCount }: ChunkLayout,
   ): void {
-    const extCols = grid.cols + 2 * OCEAN_EXTRA_TILE_RADIUS;
-    const extRows = grid.rows + 2 * OCEAN_EXTRA_TILE_RADIUS;
-
     for (let ci = 0; ci < chunkCount; ci++) {
       const chunkOffsetX = ci * MAX_TEXTURE_WIDTH;
       const chunkWidth = Math.min(MAX_TEXTURE_WIDTH, bounds.w - chunkOffsetX);
 
       const g = scene.add.graphics();
-      g.fillStyle(OCEAN_TILE_COLOR, 1);
-      g.fillRect(0, 0, chunkWidth, bounds.h);
 
       const drawTile = (tx: number, ty: number, color: number, strokeAlpha: number) => {
         const localX = tx - chunkOffsetX;
@@ -119,14 +98,6 @@ class TileGrid {
         g.lineStyle(1, 0x000000, strokeAlpha);
         g.strokePoints(pts, true);
       };
-
-      for (const { x: ex, y: ey } of isoCells(extCols, extRows)) {
-        const cx = ex - OCEAN_EXTRA_TILE_RADIUS;
-        const cy = ey - OCEAN_EXTRA_TILE_RADIUS;
-        if (cx >= 0 && cx < grid.cols && cy >= 0 && cy < grid.rows) continue;
-        const { x: tx, y: ty } = cellToWorld(cx, cy, localOriginX, localOriginY);
-        drawTile(tx, ty, OCEAN_TILE_COLOR, 0.15);
-      }
 
       for (const { x: cx, y: cy } of isoCells(grid.cols, grid.rows)) {
         const terrain = grid.terrainAt(cx, cy);

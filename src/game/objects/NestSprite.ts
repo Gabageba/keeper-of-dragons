@@ -12,8 +12,9 @@ import type { DragonState } from '@/types/dragon';
 import type { Placement } from '@/types/island';
 import type { GetAccumulated } from '@/types/dragon';
 import { PHASER_LABEL_STYLE } from '@game/shared/style';
-import { PLACEHOLDER_NEST_COLOR, placeholderDragonColor } from '@game/shared/placeholderArt';
+import { PLACEHOLDER_NEST_COLOR } from '@game/shared/placeholderArt';
 import { calcBuildingDepth } from '../shared/building';
+import DragonSprite from './DragonSprite';
 
 const BUBBLE_REFRESH_INTERVAL_MS = 3_000;
 
@@ -22,11 +23,14 @@ class NestSprite {
   private bubble!: Phaser.GameObjects.Arc;
   private bubbleText!: Phaser.GameObjects.Text;
   private dragon: DragonState | null;
+  private dragonSprite: DragonSprite | null = null;
   private readonly getAccumulated: GetAccumulated;
   private readonly scene: Phaser.Scene;
   private timer: Phaser.Time.TimerEvent | null = null;
   private pulseTween: Phaser.Tweens.Tween | null = null;
   private wasAtCap = false;
+  private isCollecting = false;
+  private bubbleBaseY = 0;
 
   constructor(
     scene: Phaser.Scene,
@@ -43,10 +47,12 @@ class NestSprite {
     const { x: wx, y: wy } = cellToWorld(placement.x, placement.y, originX, originY);
     const w = placement.w;
     const h = placement.h;
+    const depth = calcBuildingDepth(placement.x, placement.y);
 
     const roofCenterX = ((w - h) * ISO_TILE_HALF_WIDTH) / 2;
     const roofCenterY = ((w + h) * ISO_TILE_HALF_HEIGHT) / 2 - ISO_BUILDING_HEIGHT;
     const roofNorthY = -ISO_BUILDING_HEIGHT;
+    this.bubbleBaseY = roofNorthY - 26;
 
     const graphics = scene.add.graphics();
     drawIsoBox(graphics, 0, 0, w, h, PLACEHOLDER_NEST_COLOR, 0.92);
@@ -54,15 +60,15 @@ class NestSprite {
     const children: Phaser.GameObjects.GameObject[] = [graphics];
 
     if (dragon) {
+      this.dragonSprite = new DragonSprite(
+        scene,
+        wx + roofCenterX,
+        wy + roofCenterY,
+        depth + 1,
+        dragon,
+      );
+
       const def = ContentLoader.dragon(dragon.id);
-      const color = placeholderDragonColor(def?.element);
-
-      if (dragon.stage === DRAGON_STAGE.ADULT) {
-        children.push(scene.add.arc(roofCenterX, roofCenterY, 12, 0, 360, false, color, 0.88));
-      } else {
-        children.push(scene.add.arc(roofCenterX, roofCenterY, 7, 0, 360, false, color, 0.45));
-      }
-
       const dragonName = dragon.nickname ?? def?.name ?? '';
       if (dragonName) {
         const stageTag = dragon.stage !== DRAGON_STAGE.ADULT ? ` [${dragon.stage}]` : '';
@@ -96,9 +102,7 @@ class NestSprite {
       .setVisible(false);
     children.push(this.bubble, this.bubbleText);
 
-    this.container = scene.add
-      .container(wx, wy, children)
-      .setDepth(calcBuildingDepth(placement.x, placement.y));
+    this.container = scene.add.container(wx, wy, children).setDepth(depth);
 
     this.timer = scene.time.addEvent({
       delay: BUBBLE_REFRESH_INTERVAL_MS,
@@ -108,6 +112,8 @@ class NestSprite {
 
     this.refresh();
   }
+
+  // ─── bubble ──────────────────────────────────────────────────────────────────
 
   refresh(): void {
     if (!this.dragon || this.dragon.stage !== DRAGON_STAGE.ADULT) {
@@ -158,6 +164,41 @@ class NestSprite {
     this.bubbleText.setScale(1);
   }
 
+  // ─── tap ─────────────────────────────────────────────────────────────────────
+
+  get collecting(): boolean {
+    return this.isCollecting;
+  }
+
+  get hasResources(): boolean {
+    return this.bubble.visible;
+  }
+
+  playCollect(): void {
+    if (this.isCollecting) return;
+
+    if (!this.bubble.visible) return;
+
+    this.isCollecting = true;
+    this.dragonSprite?.playCollect();
+    this.stopPulse();
+    this.scene.tweens.add({
+      targets: [this.bubble, this.bubbleText],
+      y: '-=36',
+      alpha: 0,
+      duration: 380,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        this.bubble.setY(this.bubbleBaseY).setAlpha(0.9);
+        this.bubbleText.setY(this.bubbleBaseY).setAlpha(1);
+        this.isCollecting = false;
+        this.refresh();
+      },
+    });
+  }
+
+  // ─── lifecycle ────────────────────────────────────────────────────────────────
+
   updateDragon(dragon: DragonState | null): void {
     this.dragon = dragon;
     this.refresh();
@@ -166,6 +207,7 @@ class NestSprite {
   destroy(): void {
     this.timer?.destroy();
     this.stopPulse();
+    this.dragonSprite?.destroy();
     this.container.destroy();
   }
 }

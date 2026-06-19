@@ -21,6 +21,7 @@ function usePhaserBridge() {
         game.scene.stop('MapScene');
         game.scene.wake('IslandScene');
       },
+      collectAllNests: () => getIslandScene()?.collectAllNests(),
     }),
     [],
   );

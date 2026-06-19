@@ -25,7 +25,6 @@ export interface SaveData {
 
 export interface OfflineSummary {
   elapsed_ms: number;
-  resources_gained: Record<string, number>;
   breeding_completed: boolean;
   eggs_hatched: number;
 }

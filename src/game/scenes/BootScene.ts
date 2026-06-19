@@ -6,6 +6,8 @@ import { calcIslandOrigin } from '@game/shared/iso';
 import { GAME_CANVAS_WIDTH, GAME_CANVAS_HEIGHT } from '@game/shared/game';
 import { REGISTRY_KEY_ISLAND_CALLBACKS, REGISTRY_KEY_ON_BOOT } from '@game/shared/registry';
 import type { IslandCallbacks } from '@/types/bridge';
+import emoteHeart from '@/assets/emotoins/emote_heart.png';
+import emoteCash from '@/assets/emotoins/emote_cash.png';
 
 class BootScene extends Phaser.Scene {
   constructor() {
@@ -13,11 +15,17 @@ class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
+    const cam = this.cameras.main;
+    cam.setZoom(window.devicePixelRatio || 1);
+    cam.centerOn(GAME_CANVAS_WIDTH / 2, GAME_CANVAS_HEIGHT / 2);
     this.createProgressBar();
 
     for (const { key, path, active } of CONTENT_MANIFEST) {
       if (active) this.load.json(key, path);
     }
+
+    this.load.image('emote_heart', emoteHeart);
+    this.load.image('emote_cash', emoteCash);
   }
 
   create(): void {
@@ -50,6 +58,7 @@ class BootScene extends Phaser.Scene {
           fontFamily: 'ElMessiri, serif',
           fontSize: '28px',
           color: '#c9a84c',
+          resolution: window.devicePixelRatio,
         })
         .setOrigin(0.5),
       this.add
@@ -57,6 +66,7 @@ class BootScene extends Phaser.Scene {
           fontFamily: 'ElMessiri, serif',
           fontSize: '14px',
           color: '#8a7a9b',
+          resolution: window.devicePixelRatio,
         })
         .setOrigin(0.5),
     ];
