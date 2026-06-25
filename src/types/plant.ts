@@ -22,4 +22,8 @@ export interface PlantSlotState {
 export interface GardenState {
   biome: Biome;
   slots: PlantSlotState[];
+  /** true = 4×4 (16 слотов), false/undefined = 3×3 (9 слотов) */
+  upgraded?: boolean;
+  /** Алтарь стихии в центральной клетке: +5% скорости роста, −1 слот */
+  hasAltar?: boolean;
 }

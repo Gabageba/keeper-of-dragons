@@ -26,8 +26,12 @@ export interface IslandCallbacks {
   /** Сколько ресурса накопил дракон (без его списания). */
   getAccumulated: GetAccumulated;
 
+  /** Сколько растений в саду готово к сбору. */
+  getGardenReadyCount: (gardenIndex: number) => number;
+
   openActionPanel: (uid: string, name: string, buildingId: string) => void;
   openClearPanel: (cx: number, cy: number, cost: number) => void;
+  openGardenPanel: (uid: string, gardenIndex: number) => void;
   closeAllPanels: () => void;
   setGhostControls: (pos: { x: number; y: number } | null) => void;
 }

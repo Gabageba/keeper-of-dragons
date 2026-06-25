@@ -11,10 +11,16 @@ const PAD = 8;
 const PANEL_W = COLS * (BTN_W + PAD) + PAD;
 
 const styles = {
-  panel: css`
+  backdrop: css`
     position: fixed;
-    top: 112px;
-    right: 8px;
+    inset: 0;
+    z-index: 19;
+    pointer-events: auto;
+  `,
+  panel: css`
+    position: absolute;
+    top: 0;
+    right: calc(100% + 8px);
     width: ${PANEL_W}px;
     background: rgba(19, 16, 30, 0.97);
     border: 1px solid #4a3a6e;
@@ -74,23 +80,26 @@ function BuildPanel() {
   };
 
   return (
-    <div css={styles.panel}>
-      <div css={styles.title}>Выберите постройку:</div>
-      <div css={styles.grid}>
-        {buildings.map((def) => {
-          const canAfford = coins >= def.cost;
-          return (
-            <button key={def.id} onClick={() => select(def.id)} css={styles.btn}>
-              <div css={styles.btnName}>{def.name}</div>
-              <div css={[styles.btnInfo, !canAfford && styles.btnInfoCantAfford]}>
-                {def.w}×{def.h}
-                {'  '}🪙{def.cost}
-              </div>
-            </button>
-          );
-        })}
+    <>
+      <div css={styles.backdrop} onClick={closeBuildPanel} />
+      <div css={styles.panel}>
+        <div css={styles.title}>Выберите постройку:</div>
+        <div css={styles.grid}>
+          {buildings.map((def) => {
+            const canAfford = coins >= def.cost;
+            return (
+              <button key={def.id} onClick={() => select(def.id)} css={styles.btn}>
+                <div css={styles.btnName}>{def.name}</div>
+                <div css={[styles.btnInfo, !canAfford && styles.btnInfoCantAfford]}>
+                  {def.w}×{def.h}
+                  {'  '}🪙{def.cost}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

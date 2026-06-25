@@ -1,7 +1,8 @@
 import DragonBookModal from './DragonBookModal';
 import BreedingModal from './BreedingModal';
 import OrdersModal from './OrdersModal';
-import InventoryModal from './InventoryModal';
+import InventoryModal from './InventoryModal/InventoryModal';
+import GardenModal from './GardenModal/GardenModal';
 
 function Modals() {
   return (
@@ -10,6 +11,7 @@ function Modals() {
       <BreedingModal />
       <OrdersModal />
       <InventoryModal />
+      <GardenModal />
     </>
   );
 }

@@ -6,6 +6,31 @@
 - Use `css` from `@emotion/react` or `styled` from `@emotion/styled` for all styling.
 - For component-level styles, prefer a `const styles = { ... }` object with `css` values defined outside the component.
 
+## Typography
+
+Two fonts only — never use anything else.
+
+**Balsamiq Sans** (accent) — rounded, comic feel. Use for anything that needs to catch the eye:
+- Game logo / title
+- Window, panel, dialog headings ("Workshop", "Expeditions")
+- Button labels ("Buy", "Go", "Collect")
+- Dragon, building, item names
+- Large popups — "Level Up!", rewards
+- Weight: **Bold (700)**. On dark wood — cream fill `#fff8dc` + thin dark shadow/stroke for legibility.
+
+**Nunito** (body & numbers) — clean and even. Use for everything that needs to be read quickly:
+- HUD numbers — gold, crystals, XP, timers
+- Quest, item, ability descriptions
+- Long text — dialogues, tutorials, lore
+- Small labels, prices, counters
+- Weights: **600/700** for regular text, **800/900** for currency numbers (to make them stand out).
+
+**Rules — don't break the style:**
+- Never set long text or small numbers in Balsamiq Sans — it "jumps" and reads poorly at small sizes. That's Nunito's job.
+- Never use more than these two fonts.
+- Minimum text size in HUD — no less than ~22px at 1080p; button hit area — at least 44px.
+- Unified size hierarchy: heading ≈ 40–48px, button ≈ 19–22px, body ≈ 15–16px, HUD numbers ≈ 24–28px.
+
 ## Placeholder Art
 
 Real sprites don't exist yet — buildings, nests and dragons render as flat colored

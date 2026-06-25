@@ -41,6 +41,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@fontsource-variable/nunito": "^5.2.7",
+    "@fontsource/balsamiq-sans": "^5.2.8",
     "phaser": "^3.80.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

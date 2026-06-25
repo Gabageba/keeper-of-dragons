@@ -16,7 +16,15 @@ const styles = {
   `,
 };
 
-function PlaceholderModal({ modal, title, note }: { modal: ModalKey; title: string; note: string }) {
+function PlaceholderModal({
+  modal,
+  title,
+  note,
+}: {
+  modal: ModalKey;
+  title: string;
+  note: string;
+}) {
   const activeModal = useUIStore((s) => s.activeModal);
   const closeModal = useUIStore((s) => s.closeModal);
 

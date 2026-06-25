@@ -5,6 +5,7 @@ import { GAME_SAVE_STORAGE_KEY } from '@/consts/storage';
 import ContentLoader from '@game/systems/ContentLoader';
 import { DRAGON_STAGE } from '@/types/dragon';
 import { RENDER_MODE, CURRENT_RENDER_MODE, DEV_RENDER_MODE_LS_KEY } from '@/consts/renderMode';
+import usePhaserBridge from '../shared/hooks/usePhaserBridge';
 
 const DEV_PANEL_WIDTH = 220;
 const ONE_HOUR_MS = 3_600_000;
@@ -113,10 +114,21 @@ const simulateOffline = (hours: number) => {
   const save = JSON.parse(raw) as { state: Record<string, unknown> };
   const state = save.state;
   const delta = hours * ONE_HOUR_MS;
+
   state.last_save = (state.last_save as number) - delta;
+
   for (const d of (state.dragons as { last_collected: number }[]) ?? []) {
     if (d.last_collected > 0) d.last_collected -= delta;
   }
+
+  // Сдвигаем planted_at садов, чтобы рост растений тоже учитывал оффлайн-время.
+  type SlotRaw = { plant: string | null; planted_at: number | null };
+  for (const g of (state.gardens as { slots: SlotRaw[] }[]) ?? []) {
+    for (const sl of g.slots ?? []) {
+      if (sl.planted_at !== null && sl.planted_at > 0) sl.planted_at -= delta;
+    }
+  }
+
   localStorage.setItem(GAME_SAVE_STORAGE_KEY, JSON.stringify(save));
   window.location.reload();
 };
@@ -134,6 +146,7 @@ const completeAllTimers = () => {
 
 function DevMenu() {
   const close = () => useUIStore.getState().toggleDevMenu();
+  const bridge = usePhaserBridge();
 
   return (
     <div css={styles.panel}>
@@ -246,6 +259,8 @@ function DevMenu() {
           window.location.reload();
         }}
       />
+      <div css={styles.divider} />
+      <DevBtn label="Собрать все" onClick={bridge.collectAllNests} />
     </div>
   );
 }

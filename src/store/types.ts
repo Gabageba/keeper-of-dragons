@@ -2,7 +2,7 @@ import type { StoreApi } from 'zustand';
 import type GridSystem from '@game/systems/GridSystem';
 import type { DragonState, BreedingProgress, EggState } from '@/types/dragon';
 import type { GardenState } from '@/types/plant';
-import type { Placement } from '@/types/island';
+import type { Biome, Placement } from '@/types/island';
 import type { OfflineSummary } from '@/types/save';
 
 // ─── срезы (slices) ─────────────────────────────────────────────────────────
@@ -56,8 +56,14 @@ export interface IslandSlice {
 export interface GardenSlice {
   gardens: GardenState[];
 
+  /** Создаёт новый сад нужного биома, возвращает его индекс в массиве gardens. */
+  createGarden: (biome: Biome, slotCount: number) => number;
   plantSeed: (gardenIndex: number, slot: number, plant: string) => void;
   harvest: (gardenIndex: number, slot: number) => void;
+  /** Улучшение 3×3 → 4×4 за монеты. Возвращает false, если монет не хватает. */
+  upgradeGarden: (gardenIndex: number) => boolean;
+  /** Переключает алтарь стихии в центральной клетке. Очищает слот при активации. */
+  toggleAltar: (gardenIndex: number) => void;
 }
 
 export interface BreedingSlice {

@@ -34,14 +34,32 @@ export const createDragonsSlice: SliceCreator<DragonsSlice> = (set, get) => ({
     if (produced === 0) return;
 
     const state = get();
+    let toCollect = produced;
+    let newLastCollected = now;
+
     if (!hasInfiniteStorage(state)) {
       const current = state.resources[def.resource] ?? 0;
-      if (current >= MAX_RESOURCE_PER_TYPE) return;
+      const space = MAX_RESOURCE_PER_TYPE - current;
+      if (space <= 0) return;
+
+      if (space < produced) {
+        // Собираем только то, что влезает; сдвигаем last_collected назад,
+        // чтобы дракон «помнил» оставшийся объём.
+        toCollect = space;
+        let rate = def.production_per_hour;
+        if (dragon.biome) {
+          if (dragon.biome === def.favorite_biome) rate *= 1 + def.biome_buff;
+          else if (dragon.biome === def.disliked_biome) rate *= 1 - def.biome_debuff;
+        }
+        newLastCollected = now - Math.round(((produced - space) / rate) * 3_600_000);
+      }
     }
 
     set((s) => ({
-      dragons: s.dragons.map((d) => (d.uid === uid ? { ...d, last_collected: now } : d)),
+      dragons: s.dragons.map((d) =>
+        d.uid === uid ? { ...d, last_collected: newLastCollected } : d,
+      ),
     }));
-    get().addResource(def.resource, produced);
+    get().addResource(def.resource, toCollect);
   },
 });

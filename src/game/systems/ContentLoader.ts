@@ -97,6 +97,10 @@ class ContentLoaderImpl {
     return this.terrain[char];
   }
 
+  allPlants(): PlantDef[] {
+    return [...this.plants.values()];
+  }
+
   allBuildings(): BuildingDef[] {
     return [...this.buildings.values()];
   }

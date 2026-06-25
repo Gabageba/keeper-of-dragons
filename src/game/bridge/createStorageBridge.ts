@@ -30,20 +30,41 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
     getAccumulated: (dragonUid) => {
       const s = useGameStore.getState();
       const dragon = s.dragons.find((d) => d.uid === dragonUid);
-      if (!dragon || dragon.stage !== 'adult') return { amount: 0, atCap: false };
+      if (!dragon || dragon.stage !== 'adult') return { amount: 0, atCap: false, storageFull: false };
       const def = ContentLoader.dragon(dragon.id);
-      if (!def) return { amount: 0, atCap: false };
+      if (!def) return { amount: 0, atCap: false, storageFull: false };
       const raw = producedAmount(dragon, def, Date.now());
       const atCap = raw >= def.storage_cap;
-      if (hasInfiniteStorage(s)) return { amount: raw, atCap };
+      if (hasInfiniteStorage(s)) return { amount: raw, atCap, storageFull: false };
       const space = MAX_RESOURCE_PER_TYPE - (s.resources[def.resource] ?? 0);
+      const storageFull = raw > 0 && space <= 0;
       const amount = Math.min(raw, Math.max(0, space));
-      return { amount, atCap };
+      return { amount, atCap, storageFull };
+    },
+
+    getGardenReadyCount: (gardenIndex) => {
+      const s = useGameStore.getState();
+      const garden = s.gardens[gardenIndex];
+      if (!garden) return 0;
+      let count = 0;
+      for (const slot of garden.slots) {
+        if (!slot.plant || !slot.planted_at) continue;
+        const plantDef = ContentLoader.plant(slot.plant);
+        if (!plantDef) continue;
+        const nativeMatch =
+          plantDef.native_biome === 'any' || plantDef.native_biome === garden.biome;
+        const base = plantDef.grow_time_minutes * 60_000;
+        const growMs = base / (nativeMatch ? 1.5 : 1) / (garden.hasAltar ? 1.05 : 1);
+        if ((Date.now() - slot.planted_at) / growMs >= 1) count++;
+      }
+      return count;
     },
 
     openActionPanel: (uid, name, buildingId) =>
       useUIStore.getState().setActionPanel({ uid, name, buildingId }),
     openClearPanel: (cx, cy, cost) => useUIStore.getState().setClearPanel({ cx, cy, cost }),
+    openGardenPanel: (uid, gardenIndex) =>
+      useUIStore.getState().setGardenPanel({ uid, gardenIndex }),
     closeAllPanels: () => {
       useUIStore.getState().setActionPanel(null);
       useUIStore.getState().setClearPanel(null);
@@ -71,8 +92,14 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
     () => getIslandScene()?.syncGround(),
   );
 
+  const unsubGardens = useGameStore.subscribe(
+    (s) => s.gardens,
+    () => getIslandScene()?.refreshGardenSprites(),
+  );
+
   return () => {
     unsubPlacements();
     unsubCleared();
+    unsubGardens();
   };
 };

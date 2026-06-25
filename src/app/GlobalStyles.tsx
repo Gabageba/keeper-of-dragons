@@ -1,5 +1,6 @@
 import { css, Global } from '@emotion/react';
 import ElMessiri from '@/assets/fonts/ElMessiri.ttf';
+import token from '@/ui/shared/token';
 
 const globalStyles = css`
   @font-face {
@@ -12,7 +13,8 @@ const globalStyles = css`
 
   html,
   body {
-    font-family: 'Sofia Sans Semi Condensed', sans-serif;
+    font-family: ${token.textFontFamily};
+    color: ${token.textColor}
     margin: 0;
     padding: 0;
     height: 100%;

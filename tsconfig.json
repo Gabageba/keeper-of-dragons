@@ -28,5 +28,5 @@
       "@config/*": ["src/config/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "src/ui/hud/NavBar/NavBarButton/.tsx"]
 }

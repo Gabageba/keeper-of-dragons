@@ -8,6 +8,11 @@ interface ActionPanelData {
   buildingId: string;
 }
 
+interface GardenPanelData {
+  uid: string;
+  gardenIndex: number;
+}
+
 interface ClearPanelData {
   cx: number;
   cy: number;
@@ -20,16 +25,19 @@ interface ClearPanelData {
  */
 interface UIState {
   gameReady: boolean;
+  loadingProgress: number;
   activeModal: ModalKey | null;
   buildPanelOpen: boolean;
   devMenuOpen: boolean;
   actionPanel: ActionPanelData | null;
   clearPanel: ClearPanelData | null;
+  gardenPanel: GardenPanelData | null;
   ghostControls: { x: number; y: number } | null;
   offlineSummary: OfflineSummary | null;
   toastMessage: string | null;
 
   setGameReady: (v: boolean) => void;
+  setLoadingProgress: (v: number) => void;
   openModal: (modal: ModalKey) => void;
   closeModal: () => void;
   toggleBuildPanel: () => void;
@@ -37,6 +45,7 @@ interface UIState {
   toggleDevMenu: () => void;
   setActionPanel: (data: ActionPanelData | null) => void;
   setClearPanel: (data: ClearPanelData | null) => void;
+  setGardenPanel: (data: GardenPanelData | null) => void;
   setGhostControls: (pos: { x: number; y: number } | null) => void;
   setOfflineSummary: (data: OfflineSummary | null) => void;
   showToast: (text: string, durationMs?: number) => void;
@@ -46,16 +55,19 @@ let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useUIStore = create<UIState>((set) => ({
   gameReady: false,
+  loadingProgress: 0,
   activeModal: null,
   buildPanelOpen: false,
   devMenuOpen: false,
   actionPanel: null,
   clearPanel: null,
+  gardenPanel: null,
   ghostControls: null,
   offlineSummary: null,
   toastMessage: null,
 
   setGameReady: (v) => set({ gameReady: v }),
+  setLoadingProgress: (v) => set({ loadingProgress: v }),
   openModal: (modal) => set({ activeModal: modal, buildPanelOpen: false }),
   closeModal: () => set({ activeModal: null }),
   toggleBuildPanel: () => set((s) => ({ buildPanelOpen: !s.buildPanelOpen })),
@@ -63,6 +75,7 @@ export const useUIStore = create<UIState>((set) => ({
   toggleDevMenu: () => set((s) => ({ devMenuOpen: !s.devMenuOpen })),
   setActionPanel: (data) => set({ actionPanel: data }),
   setClearPanel: (data) => set({ clearPanel: data }),
+  setGardenPanel: (data) => set({ gardenPanel: data, actionPanel: null }),
   setGhostControls: (pos) => set({ ghostControls: pos }),
   setOfflineSummary: (data) => set({ offlineSummary: data }),
   showToast: (text, durationMs = 2000) => {

@@ -28,8 +28,9 @@ class NestSprite {
   private readonly scene: Phaser.Scene;
   private timer: Phaser.Time.TimerEvent | null = null;
   private pulseTween: Phaser.Tweens.Tween | null = null;
-  private wasAtCap = false;
+  private wasPulsing = false;
   private isCollecting = false;
+  private _storageFull = false;
   private bubbleBaseY = 0;
 
   constructor(
@@ -121,26 +122,32 @@ class NestSprite {
       return;
     }
 
-    const { amount, atCap } = this.getAccumulated(this.dragon.uid);
+    const { amount, atCap, storageFull } = this.getAccumulated(this.dragon.uid);
+    this._storageFull = storageFull;
 
-    if (amount <= 0) {
+    if (!storageFull && amount <= 0) {
       this.hideBubble();
       return;
     }
 
-    this.bubble.setVisible(true);
-    this.bubbleText.setVisible(true).setText(amount >= 1000 ? '1k' : String(amount));
+    const shouldPulse = storageFull || atCap;
 
-    if (atCap && !this.wasAtCap) this.startPulse();
-    else if (!atCap && this.wasAtCap) this.stopPulse();
-    this.wasAtCap = atCap;
+    this.bubble.setFillStyle(storageFull ? 0xff4444 : 0x33cc77, 0.9).setVisible(true);
+    this.bubbleText
+      .setVisible(true)
+      .setText(storageFull ? 'МАХ' : amount >= 1000 ? '1k' : String(amount));
+
+    if (shouldPulse && !this.wasPulsing) this.startPulse();
+    else if (!shouldPulse && this.wasPulsing) this.stopPulse();
+    this.wasPulsing = shouldPulse;
   }
 
   private hideBubble(): void {
     this.bubble.setVisible(false);
     this.bubbleText.setVisible(false);
     this.stopPulse();
-    this.wasAtCap = false;
+    this.wasPulsing = false;
+    this._storageFull = false;
   }
 
   private startPulse(): void {
@@ -172,6 +179,10 @@ class NestSprite {
 
   get hasResources(): boolean {
     return this.bubble.visible;
+  }
+
+  get isStorageFull(): boolean {
+    return this._storageFull;
   }
 
   playCollect(): void {

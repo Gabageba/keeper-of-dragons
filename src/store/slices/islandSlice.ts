@@ -31,10 +31,20 @@ export const createIslandSlice: SliceCreator<IslandSlice> = (set, get) => ({
     const { grid, currentIslandId } = get();
     if (!grid?.canPlace(x, y, w, h)) return { ok: false, reason: 'Нельзя поставить здесь' };
 
-    const cost = ContentLoader.building(buildingId)?.cost ?? 0;
+    const def = ContentLoader.building(buildingId);
+    const cost = def?.cost ?? 0;
     if (!get().spendCoins(cost)) return { ok: false, reason: `Нужно ${cost} монет` };
 
-    const placement: Placement = { uid: generatePlacementUid(), buildingId, x, y, w, h };
+    let refId: string | undefined;
+    if (def?.type === 'garden') {
+      const island = ContentLoader.island(currentIslandId);
+      if (island) {
+        const gardenIndex = get().createGarden(island.biome, w * h);
+        refId = String(gardenIndex);
+      }
+    }
+
+    const placement: Placement = { uid: generatePlacementUid(), buildingId, x, y, w, h, refId };
     grid.place(placement);
     set((s) => ({
       placements: {

@@ -18,6 +18,7 @@ import type GridSystem from '@game/systems/GridSystem';
 import TileGrid from '@game/objects/TileGrid';
 import BuildingSprite from '@game/objects/BuildingSprite';
 import NestSprite from '@game/objects/NestSprite';
+import GardenSprite from '@game/objects/GardenSprite';
 import { REGISTRY_KEY_ISLAND_CALLBACKS } from '@game/shared/registry';
 import type { IslandCallbacks } from '@/types/bridge';
 import { PHASER_LABEL_STYLE } from '@game/shared/style';
@@ -58,7 +59,7 @@ class IslandScene extends Phaser.Scene {
   private originY = 0;
 
   private tileGrid!: TileGrid;
-  private buildingSprites = new Map<string, BuildingSprite | NestSprite>();
+  private buildingSprites = new Map<string, BuildingSprite | NestSprite | GardenSprite>();
   private ghost!: Ghost;
 
   private mode: Mode = Mode.IDLE;
@@ -134,6 +135,14 @@ class IslandScene extends Phaser.Scene {
           p.uid,
           new NestSprite(this, this.originX, this.originY, p, dragon, (uid) =>
             this.callbacks.getAccumulated(uid),
+          ),
+        );
+      } else if (def?.type === 'garden') {
+        const gardenIndex = p.refId !== undefined ? parseInt(p.refId, 10) : -1;
+        this.buildingSprites.set(
+          p.uid,
+          new GardenSprite(this, this.originX, this.originY, p, gardenIndex, (idx) =>
+            this.callbacks.getGardenReadyCount(idx),
           ),
         );
       } else {
@@ -345,9 +354,14 @@ class IslandScene extends Phaser.Scene {
       const def = p ? ContentLoader.building(p.buildingId) : null;
       if (def?.type === 'nest') {
         const sprite = this.buildingSprites.get(uid);
-        if (sprite instanceof NestSprite && sprite.collecting) return;
+        if (sprite instanceof NestSprite && (sprite.collecting || sprite.isStorageFull)) return;
         this.callbacks.collectNest(uid);
         if (sprite instanceof NestSprite) sprite.playCollect();
+        return;
+      }
+      if (def?.type === 'garden') {
+        const gardenIndex = p?.refId !== undefined ? parseInt(p.refId, 10) : -1;
+        if (gardenIndex >= 0) this.callbacks.openGardenPanel(uid, gardenIndex);
         return;
       }
       this.openActionPanel(uid);
@@ -477,9 +491,20 @@ class IslandScene extends Phaser.Scene {
 
   // ─── публичные команды (React → Phaser) ──────────────────────────────────────
 
+  refreshGardenSprites(): void {
+    for (const sprite of this.buildingSprites.values()) {
+      if (sprite instanceof GardenSprite) sprite.refresh();
+    }
+  }
+
   collectAllNests(): void {
     for (const [uid, sprite] of this.buildingSprites) {
-      if (sprite instanceof NestSprite && !sprite.collecting && sprite.hasResources) {
+      if (
+        sprite instanceof NestSprite &&
+        !sprite.collecting &&
+        sprite.hasResources &&
+        !sprite.isStorageFull
+      ) {
         this.callbacks.collectNest(uid);
         sprite.playCollect();
       }

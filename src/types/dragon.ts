@@ -100,5 +100,5 @@ export interface EggState {
   ready_at: number;
 }
 
-export type AccumulatedInfo = { amount: number; atCap: boolean };
+export type AccumulatedInfo = { amount: number; atCap: boolean; storageFull: boolean };
 export type GetAccumulated = (dragonUid: string) => AccumulatedInfo;
