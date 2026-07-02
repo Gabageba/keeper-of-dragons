@@ -5,11 +5,17 @@
     "element": "fire",
     "rarity": "common",
     "resource": "char_coal",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["fireflower", "lava_berry"],
-    "disliked_food": ["moon_lotus"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "fireflower",
+      "lava_berry"
+    ],
+    "disliked_food": [
+      "moon_lotus"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "volcanic",
     "disliked_biome": "ice",
     "biome_buff": 0.15,
@@ -27,11 +33,17 @@
     "element": "water",
     "rarity": "common",
     "resource": "pure_essence",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["sea_flower", "pearl_moss"],
-    "disliked_food": ["fireflower"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "sea_flower",
+      "pearl_moss"
+    ],
+    "disliked_food": [
+      "fireflower"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "lunar",
     "disliked_biome": "volcanic",
     "biome_buff": 0.15,
@@ -49,11 +61,17 @@
     "element": "earth",
     "rarity": "common",
     "resource": "living_clay",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["root_of_power", "stone_fruit"],
-    "disliked_food": ["moon_lotus"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "root_of_power",
+      "stone_fruit"
+    ],
+    "disliked_food": [
+      "moon_lotus"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "crystal",
     "disliked_biome": "storm",
     "biome_buff": 0.15,
@@ -71,11 +89,17 @@
     "element": "storm",
     "rarity": "common",
     "resource": "lightning_charge",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["storm_pepper", "electric_truffle"],
-    "disliked_food": ["pearl_moss"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "storm_pepper",
+      "electric_truffle"
+    ],
+    "disliked_food": [
+      "pearl_moss"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "storm",
     "disliked_biome": "crystal",
     "biome_buff": 0.15,
@@ -93,11 +117,18 @@
     "element": "ice",
     "rarity": "common",
     "resource": "eternal_frost",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["ice_rose", "snow_mushroom"],
-    "disliked_food": ["fireflower", "lava_berry"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "ice_rose",
+      "snow_mushroom"
+    ],
+    "disliked_food": [
+      "fireflower",
+      "lava_berry"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "ice",
     "disliked_biome": "volcanic",
     "biome_buff": 0.15,
@@ -115,11 +146,17 @@
     "element": "wind",
     "rarity": "common",
     "resource": "pure_breeze",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["air_dandelion", "feather_grass"],
-    "disliked_food": ["stone_fruit"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "air_dandelion",
+      "feather_grass"
+    ],
+    "disliked_food": [
+      "stone_fruit"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "air",
     "disliked_biome": "crystal",
     "biome_buff": 0.15,
@@ -137,11 +174,17 @@
     "element": "nature",
     "rarity": "common",
     "resource": "green_resin",
-    "production_per_hour": 8,
-    "storage_cap": 200,
-    "favorite_food": ["life_flower", "sweet_root"],
-    "disliked_food": ["storm_pepper"],
+    "yield_per_feed": 8,
+    "production_duration_min": 30,
+    "favorite_food": [
+      "life_flower",
+      "sweet_root"
+    ],
+    "disliked_food": [
+      "storm_pepper"
+    ],
     "food_bonus": 0.2,
+    "food_penalty": 0.3,
     "favorite_biome": "nature",
     "disliked_biome": "shadow",
     "biome_buff": 0.15,

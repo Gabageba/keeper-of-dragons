@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useUIStore } from '@store/useUIStore';
+import { useGameStore } from '@store/useGameStore';
 import usePhaserBridge from '@/ui/shared/hooks/usePhaserBridge';
 
 const styles = {
@@ -25,29 +26,45 @@ const styles = {
       background: #3a2e60;
     }
   `,
+  btnDanger: css`
+    color: #e05050;
+    border-color: #6e3a3a;
+    &:hover {
+      background: #3e1a1a;
+    }
+  `,
 };
 
 function GhostControls() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const movingUidRef = useRef<string | undefined>(undefined);
   const bridge = usePhaserBridge();
+  const removeBuilding = useGameStore((s) => s.removeBuilding);
 
-  // Позиция приходит из Phaser-сцены каждый кадр через useUIStore. Двигаем DOM
-  // императивно, чтобы не дёргать React-рендер на каждом кадре.
   useEffect(() => {
-    const apply = (pos: { x: number; y: number } | null) => {
+    const apply = (pos: { x: number; y: number; movingUid?: string } | null) => {
       const el = containerRef.current;
       if (!el) return;
+      movingUidRef.current = pos?.movingUid;
       if (!pos) {
         el.style.display = 'none';
       } else {
         el.style.left = `${pos.x}px`;
         el.style.top = `${pos.y}px`;
         el.style.display = 'flex';
+        const demolishBtn = el.querySelector<HTMLButtonElement>('[data-demolish]');
+        if (demolishBtn) demolishBtn.style.display = pos.movingUid ? '' : 'none';
       }
     };
     apply(useUIStore.getState().ghostControls);
     return useUIStore.subscribe((s) => apply(s.ghostControls));
   }, []);
+
+  const handleDemolish = () => {
+    const uid = movingUidRef.current;
+    bridge.ghostCancel();
+    if (uid) removeBuilding(uid);
+  };
 
   return (
     <div ref={containerRef} css={styles.container}>
@@ -59,6 +76,9 @@ function GhostControls() {
       </button>
       <button css={styles.btn} onClick={bridge.ghostCancel}>
         ✕ Отмена
+      </button>
+      <button data-demolish css={[styles.btn, styles.btnDanger]} onClick={handleDemolish}>
+        🗑 Снести
       </button>
     </div>
   );

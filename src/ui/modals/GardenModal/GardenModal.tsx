@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUIStore } from '@store/useUIStore';
 import { useGardens, useGardenActions } from '@store/useGardenStore';
 import { useGameStore } from '@store/useGameStore';
@@ -17,6 +17,7 @@ import {
 import { styles } from './styles';
 
 const STAGE_ICON: Record<0 | 1 | 2, string> = { 0: '🌱', 1: '🌿', 2: '✅' };
+
 const BIOME_LABEL: Record<string, string> = {
   volcanic: 'Вулканический',
   lunar: 'Лунный',
@@ -29,6 +30,18 @@ const BIOME_LABEL: Record<string, string> = {
   cosmic: 'Космический',
 };
 
+const ELEMENT_COLOR: Record<string, string> = {
+  fire: '#e05030',
+  water: '#3080d0',
+  earth: '#60a040',
+  storm: '#9050d0',
+  ice: '#60c0e0',
+  air: '#a0c0e0',
+  shadow: '#5040a0',
+  cosmic: '#c060e0',
+  neutral: '#8090a0',
+};
+
 function GardenModal() {
   const gardenPanel = useUIStore((s) => s.gardenPanel);
   const setGardenPanel = useUIStore((s) => s.setGardenPanel);
@@ -36,10 +49,17 @@ function GardenModal() {
   const { plantSeed, harvest, upgradeGarden, toggleAltar } = useGardenActions();
   const coins = useGameStore((s) => s.coins);
 
-  const [pickerTarget, setPickerTarget] = useState<number | 'all' | null>(null);
-  const [lastPlantId, setLastPlantId] = useState<string | null>(null);
-  // dummy tick to re-render growing plants
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
+  const [harvestDragging, setHarvestDragging] = useState(false);
+  const [seedDragging, setSeedDragging] = useState(false);
   const [, setTick] = useState(0);
+
+  const draggedPlantRef = useRef<string | null>(null);
+  const plantOriginRef = useRef<number | null>(null);
+  const plantedDuringDragRef = useRef<Set<number>>(new Set());
+  const harvestOriginRef = useRef<number | null>(null);
+  const harvestedDuringDragRef = useRef<Set<number>>(new Set());
 
   const garden = gardenPanel !== null ? (gardens[gardenPanel.gardenIndex] ?? null) : null;
 
@@ -53,7 +73,7 @@ function GardenModal() {
 
   const close = useCallback(() => {
     setGardenPanel(null);
-    setPickerTarget(null);
+    setSelectedSlot(null);
   }, [setGardenPanel]);
 
   if (!gardenPanel || !garden) return null;
@@ -67,79 +87,239 @@ function GardenModal() {
     if (slotIdx === altarIdx && garden.hasAltar) return;
     const slot = garden.slots[slotIdx];
     if (!slot) return;
+    setSelectedSlot(slotIdx === selectedSlot ? null : slotIdx);
+  };
 
-    if (slot.plant) {
-      const plantDef = ContentLoader.plant(slot.plant);
-      if (!plantDef) return;
-      const growMs = calcGrowMs(plantDef, garden);
-      if (growthStage(slot, growMs) === 2) {
+  const handleSeedClick = (plantId: string) => {
+    if (selectedSlot === null) return;
+    const slot = garden.slots[selectedSlot];
+    if (!slot || slot.plant) return;
+    plantSeed(gardenIndex, selectedSlot, plantId);
+    setSelectedSlot(null);
+  };
+
+  const handleFillAll = (plantId: string) => {
+    const altarIdx = altarSlotIndex(garden.upgraded);
+    garden.slots.forEach((slot, si) => {
+      if (!slot.plant && !(si === altarIdx && garden.hasAltar)) {
+        plantSeed(gardenIndex, si, plantId);
+      }
+    });
+    setSelectedSlot(null);
+  };
+
+  const handleSeedDragStart = (plantId: string) => {
+    if (selectedSlot === null) return;
+    draggedPlantRef.current = plantId;
+    plantOriginRef.current = selectedSlot;
+    plantedDuringDragRef.current = new Set();
+    setSeedDragging(true);
+  };
+
+  const handleSeedDragEnd = () => {
+    draggedPlantRef.current = null;
+    plantOriginRef.current = null;
+    setDragOverSlot(null);
+    plantedDuringDragRef.current = new Set();
+    setSeedDragging(false);
+  };
+
+  const handleHarvestClick = () => {
+    if (selectedSlot === null) return;
+    harvest(gardenIndex, selectedSlot);
+    setSelectedSlot(null);
+  };
+
+  const handleHarvestDragStart = () => {
+    if (selectedSlot === null) return;
+    harvestOriginRef.current = selectedSlot;
+    harvestedDuringDragRef.current = new Set();
+    setHarvestDragging(true);
+  };
+
+  const handleHarvestDragEnd = () => {
+    setHarvestDragging(false);
+    harvestOriginRef.current = null;
+    harvestedDuringDragRef.current = new Set();
+  };
+
+  const handleSlotDragOver = (e: React.DragEvent, slotIdx: number) => {
+    if (harvestDragging) {
+      e.preventDefault();
+      // Until the originally selected cell is harvested, dragging over other ready
+      // cells does nothing — only after that does the drag become freeform.
+      const restrictTo = harvestOriginRef.current;
+      if (restrictTo !== null && slotIdx !== restrictTo) return;
+
+      const slot = garden.slots[slotIdx];
+      const plantDef = slot?.plant ? ContentLoader.plant(slot.plant) : null;
+      const growMs = plantDef ? calcGrowMs(plantDef, garden) : 0;
+      if (
+        slot?.plant &&
+        growthStage(slot, growMs) === 2 &&
+        !harvestedDuringDragRef.current.has(slotIdx)
+      ) {
+        harvestedDuringDragRef.current.add(slotIdx);
         harvest(gardenIndex, slotIdx);
+        if (restrictTo !== null) {
+          harvestOriginRef.current = null;
+          setSelectedSlot(null);
+        }
       }
       return;
     }
-    setPickerTarget(slotIdx);
-  };
 
-  const handlePickPlant = (plantId: string) => {
-    setLastPlantId(plantId);
-    if (pickerTarget === 'all') {
-      garden.slots.forEach((slot, si) => {
-        if (!slot.plant && !(si === altarIdx && garden.hasAltar)) {
-          plantSeed(gardenIndex, si, plantId);
-        }
-      });
-    } else if (pickerTarget !== null) {
-      plantSeed(gardenIndex, pickerTarget, plantId);
-    }
-    setPickerTarget(null);
-  };
+    const slot = garden.slots[slotIdx];
+    if (!slot || slot.plant || (slotIdx === altarIdx && garden.hasAltar)) return;
+    e.preventDefault();
 
-  const handleSeedAll = () => {
-    if (lastPlantId) {
-      garden.slots.forEach((slot, si) => {
-        if (!slot.plant && !(si === altarIdx && garden.hasAltar)) {
-          plantSeed(gardenIndex, si, lastPlantId);
-        }
-      });
-    } else {
-      setPickerTarget('all');
+    const plantId = draggedPlantRef.current;
+    if (!plantId || plantedDuringDragRef.current.has(slotIdx)) return;
+
+    // Until the originally selected cell is planted, dragging over other empty
+    // cells does nothing (and isn't highlighted) — only after that does the drag
+    // become freeform.
+    const restrictTo = plantOriginRef.current;
+    if (restrictTo !== null && slotIdx !== restrictTo) return;
+
+    setDragOverSlot(slotIdx);
+    plantedDuringDragRef.current.add(slotIdx);
+    plantSeed(gardenIndex, slotIdx, plantId);
+    if (restrictTo !== null) {
+      plantOriginRef.current = null;
+      setSelectedSlot(null);
     }
   };
 
-  const handleUpgrade = () => {
-    upgradeGarden(gardenIndex);
+  const handleSlotDragLeave = () => setDragOverSlot(null);
+
+  const handleSlotDrop = (e: React.DragEvent, slotIdx: number) => {
+    e.preventDefault();
+    const plantId = draggedPlantRef.current;
+    if (!plantId) return;
+    const slot = garden.slots[slotIdx];
+    if (!slot || slot.plant || (slotIdx === altarIdx && garden.hasAltar)) return;
+
+    const restrictTo = plantOriginRef.current;
+    if (restrictTo !== null && slotIdx !== restrictTo) {
+      setDragOverSlot(null);
+      return;
+    }
+
+    if (!plantedDuringDragRef.current.has(slotIdx)) {
+      plantedDuringDragRef.current.add(slotIdx);
+      plantSeed(gardenIndex, slotIdx, plantId);
+      if (restrictTo !== null) {
+        plantOriginRef.current = null;
+        setSelectedSlot(null);
+      }
+    }
+    setDragOverSlot(null);
   };
 
-  const handleAltarToggle = () => {
-    toggleAltar(gardenIndex);
-  };
-
-  const biomeLabel = BIOME_LABEL[garden.biome] ?? garden.biome;
   const canUpgrade = !garden.upgraded && coins >= GARDEN_UPGRADE_COST;
   const allSlotsFull = garden.slots.every((s) => !!s.plant);
   const canEnableAltar = garden.hasAltar || !allSlotsFull;
+  const biomeLabel = BIOME_LABEL[garden.biome] ?? garden.biome;
+
+  const selectedSlotState = selectedSlot !== null ? garden.slots[selectedSlot] : null;
+  const selectedPlantDef = selectedSlotState?.plant
+    ? (ContentLoader.plant(selectedSlotState.plant) as PlantDef | undefined)
+    : undefined;
+  const selectedGrowMs = selectedPlantDef ? calcGrowMs(selectedPlantDef, garden) : 60_000;
+  const selectedIsReady =
+    !!selectedSlotState?.plant && growthStage(selectedSlotState, selectedGrowMs) === 2;
+  const canPlantSelected = !!selectedSlotState && !selectedSlotState.plant;
 
   return (
-    <ModalShell onClose={close}>
+    <ModalShell
+      onClose={close}
+      below={
+        harvestDragging || selectedIsReady ? (
+          <div css={styles.toolPanel}>
+            <div
+              css={styles.sickleItem}
+              draggable
+              onDragStart={handleHarvestDragStart}
+              onDragEnd={handleHarvestDragEnd}
+              onClick={handleHarvestClick}
+            >
+              🌾 Собрать
+            </div>
+          </div>
+        ) : seedDragging || canPlantSelected ? (
+          <div css={styles.toolPanel}>
+            {allPlants.map((p: PlantDef) => {
+              const isNative = p.native_biome === 'any' || p.native_biome === garden.biome;
+              const canAfford = coins >= p.cost;
+              const elemColor = ELEMENT_COLOR[p.element] ?? ELEMENT_COLOR.neutral;
+              return (
+                <div
+                  key={p.id}
+                  css={styles.seedRow(isNative, canAfford)}
+                  draggable={canAfford}
+                  onDragStart={() => handleSeedDragStart(p.id)}
+                  onDragEnd={handleSeedDragEnd}
+                  onClick={() => canAfford && handleSeedClick(p.id)}
+                  title={canAfford ? undefined : 'Не хватает монет'}
+                >
+                  <span css={styles.seedDot(elemColor)} />
+                  <span css={styles.seedName}>
+                    {p.name}
+                    {isNative && <span css={styles.seedNative}> ★</span>}
+                  </span>
+                  <span css={styles.seedCost}>{p.cost}💰</span>
+                  <button
+                    css={styles.seedFillAllBtn}
+                    disabled={!canAfford}
+                    title="Засеять все пустые слоты"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFillAll(p.id);
+                    }}
+                  >
+                    ×все
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div css={styles.toolPanel} />
+        )
+      }
+    >
       <div css={styles.root}>
         <div css={styles.header}>
-          <span css={styles.title}>{biomeLabel} сад</span>
           <span css={styles.biomeTag}>{garden.biome}</span>
-          {!garden.upgraded && (
+          <span css={styles.title}>{biomeLabel} сад</span>
+          <div css={styles.headerActions}>
+            {!garden.upgraded && (
+              <button
+                css={styles.upgradeBtn}
+                onClick={() => upgradeGarden(gardenIndex)}
+                disabled={!canUpgrade}
+                title={canUpgrade ? '' : `Нужно ${GARDEN_UPGRADE_COST} монет`}
+              >
+                4×4 — {GARDEN_UPGRADE_COST}💰
+              </button>
+            )}
             <button
-              css={styles.upgradeBtn}
-              onClick={handleUpgrade}
-              disabled={!canUpgrade}
-              title={canUpgrade ? '' : `Нужно ${GARDEN_UPGRADE_COST} монет`}
+              css={[styles.altarBtn, garden.hasAltar && styles.altarBtnActive]}
+              onClick={() => toggleAltar(gardenIndex)}
+              disabled={!canEnableAltar}
+              title={!canEnableAltar ? 'Освободите хотя бы одно поле' : undefined}
             >
-              4×4 — {GARDEN_UPGRADE_COST}💰
+              ⚗
             </button>
-          )}
+          </div>
         </div>
 
         <div css={styles.grid(side)}>
           {garden.slots.map((slot, si) => {
             const isAltar = si === altarIdx && garden.hasAltar;
+            const isSelected = si === selectedSlot;
+            const isDragTarget = si === dragOverSlot;
 
             if (isAltar) {
               return (
@@ -152,8 +332,20 @@ function GardenModal() {
 
             if (!slot.plant) {
               return (
-                <div key={si} css={styles.slot} onClick={() => handleSlotClick(si)}>
-                  <span css={[styles.slotIcon, styles.slotEmpty]}>+</span>
+                <div
+                  key={si}
+                  css={[
+                    styles.slot,
+                    styles.slotEmpty,
+                    isSelected && styles.slotSelected,
+                    isDragTarget && styles.slotDragOver,
+                  ]}
+                  onClick={() => handleSlotClick(si)}
+                  onDragOver={(e) => handleSlotDragOver(e, si)}
+                  onDragLeave={handleSlotDragLeave}
+                  onDrop={(e) => handleSlotDrop(e, si)}
+                >
+                  <span css={styles.slotEmptyPlus}>+</span>
                 </div>
               );
             }
@@ -167,9 +359,10 @@ function GardenModal() {
             return (
               <div
                 key={si}
-                css={[styles.slot, isReady && styles.slotReady]}
+                css={[styles.slot, isReady && styles.slotReady, isSelected && styles.slotSelected]}
                 onClick={() => handleSlotClick(si)}
-                title={isReady ? 'Тап — собрать!' : undefined}
+                onDragOver={(e) => handleSlotDragOver(e, si)}
+                onDragLeave={handleSlotDragLeave}
               >
                 <span css={styles.slotIcon}>{STAGE_ICON[stage]}</span>
                 <span css={styles.slotLabel}>{plantDef?.name ?? slot.plant}</span>
@@ -178,49 +371,6 @@ function GardenModal() {
             );
           })}
         </div>
-
-        <div css={styles.footer}>
-          <button css={styles.footerBtn} onClick={handleSeedAll}>
-            {lastPlantId
-              ? `Засеять всё: ${ContentLoader.plant(lastPlantId)?.name ?? lastPlantId}`
-              : 'Засеять всё…'}
-          </button>
-          <button
-            css={[styles.footerBtn, garden.hasAltar && styles.altarActive]}
-            onClick={handleAltarToggle}
-            disabled={!canEnableAltar}
-            title={!canEnableAltar ? 'Освободите хотя бы одно поле' : undefined}
-          >
-            {garden.hasAltar ? '⚗ Алтарь: ВКЛ' : '⚗ Алтарь: ВЫКЛ'}
-          </button>
-        </div>
-
-        {pickerTarget !== null && (
-          <div css={styles.pickerOverlay}>
-            <div css={styles.pickerTitle}>
-              {pickerTarget === 'all' ? 'Выберите семя для всех слотов:' : 'Выберите семя:'}
-            </div>
-            <div css={styles.pickerList}>
-              {allPlants.map((p) => {
-                const isNative = p.native_biome === 'any' || p.native_biome === garden.biome;
-                const growMs = calcGrowMs(p, garden);
-                const growMin = Math.round(growMs / 60_000);
-                return (
-                  <button
-                    key={p.id}
-                    css={styles.plantCard(isNative)}
-                    onClick={() => handlePickPlant(p.id)}
-                  >
-                    {p.name}
-                    {isNative && ' ★'}
-                    <br />
-                    <span css={styles.plantCardTime}>~{growMin}м</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     </ModalShell>
   );

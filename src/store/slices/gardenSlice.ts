@@ -1,5 +1,6 @@
 import type { PlantSlotState } from '@/types/plant';
 import type { GardenSlice, SliceCreator } from '../types';
+import ContentLoader from '@game/systems/ContentLoader';
 
 export const GARDEN_UPGRADE_COST = 500;
 
@@ -24,6 +25,8 @@ export const createGardenSlice: SliceCreator<GardenSlice> = (set, get) => ({
   },
 
   plantSeed: (gardenIndex, slot, plant) => {
+    const cost = ContentLoader.plant(plant)?.cost ?? 0;
+    if (cost > 0 && !get().spendCoins(cost)) return false;
     set((s) => ({
       gardens: s.gardens.map((g, gi) =>
         gi !== gardenIndex
@@ -36,6 +39,7 @@ export const createGardenSlice: SliceCreator<GardenSlice> = (set, get) => ({
             },
       ),
     }));
+    return true;
   },
 
   harvest: (gardenIndex, slot) => {

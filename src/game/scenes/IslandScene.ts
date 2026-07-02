@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { useUIStore } from '@store/useUIStore';
+import type { DragonState } from '@/types/dragon';
 import {
   ISO_TILE_HALF_WIDTH,
   ISO_TILE_HALF_HEIGHT,
@@ -72,7 +73,6 @@ class IslandScene extends Phaser.Scene {
   private minZoom = 0.5;
   private ignoreNextPointerUp = false;
 
-
   constructor() {
     super('IslandScene');
   }
@@ -134,7 +134,7 @@ class IslandScene extends Phaser.Scene {
         this.buildingSprites.set(
           p.uid,
           new NestSprite(this, this.originX, this.originY, p, dragon, (uid) =>
-            this.callbacks.getAccumulated(uid),
+            this.callbacks.getProduction(uid),
           ),
         );
       } else if (def?.type === 'garden') {
@@ -342,7 +342,16 @@ class IslandScene extends Phaser.Scene {
     this.ignoreNextPointerUp = true;
     const world = this.screenToWorld(ptr.x, ptr.y);
     const uid = this.buildingAt(world.x, world.y);
-    if (uid) this.openActionPanel(uid);
+    if (!uid) return;
+
+    const p = this.callbacks.getPlacements().find((x) => x.uid === uid);
+    const def = p ? ContentLoader.building(p.buildingId) : null;
+
+    if (def?.type === 'nest') {
+      this.enterMoveMode(uid);
+    } else {
+      this.openActionPanel(uid);
+    }
   }
 
   private handleTap(worldX: number, worldY: number): void {
@@ -353,10 +362,9 @@ class IslandScene extends Phaser.Scene {
       const p = this.callbacks.getPlacements().find((x) => x.uid === uid);
       const def = p ? ContentLoader.building(p.buildingId) : null;
       if (def?.type === 'nest') {
-        const sprite = this.buildingSprites.get(uid);
-        if (sprite instanceof NestSprite && (sprite.collecting || sprite.isStorageFull)) return;
-        this.callbacks.collectNest(uid);
-        if (sprite instanceof NestSprite) sprite.playCollect();
+        // Гнездо с драконом → окно ухода (сбор/кормёжка/апгрейд); пустое → меню постройки.
+        if (p?.refId) this.callbacks.openDragonPanel(uid, p.refId);
+        else this.openActionPanel(uid);
         return;
       }
       if (def?.type === 'garden') {
@@ -472,11 +480,13 @@ class IslandScene extends Phaser.Scene {
     );
   }
 
-  private ghostControlsScreenPos(): { x: number; y: number } {
+  private ghostControlsScreenPos(): { x: number; y: number; movingUid?: string } {
     const { x: wx, y: wy } = this.tileTop(this.ghost.cellX, this.ghost.cellY);
     const peakX = wx + ((this.ghost.w - this.ghost.h) * ISO_TILE_HALF_WIDTH) / 2;
     const peakY = wy - ISO_BUILDING_HEIGHT;
-    const TOTAL_BUTTONS_WIDTH = 88 * 3 + 8 * 2;
+    const movingUid = this.ghost.movingBuildingUid || undefined;
+    const buttonCount = movingUid ? 4 : 3;
+    const TOTAL_BUTTONS_WIDTH = 88 * buttonCount + 8 * (buttonCount - 1);
 
     const { x: canvasX, y: canvasY } = this.worldToCanvas(peakX, peakY);
     const rect = this.game.canvas.getBoundingClientRect();
@@ -486,6 +496,7 @@ class IslandScene extends Phaser.Scene {
     return {
       x: rect.left + canvasX * sx - TOTAL_BUTTONS_WIDTH / 2,
       y: rect.top + canvasY * sy - 46,
+      movingUid,
     };
   }
 
@@ -497,14 +508,18 @@ class IslandScene extends Phaser.Scene {
     }
   }
 
+  syncNestDragons(dragons: DragonState[]): void {
+    for (const [uid, sprite] of this.buildingSprites) {
+      if (!(sprite instanceof NestSprite)) continue;
+      const p = this.callbacks.getPlacements().find((x) => x.uid === uid);
+      const dragon = p?.refId ? (dragons.find((d) => d.uid === p.refId) ?? null) : null;
+      sprite.updateDragon(dragon);
+    }
+  }
+
   collectAllNests(): void {
     for (const [uid, sprite] of this.buildingSprites) {
-      if (
-        sprite instanceof NestSprite &&
-        !sprite.collecting &&
-        sprite.hasResources &&
-        !sprite.isStorageFull
-      ) {
+      if (sprite instanceof NestSprite && !sprite.collecting && sprite.isReady) {
         this.callbacks.collectNest(uid);
         sprite.playCollect();
       }

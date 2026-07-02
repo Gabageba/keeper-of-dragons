@@ -31,8 +31,16 @@ export interface DragonsSlice {
   dragons: DragonState[];
 
   addDragon: (state: DragonState) => void;
-  /** Тап по гнезду: начисляет накопленное производство и сбрасывает таймер. */
+  /** Сбор готовой партии: переносит pending_amount в склад (с возможным переливом за лимит). */
   collectResource: (uid: string) => void;
+  /**
+   * Кормление дракона: тратит растение и запускает производство партии
+   * (PRODUCTION_DURATION_MS). Размер партии зависит от улучшения, любимой/нелюбимой
+   * еды и биома. Блокируется, если партия ещё не собрана или склад полон.
+   */
+  feedDragon: (uid: string, plantId: string) => void;
+  /** Улучшает выход ресурса дракона за монеты. Возвращает false, если потолок/нет монет. */
+  upgradeDragonYield: (uid: string) => boolean;
 }
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
@@ -58,7 +66,8 @@ export interface GardenSlice {
 
   /** Создаёт новый сад нужного биома, возвращает его индекс в массиве gardens. */
   createGarden: (biome: Biome, slotCount: number) => number;
-  plantSeed: (gardenIndex: number, slot: number, plant: string) => void;
+  /** Возвращает false, если монет не хватает. */
+  plantSeed: (gardenIndex: number, slot: number, plant: string) => boolean;
   harvest: (gardenIndex: number, slot: number) => void;
   /** Улучшение 3×3 → 4×4 за монеты. Возвращает false, если монет не хватает. */
   upgradeGarden: (gardenIndex: number) => boolean;

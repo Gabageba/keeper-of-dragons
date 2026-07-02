@@ -3,6 +3,7 @@ import BreedingModal from './BreedingModal';
 import OrdersModal from './OrdersModal';
 import InventoryModal from './InventoryModal/InventoryModal';
 import GardenModal from './GardenModal/GardenModal';
+import DragonFeedModal from './DragonFeedModal/DragonFeedModal';
 
 function Modals() {
   return (
@@ -12,6 +13,7 @@ function Modals() {
       <OrdersModal />
       <InventoryModal />
       <GardenModal />
+      <DragonFeedModal />
     </>
   );
 }

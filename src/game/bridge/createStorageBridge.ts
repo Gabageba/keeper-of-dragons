@@ -2,8 +2,9 @@ import type Phaser from 'phaser';
 import { useGameStore } from '@store/useGameStore';
 import { useUIStore } from '@store/useUIStore';
 import { MAX_RESOURCE_PER_TYPE } from '@store/types';
-import { producedAmount } from '@store/slices/dragonsSlice';
+import { productionStatus } from '@store/slices/dragonsSlice';
 import { hasInfiniteStorage } from '@store/slices/gameSlice';
+import { PRODUCTION_STATE } from '@/types/dragon';
 import ContentLoader from '@game/systems/ContentLoader';
 import { getIslandScene } from '../gameRef';
 import type { IslandCallbacks } from '@/types/bridge';
@@ -27,19 +28,16 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
       if (placement?.refId) s.collectResource(placement.refId);
     },
 
-    getAccumulated: (dragonUid) => {
+    getProduction: (dragonUid) => {
+      const idle = { state: PRODUCTION_STATE.HUNGRY, pending: 0, readyAt: 0, canFeed: false };
       const s = useGameStore.getState();
       const dragon = s.dragons.find((d) => d.uid === dragonUid);
-      if (!dragon || dragon.stage !== 'adult') return { amount: 0, atCap: false, storageFull: false };
+      if (!dragon) return idle;
       const def = ContentLoader.dragon(dragon.id);
-      if (!def) return { amount: 0, atCap: false, storageFull: false };
-      const raw = producedAmount(dragon, def, Date.now());
-      const atCap = raw >= def.storage_cap;
-      if (hasInfiniteStorage(s)) return { amount: raw, atCap, storageFull: false };
-      const space = MAX_RESOURCE_PER_TYPE - (s.resources[def.resource] ?? 0);
-      const storageFull = raw > 0 && space <= 0;
-      const amount = Math.min(raw, Math.max(0, space));
-      return { amount, atCap, storageFull };
+      if (!def) return idle;
+      const atCap =
+        !hasInfiniteStorage(s) && (s.resources[def.resource] ?? 0) >= MAX_RESOURCE_PER_TYPE;
+      return productionStatus(dragon, Date.now(), atCap);
     },
 
     getGardenReadyCount: (gardenIndex) => {
@@ -65,6 +63,8 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
     openClearPanel: (cx, cy, cost) => useUIStore.getState().setClearPanel({ cx, cy, cost }),
     openGardenPanel: (uid, gardenIndex) =>
       useUIStore.getState().setGardenPanel({ uid, gardenIndex }),
+    openDragonPanel: (nestUid, dragonUid) =>
+      useUIStore.getState().setDragonPanel({ nestUid, dragonUid }),
     closeAllPanels: () => {
       useUIStore.getState().setActionPanel(null);
       useUIStore.getState().setClearPanel(null);
@@ -97,9 +97,15 @@ export const createStoreBridge = (game: Phaser.Game): (() => void) => {
     () => getIslandScene()?.refreshGardenSprites(),
   );
 
+  const unsubDragons = useGameStore.subscribe(
+    (s) => s.dragons,
+    (dragons) => getIslandScene()?.syncNestDragons(dragons),
+  );
+
   return () => {
     unsubPlacements();
     unsubCleared();
     unsubGardens();
+    unsubDragons();
   };
 };

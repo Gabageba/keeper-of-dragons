@@ -35,6 +35,15 @@ export const DRAGON_STAGE = {
 } as const;
 type DragonStage = EnumLiteralsOf<typeof DRAGON_STAGE>;
 
+/** Состояние производственного цикла дракона (корми → произведёт → собери). */
+export const PRODUCTION_STATE = {
+  HUNGRY: 'hungry', // нечего собирать, можно покормить
+  PRODUCING: 'producing', // партия зреет (producing_until > now)
+  READY: 'ready', // партия готова к сбору
+  FULL: 'full', // склад ресурса полон — кормить нельзя
+} as const;
+export type ProductionState = EnumLiteralsOf<typeof PRODUCTION_STATE>;
+
 /** Определение вида дракона (статичный контент, data/dragons.json). */
 export interface DragonDef {
   id: string;
@@ -42,11 +51,14 @@ export interface DragonDef {
   element: Element;
   rarity: Rarity;
   resource: string;
-  production_per_hour: number;
-  storage_cap: number;
+  /** Базовый выход ресурса за одно кормление (до улучшений, еды и биома). */
+  yield_per_feed: number;
+  /** Длительность производственного цикла в мс. */
+  production_duration_ms: number;
   favorite_food: string[];
   disliked_food: string[];
-  food_bonus: number;
+  food_bonus: number; // прибавка к выходу за любимую еду (+0.2 = +20%)
+  food_penalty: number; // штраф к выходу за нелюбимую еду (0.3 = −30%)
   favorite_biome: Biome | null;
   disliked_biome: Biome | null;
   biome_buff: number;
@@ -81,9 +93,11 @@ export interface DragonState {
   level: number;
   stage: DragonStage;
   feedings: number; // сколько раз покормлен (для взросления)
-  last_collected: number; // timestamp
   biome?: Biome; // рядом с каким биомом стоит гнездо
   parent_ids?: [string, string];
+  yield_level: number; // уровень улучшения выхода (за монеты)
+  pending_amount?: number; // размер текущей партии (ждёт сбора); 0/undefined — нет партии
+  producing_until?: number; // timestamp готовности текущей партии
 }
 
 export interface BreedingProgress {
@@ -100,5 +114,11 @@ export interface EggState {
   ready_at: number;
 }
 
-export type AccumulatedInfo = { amount: number; atCap: boolean; storageFull: boolean };
-export type GetAccumulated = (dragonUid: string) => AccumulatedInfo;
+/** Сводка производственного цикла дракона для рендера/UI (без мутаций стора). */
+export type DragonProduction = {
+  state: ProductionState;
+  pending: number; // размер партии, ждущей сбора (0, если нет)
+  readyAt: number; // timestamp готовности (0, если не производит)
+  canFeed: boolean; // можно ли сейчас покормить
+};
+export type GetProduction = (dragonUid: string) => DragonProduction;

@@ -2,7 +2,7 @@ import type GridSystem from '@game/systems/GridSystem';
 import type { Placement } from '@/types/island';
 import type { DragonState } from '@/types/dragon';
 import type { PlaceResult } from '@store/types';
-import type { GetAccumulated } from '@/types/dragon';
+import type { GetProduction } from '@/types/dragon';
 
 /**
  * Граница Phaser → стор. IslandScene получает этот объект из game.registry и
@@ -21,10 +21,10 @@ export interface IslandCallbacks {
   placeBuilding: (buildingId: string, x: number, y: number, w: number, h: number) => PlaceResult;
   moveBuilding: (uid: string, x: number, y: number, w: number, h: number) => PlaceResult;
 
-  /** Начисляет накопленное производство дракона, привязанного к гнезду по nestUid. */
+  /** Собирает готовую партию дракона, привязанного к гнезду по nestUid. */
   collectNest: (nestUid: string) => void;
-  /** Сколько ресурса накопил дракон (без его списания). */
-  getAccumulated: GetAccumulated;
+  /** Состояние производственного цикла дракона (без мутаций стора). */
+  getProduction: GetProduction;
 
   /** Сколько растений в саду готово к сбору. */
   getGardenReadyCount: (gardenIndex: number) => number;
@@ -32,6 +32,7 @@ export interface IslandCallbacks {
   openActionPanel: (uid: string, name: string, buildingId: string) => void;
   openClearPanel: (cx: number, cy: number, cost: number) => void;
   openGardenPanel: (uid: string, gardenIndex: number) => void;
+  openDragonPanel: (nestUid: string, dragonUid: string) => void;
   closeAllPanels: () => void;
-  setGhostControls: (pos: { x: number; y: number } | null) => void;
+  setGhostControls: (pos: { x: number; y: number; movingUid?: string } | null) => void;
 }

@@ -4,6 +4,8 @@ import type { PlantDef } from '@/types/plant';
 import type { IslandDef, TerrainDef } from '@/types/island';
 import type { BuildingDef } from '@game/shared/building';
 
+type DragonDefRaw = Omit<DragonDef, 'production_duration_ms'> & { production_duration_min: number };
+
 class ContentLoaderImpl {
   private dragons = new Map<string, DragonDef>();
   private plants = new Map<string, PlantDef>();
@@ -13,9 +15,10 @@ class ContentLoaderImpl {
   private terrain: Record<string, TerrainDef> = {};
 
   init(scene: Phaser.Scene): void {
-    (scene.cache.json.get('dragons') as DragonDef[] | undefined)?.forEach((d) =>
-      this.dragons.set(d.id, d),
-    );
+    (scene.cache.json.get('dragons') as DragonDefRaw[] | undefined)?.forEach((raw) => {
+      const d: DragonDef = { ...raw, production_duration_ms: raw.production_duration_min * 60_000 };
+      this.dragons.set(d.id, d);
+    });
     (scene.cache.json.get('plants') as PlantDef[] | undefined)?.forEach((p) =>
       this.plants.set(p.id, p),
     );
@@ -45,6 +48,15 @@ class ContentLoaderImpl {
     for (const p of this.plants.values()) {
       if (seenPlants.has(p.id)) console.error(`[ContentLoader] дубль plant id: "${p.id}"`);
       seenPlants.add(p.id);
+    }
+
+    for (const d of this.dragons.values()) {
+      for (const plantId of [...d.favorite_food, ...d.disliked_food]) {
+        if (!plantIds.has(plantId))
+          console.error(
+            `[ContentLoader] дракон "${d.id}": еда "${plantId}" не найдена в plants`,
+          );
+      }
     }
 
     for (const r of this.recipes) {

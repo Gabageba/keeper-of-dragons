@@ -14,8 +14,7 @@ export const altarSlotIndex = (upgraded: boolean | undefined): number => {
 };
 
 export const calcGrowMs = (plantDef: PlantDef, garden: GardenState): number => {
-  const nativeMatch =
-    plantDef.native_biome === 'any' || plantDef.native_biome === garden.biome;
+  const nativeMatch = plantDef.native_biome === 'any' || plantDef.native_biome === garden.biome;
   const base = plantDef.grow_time_minutes * 60_000;
   return base / (nativeMatch ? 1.5 : 1) / (garden.hasAltar ? 1.05 : 1);
 };

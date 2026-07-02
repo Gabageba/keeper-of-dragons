@@ -7,10 +7,10 @@ import {
   cellToWorld,
 } from '@game/shared/iso';
 import ContentLoader from '@game/systems/ContentLoader';
-import { DRAGON_STAGE } from '@/types/dragon';
+import { DRAGON_STAGE, PRODUCTION_STATE } from '@/types/dragon';
 import type { DragonState } from '@/types/dragon';
 import type { Placement } from '@/types/island';
-import type { GetAccumulated } from '@/types/dragon';
+import type { GetProduction } from '@/types/dragon';
 import { PHASER_LABEL_STYLE } from '@game/shared/style';
 import { PLACEHOLDER_NEST_COLOR } from '@game/shared/placeholderArt';
 import { calcBuildingDepth } from '../shared/building';
@@ -24,13 +24,13 @@ class NestSprite {
   private bubbleText!: Phaser.GameObjects.Text;
   private dragon: DragonState | null;
   private dragonSprite: DragonSprite | null = null;
-  private readonly getAccumulated: GetAccumulated;
+  private readonly getProduction: GetProduction;
   private readonly scene: Phaser.Scene;
   private timer: Phaser.Time.TimerEvent | null = null;
   private pulseTween: Phaser.Tweens.Tween | null = null;
   private wasPulsing = false;
   private isCollecting = false;
-  private _storageFull = false;
+  private _isReady = false;
   private bubbleBaseY = 0;
 
   constructor(
@@ -39,11 +39,11 @@ class NestSprite {
     originY: number,
     placement: Placement,
     dragon: DragonState | null,
-    getAccumulated: GetAccumulated,
+    getProduction: GetProduction,
   ) {
     this.scene = scene;
     this.dragon = dragon;
-    this.getAccumulated = getAccumulated;
+    this.getProduction = getProduction;
 
     const { x: wx, y: wy } = cellToWorld(placement.x, placement.y, originX, originY);
     const w = placement.w;
@@ -122,24 +122,46 @@ class NestSprite {
       return;
     }
 
-    const { amount, atCap, storageFull } = this.getAccumulated(this.dragon.uid);
-    this._storageFull = storageFull;
+    const prod = this.getProduction(this.dragon.uid);
+    this._isReady = prod.state === PRODUCTION_STATE.READY;
 
-    if (!storageFull && amount <= 0) {
-      this.hideBubble();
-      return;
+    // цвет, текст и пульсация по состоянию цикла
+    let color = 0x33cc77;
+    let text = '';
+    let pulse = false;
+
+    switch (prod.state) {
+      case PRODUCTION_STATE.READY: {
+        color = 0x33cc77; // зелёный — готово к сбору
+        text = prod.pending >= 1000 ? '1k' : String(prod.pending);
+        pulse = true;
+        break;
+      }
+      case PRODUCTION_STATE.PRODUCING: {
+        color = 0xf0a030; // янтарь — зреет
+        const minLeft = Math.max(1, Math.ceil((prod.readyAt - Date.now()) / 60_000));
+        text = `${minLeft}м`;
+        break;
+      }
+      case PRODUCTION_STATE.FULL: {
+        color = 0xff4444; // красный — склад полон
+        text = 'МАХ';
+        pulse = true;
+        break;
+      }
+      case PRODUCTION_STATE.HUNGRY: {
+        color = 0xc9a84c; // золото — голоден, можно покормить
+        text = '!';
+        break;
+      }
     }
 
-    const shouldPulse = storageFull || atCap;
+    this.bubble.setFillStyle(color, 0.9).setVisible(true);
+    this.bubbleText.setVisible(true).setText(text);
 
-    this.bubble.setFillStyle(storageFull ? 0xff4444 : 0x33cc77, 0.9).setVisible(true);
-    this.bubbleText
-      .setVisible(true)
-      .setText(storageFull ? 'МАХ' : amount >= 1000 ? '1k' : String(amount));
-
-    if (shouldPulse && !this.wasPulsing) this.startPulse();
-    else if (!shouldPulse && this.wasPulsing) this.stopPulse();
-    this.wasPulsing = shouldPulse;
+    if (pulse && !this.wasPulsing) this.startPulse();
+    else if (!pulse && this.wasPulsing) this.stopPulse();
+    this.wasPulsing = pulse;
   }
 
   private hideBubble(): void {
@@ -147,7 +169,7 @@ class NestSprite {
     this.bubbleText.setVisible(false);
     this.stopPulse();
     this.wasPulsing = false;
-    this._storageFull = false;
+    this._isReady = false;
   }
 
   private startPulse(): void {
@@ -177,18 +199,15 @@ class NestSprite {
     return this.isCollecting;
   }
 
-  get hasResources(): boolean {
-    return this.bubble.visible;
-  }
-
-  get isStorageFull(): boolean {
-    return this._storageFull;
+  /** Есть готовая партия, которую можно собрать. */
+  get isReady(): boolean {
+    return this._isReady;
   }
 
   playCollect(): void {
     if (this.isCollecting) return;
 
-    if (!this.bubble.visible) return;
+    if (!this._isReady) return;
 
     this.isCollecting = true;
     this.dragonSprite?.playCollect();

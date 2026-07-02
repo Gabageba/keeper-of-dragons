@@ -5,4 +5,11 @@ import { useGameStore } from './useGameStore';
 export const useDragons = () => useGameStore((s) => s.dragons);
 
 export const useDragonActions = () =>
-  useGameStore(useShallow((s) => ({ addDragon: s.addDragon, collectResource: s.collectResource })));
+  useGameStore(
+    useShallow((s) => ({
+      addDragon: s.addDragon,
+      collectResource: s.collectResource,
+      feedDragon: s.feedDragon,
+      upgradeDragonYield: s.upgradeDragonYield,
+    })),
+  );

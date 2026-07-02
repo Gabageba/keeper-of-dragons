@@ -13,6 +13,11 @@ interface GardenPanelData {
   gardenIndex: number;
 }
 
+interface DragonPanelData {
+  nestUid: string;
+  dragonUid: string;
+}
+
 interface ClearPanelData {
   cx: number;
   cy: number;
@@ -32,7 +37,8 @@ interface UIState {
   actionPanel: ActionPanelData | null;
   clearPanel: ClearPanelData | null;
   gardenPanel: GardenPanelData | null;
-  ghostControls: { x: number; y: number } | null;
+  dragonPanel: DragonPanelData | null;
+  ghostControls: { x: number; y: number; movingUid?: string } | null;
   offlineSummary: OfflineSummary | null;
   toastMessage: string | null;
 
@@ -46,7 +52,8 @@ interface UIState {
   setActionPanel: (data: ActionPanelData | null) => void;
   setClearPanel: (data: ClearPanelData | null) => void;
   setGardenPanel: (data: GardenPanelData | null) => void;
-  setGhostControls: (pos: { x: number; y: number } | null) => void;
+  setDragonPanel: (data: DragonPanelData | null) => void;
+  setGhostControls: (pos: { x: number; y: number; movingUid?: string } | null) => void;
   setOfflineSummary: (data: OfflineSummary | null) => void;
   showToast: (text: string, durationMs?: number) => void;
 }
@@ -62,6 +69,7 @@ export const useUIStore = create<UIState>((set) => ({
   actionPanel: null,
   clearPanel: null,
   gardenPanel: null,
+  dragonPanel: null,
   ghostControls: null,
   offlineSummary: null,
   toastMessage: null,
@@ -76,6 +84,7 @@ export const useUIStore = create<UIState>((set) => ({
   setActionPanel: (data) => set({ actionPanel: data }),
   setClearPanel: (data) => set({ clearPanel: data }),
   setGardenPanel: (data) => set({ gardenPanel: data, actionPanel: null }),
+  setDragonPanel: (data) => set({ dragonPanel: data, actionPanel: null }),
   setGhostControls: (pos) => set({ ghostControls: pos }),
   setOfflineSummary: (data) => set({ offlineSummary: data }),
   showToast: (text, durationMs = 2000) => {

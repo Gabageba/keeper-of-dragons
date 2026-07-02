@@ -117,8 +117,9 @@ const simulateOffline = (hours: number) => {
 
   state.last_save = (state.last_save as number) - delta;
 
-  for (const d of (state.dragons as { last_collected: number }[]) ?? []) {
-    if (d.last_collected > 0) d.last_collected -= delta;
+  // Сдвигаем готовность производства назад, чтобы зреющая партия «дозрела» за оффлайн.
+  for (const d of (state.dragons as { producing_until?: number }[]) ?? []) {
+    if (d.producing_until) d.producing_until -= delta;
   }
 
   // Сдвигаем planted_at садов, чтобы рост растений тоже учитывал оффлайн-время.
@@ -187,7 +188,7 @@ function DevMenu() {
             level: 1,
             stage: DRAGON_STAGE.ADULT,
             feedings: 10,
-            last_collected: Date.now(),
+            yield_level: 0,
           });
           store.discoverInBook(def.id);
           const islandId = store.currentIslandId;
@@ -211,7 +212,7 @@ function DevMenu() {
             level: 1,
             stage: DRAGON_STAGE.BABY,
             feedings: 0,
-            last_collected: Date.now(),
+            yield_level: 0,
           });
           store.discoverInBook(def.id);
           const islandId = store.currentIslandId;

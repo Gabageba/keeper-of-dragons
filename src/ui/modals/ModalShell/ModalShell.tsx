@@ -5,6 +5,7 @@ import Background from '@/assets/ui/modal.png';
 interface Props {
   onClose: () => void;
   children: ReactNode;
+  below?: ReactNode;
 }
 
 const styles = {
@@ -13,8 +14,10 @@ const styles = {
     inset: 0;
     background: rgba(0, 0, 0, 0.65);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
     z-index: 40;
     pointer-events: auto;
   `,
@@ -37,6 +40,9 @@ const styles = {
     background-repeat: no-repeat;
     background-position: center; */
   `,
+  modalWithBelow: css`
+    height: 76%;
+  `,
   closeButton: (hovered: boolean) => css`
     position: absolute;
     top: 12px;
@@ -51,12 +57,15 @@ const styles = {
   `,
 };
 
-function ModalShell({ onClose, children }: Props) {
+function ModalShell({ onClose, children, below }: Props) {
   const [closeHovered, setCloseHovered] = useState(false);
 
   return (
     <div onClick={onClose} css={styles.overlay}>
-      <div onClick={(e) => e.stopPropagation()} css={styles.modal}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        css={[styles.modal, !!below && styles.modalWithBelow]}
+      >
         <button
           onClick={onClose}
           onMouseEnter={() => setCloseHovered(true)}
@@ -67,6 +76,7 @@ function ModalShell({ onClose, children }: Props) {
         </button>
         {children}
       </div>
+      {below && <div onClick={(e) => e.stopPropagation()}>{below}</div>}
     </div>
   );
 }

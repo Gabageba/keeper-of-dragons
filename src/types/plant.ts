@@ -9,6 +9,8 @@ export interface PlantDef {
   name: string;
   element: Element | 'neutral';
   grow_time_minutes: number;
+  /** Стоимость посадки одного семени в монетах. */
+  cost: number;
   native_biome: Biome | 'any';
   sprite: string;
   description: string;

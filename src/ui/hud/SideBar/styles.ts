@@ -11,6 +11,7 @@ const styles = {
     padding: ${token.uiPaddingBlock} ${token.uiPaddingInline};
     pointer-events: auto;
     height: 100%;
+    justify-content: center;
   `,
   questsIcon: css`
     height: 51px;
